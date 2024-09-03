@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const jobListingSchema = new mongoose.Schema(
   {
+    employer: {
+      type: String,
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -9,14 +13,17 @@ const jobListingSchema = new mongoose.Schema(
     description: {
       type: String,
       required: true,
-      maxlength: 2000,
+      maxlength: 5000,
     },
     company: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "CompanyProfile",
+      type: String,
       required: true,
     },
     location: {
+      type: String,
+      required: true,
+    },
+    jobCategory: {
       type: String,
       required: true,
     },
@@ -29,6 +36,12 @@ const jobListingSchema = new mongoose.Schema(
     },
     salaryRange: {
       type: String,
+      enum: ["$0-$10,000", "$10,000-$20,000", "$20,000-$40,000", "$40,000-$60,000",
+        "$60,000-$80,000", "$80,000-$100,000", "$100,000-$120,000",
+        "$120,000-$140,000", "$140,000-$160,000", "$160,000-$180,000",
+        "$180,000-$200,000", "$200,000+"
+      ],
+      required: true,
     },
     employmentType: {
       type: String,

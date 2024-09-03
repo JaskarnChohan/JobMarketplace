@@ -1,5 +1,4 @@
 const User = require("../models/user");
-const Joblisting = require("../models/joblisting");
 const { validationResult, check, body } = require("express-validator");
 const sendTokenResponse = require("../utils/sendTokenResponse");
 const nodemailer = require("nodemailer");
@@ -28,66 +27,6 @@ const resetPasswordValidationRules = [
   body("token", "Reset token is required").notEmpty(),
   body("newPassword", "New password is required").notEmpty(),
   body("confirmPassword", "Confirm password is required").notEmpty(),
-];
-
-// George Haeberlin: Create Job Listing Validation rules
-const createJobValidationRules = [
-  check("title", "Please provide a valid title")
-    .notEmpty()
-    .isString(),
-  check("company", "Please provide a valid company")
-    .notEmpty()
-    .isString(),
-  check("location", "Please provide a valid location")
-    .notEmpty()
-    .isString(),
-  check("jobCategory", "Please provice a valid job category")
-    .notEmpty()
-    .isString(),
-  check("workType", "Please provide a valid work type")
-    .notEmpty()
-    .isString(),
-  check("pay", "Please provide a valid pay/salary")
-    .notEmpty()
-    .isString(),
-  check("description", "Please provide a description").notEmpty(),
-  check("employer", "invalid employer").notEmpty(),
-]
-
-// George Haeberlin: Create Job Listing
-exports.createjob = [
-  createJobValidationRules,
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { employer, title, company, location, 
-      jobCategory, workType,
-      pay, description } = req.body;
-    try {
-      let joblisting = await Joblisting.findOne({ employer, title, company, location, 
-        jobCategory, workType,
-        pay, description });
-      
-      if (joblisting) {
-        return res
-          .status(400)
-          .json({ errors: [{ msg: "Identical job listing already exists" }] });
-      }
-
-      joblisting = new Joblisting({ employer, title, company, location, 
-        jobCategory, workType,
-        pay, description });
-      await joblisting.save();
-      
-      res.status(200).json({ success: true });
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).json({ errors: [{ msg: "Server error" }] });
-    }
-  },
 ];
 
 // Register User

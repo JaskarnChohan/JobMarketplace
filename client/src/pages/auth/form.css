@@ -53,14 +53,18 @@
 
 /* General Container Styling */
 .page-container {
+  position: relative; /* Ensure it remains in the normal document flow */
+  margin-top: 0; /* No upward margin */
   display: flex;
   justify-content: center;
+  flex-direction: column;
   align-items: center;
   height: 90vh;
   background-color: var(--bg-color);
 }
 
 .form-container {
+  margin-top: 0; /* No upward margin */
   width: 550px;
   margin: 0 auto;
   padding: 20px;
@@ -81,11 +85,86 @@
   font-weight: bold;
 }
 
+.form-container-wide {
+  margin-top: 0; /* No upward margin */
+  width: auto;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--white-color);
+  display: flex;            /* Set as a flex container */
+  align-items: stretch; /* Ensure items fill the container width */
+  flex-direction: row;      /* Arrange children (sections) in a row */
+  justify-content: center;  /* Center the content horizontally */
+  gap: 20px;                /* Add space between sections */
+}
+
+.form-container-wide .section {
+  flex: 1;                  /* Allow sections to take equal space */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  width: 30vw;              /* Allow the width to be determined by content */
+  height: auto;
+  display: flex;            /* Ensure internal content can flex if needed */
+  flex-direction: column;   /* If you want items inside the section to stack vertically */
+  justify-content: center;
+}
+
+.form-container-wide .section .btn {
+  display: inline-block;
+  font-family: var(--secondary-font);
+  background: var(--primary-color);
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.6rem;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-top: auto; /* Pushes the button to the bottom of the container */
+}
+
+.form-container-wide .section .datepicker {
+  text-align: center;
+}
+
+.form-container-wide h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-container-wide label {
+  flex-direction: row;
+  font-weight: bold;
+}
+
+.expandable-textarea {
+  width: 100%; /* Full width */
+  min-height: 50px; /* Minimum height */
+  padding: 10px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: none; /* Disables manual resizing */
+  overflow: hidden;  /* Hide scrollbar if text exceeds height */
+  /* max-height: 500px; Optional: Set a maximum height if needed */
+  height: auto;  /* Allow height to adjust automatically */
+}
+
 /* Form Styling */
 form {
   display: flex;
   flex-direction: column;
   width: auto;
+  overflow: visible; 
+  margin-top: 0; /* Prevent any margin that could cause upward expansion */
 }
 
 input,

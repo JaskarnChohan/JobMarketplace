@@ -13,6 +13,7 @@ import CreateJob from "./pages/jobs/CreateJob";
 import RequestResetPassword from "./pages/auth/RequestResetPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import { useAuth } from "./context/AuthContext";
+import JobListings from "./pages/jobs/JobListings";
 
 const App = () => {
   const { isAuthenticated } = useAuth();
@@ -35,6 +36,10 @@ const App = () => {
         <Route
           path="/createjob"
           element={isAuthenticated ? <CreateJob /> : <Navigate to="/login" />}
+        />
+        <Route 
+          path="/joblistings"
+          element={<JobListings/>}
         />
         <Route
           path="/request-reset-password"

@@ -37,38 +37,38 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // George Haeberlin: This will fetch the user data of the user.
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No token found");
-        }
+  // useEffect(() => {
+  //   const fetchUserData = async () => {
+  //     try {
+  //       const token = localStorage.getItem("token");
+  //       if (!token) {
+  //         throw new Error("No token found");
+  //       }
 
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
+  //       const config = {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       };
 
-        // Ensure the endpoint is correct
-        const res = await axios.get(
-          "http://localhost:5050/api/auth/dashboard",
-          config
-        );
-        setUser(res.data);
-      } catch (err) {
-        console.error(
-          "Failed to fetch user data:",
-          err.response?.data?.errors || err.message
-        );
-      }
-    };
+  //       // Ensure the endpoint is correct
+  //       const res = await axios.get(
+  //         "http://localhost:5050/api/auth/dashboard",
+  //         config
+  //       );
+  //       setUser(res.data);
+  //     } catch (err) {
+  //       console.error(
+  //         "Failed to fetch user data:",
+  //         err.response?.data?.errors || err.message
+  //       );
+  //     }
+  //   };
 
-    fetchUserData();
-  }, [setUser]);
+  //   fetchUserData();
+  // }, [setUser]);
 
-  const login = (token) => {
+  const login = async (token) => {
     localStorage.setItem("token", token);
     setIsAuthenticated(true);
     try {
