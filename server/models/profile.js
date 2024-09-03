@@ -24,11 +24,35 @@ const profileSchema = new mongoose.Schema(
       maxlength: 500,
     },
     profilePhoto: {
-      type: String, // Store the URL or path to the profile photo
+      type: String, 
     },
     cvFile: {
-      type: String, // Store the URL or path to the CV file
+      type: String, 
     },
+    skills: [String], 
+    education: [
+      {
+        school: String,
+        degree: String,
+        fieldOfStudy: String,
+        startDate: Date,
+        endDate: Date,
+      },
+    ],
+    jobPreferences: {
+      type: String,
+    },
+    experience: [
+      {
+        title: String,
+        company: String,
+        location: String,
+        startDate: Date,
+        endDate: Date,
+        description: String,
+      },
+    ],
+    certifications: [String], 
   },
   { timestamps: true }
 );
