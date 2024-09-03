@@ -7,42 +7,67 @@ import { useAuth } from "../../context/AuthContext";
 const Navbar = ({ isAuthenticated, handleLogout }) => {
   const { user } = useAuth();
 
-  return (
-    <nav>
-      <Link className="lrg-heading" to="/">
-        JobHive
-      </Link>
-      <div className="navbar-links">
-        <Link to="/job-listings">Job Listings</Link>
-        {/* George Haeberlin: stops non employer accounts from seeing links for employers */}
-        {isAuthenticated && user.role === "employer" ? (
+  const renderLinks = () => {
+    if (!isAuthenticated) {
+      return (
+        <>
+          <Link to="/job-listings">Job Listings</Link>
+          <Link to="/browse-employers">Browse Employers</Link>
+          <Link className="btn" to="/login">
+            Login
+          </Link>
+          <Link className="btn" to="/signup">
+            Sign Up
+          </Link>
+        </>
+      );
+    }
+
+    switch (user.role) {
+      case "employer":
+        return (
           <>
+            <Link to="/browse-employees">Browse Employees</Link>
+            <Link to="/job-listings">My Job Listings</Link>
             <Link to="/createjob">Create Job Listing</Link>
-          </>
-        ) : (
-          <>
-          </>
-        )}
-        <Link to="/browse-employees">Browse Employers</Link>
-        {isAuthenticated ? (
-          <>
-            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/applications">Applications</Link>
             <Link to="/profile">Profile</Link>
             <Link className="btn" onClick={handleLogout}>
               Logout
             </Link>
           </>
-        ) : (
+        );
+      case "jobSeeker":
+        return (
           <>
-            <Link className="btn" to="/login">
-              Login
-            </Link>
-            <Link className="btn" to="/signup">
-              Sign Up
+            <Link to="/job-listings">Job Listings</Link>
+            <Link to="/browse-employers">Browse Employers</Link>
+            <Link to="/browse-employers">Dashboard</Link>
+            <Link to="/profile">Profile</Link>
+            <Link className="btn" onClick={handleLogout}>
+              Logout
             </Link>
           </>
-        )}
-      </div>
+        );
+      default:
+        return (
+          <>
+            <Link to="/job-listings">Job Listings</Link>
+            <Link to="/browse-employers">Browse Employers</Link>
+            <Link className="btn" onClick={handleLogout}>
+              Logout
+            </Link>
+          </>
+        );
+    }
+  };
+
+  return (
+    <nav>
+      <Link className="lrg-heading" to="/">
+        JobHive
+      </Link>
+      <div className="navbar-links">{renderLinks()}</div>
     </nav>
   );
 };

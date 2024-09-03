@@ -7,10 +7,7 @@ import "../../global.css";
 import "./form.css";
 
 const Login = () => {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState([]);
   const { isAuthenticated, login } = useAuth();
   const navigate = useNavigate();
@@ -34,9 +31,8 @@ const Login = () => {
         formData,
         { withCredentials: true }
       );
-
-      localStorage.setItem("token", res.data.token);
-      login(res.data.token);
+      const token = res.data.token;
+      login(token);
       navigate("/dashboard");
     } catch (err) {
       if (err.response && err.response.data.errors) {

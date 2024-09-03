@@ -1,51 +1,17 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
 import Navbar from "../../components/header/Navbar";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "../../global.css";
 
 const Dashboard = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
-
-  const [user, setUser] = useState(null);
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No token found");
-        }
-
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-
-        // Ensure the endpoint is correct
-        const res = await axios.get(
-          "http://localhost:5050/api/auth/dashboard",
-          config
-        );
-        setUser(res.data);
-      } catch (err) {
-        console.error(
-          "Failed to fetch user data:",
-          err.response?.data?.errors || err.message
-        );
-      }
-    };
-
-    fetchUserData();
-  }, []);
 
   if (!user) {
     return <div>Loading...</div>;
@@ -53,7 +19,7 @@ const Dashboard = () => {
 
   return (
     <div>
-      <Navbar isAuthenticated={true} handleLogout={handleLogout} user={user} />
+      <Navbar isAuthenticated={true} handleLogout={handleLogout} />
       <div className="content">
         <h2>Welcome to your dashboard!</h2>
         <p>

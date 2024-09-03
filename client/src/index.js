@@ -1,9 +1,9 @@
 import React from "react";
-import ReactDOM from "react-dom/client"; // Updated import for React 18
+import ReactDOM from "react-dom/client";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
 
-const root = ReactDOM.createRoot(document.getElementById("root")); // Create a root element
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <AuthProvider>
     <App />

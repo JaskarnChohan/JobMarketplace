@@ -18,13 +18,18 @@ export const AuthProvider = ({ children }) => {
               Authorization: `Bearer ${token}`,
             },
           };
-          await axios.get("http://localhost:5050/api/auth/dashboard", config);
+          const res = await axios.get(
+            "http://localhost:5050/api/auth/user-info",
+            config
+          );
+          setUser(res.data);
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
         }
       } catch (err) {
         setIsAuthenticated(false);
+        console.error("Failed to check authentication status", err);
       }
     };
 
@@ -66,6 +71,20 @@ export const AuthProvider = ({ children }) => {
   const login = (token) => {
     localStorage.setItem("token", token);
     setIsAuthenticated(true);
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const res = await axios.get(
+        "http://localhost:5050/api/auth/user-info",
+        config
+      );
+      setUser(res.data);
+    } catch (err) {
+      console.error("Failed to fetch user info after login", err);
+    }
   };
 
   const logout = async () => {
@@ -76,6 +95,7 @@ export const AuthProvider = ({ children }) => {
         { withCredentials: true }
       );
       setIsAuthenticated(false);
+      setUser(null);
       localStorage.removeItem("token");
     } catch (err) {
       console.error("Logout failed", err);
