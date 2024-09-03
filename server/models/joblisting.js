@@ -1,52 +1,54 @@
 const mongoose = require("mongoose");
 
-const joblistingSchema = new mongoose.Schema(
+const jobListingSchema = new mongoose.Schema(
   {
-    employer: {
-        type: String,
-        required: true,
-    },
     title: {
       type: String,
       required: true,
     },
+    description: {
+      type: String,
+      required: true,
+      maxlength: 2000,
+    },
     company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "CompanyProfile",
+      required: true,
+    },
+    location: {
       type: String,
       required: true,
     },
-    location: { 
-        type: String, 
-        required: true,
+    requirements: {
+      type: [String], // An array of strings to list job requirements
+      required: true,
     },
-    jobCategory: {
-        type: String,
-        required: true,
+    benefits: {
+      type: [String], // An array of strings to list job benefits
     },
-    workType: {
-        type: String,
-        enum: ["full-time", "part-time", "contract-temp", "casual-vacation"],
-        required: true,
+    salaryRange: {
+      type: String,
     },
-    pay: {
-        type: String,
-        enum: ["$0-$10,000", "$10,000-$20,000", 
-            "$20,000-$40,000", "$40,000-$60,000", 
-            "$60,000-$80,000", "$80,000-$100,000", 
-            "$100,000-$120,000", "$120,000-$140,000", 
-            "$140,000-$160,000", "$160,000-$180,000", 
-            "$180,000-$200,000", "$200,000+"],
-        required: true,
+    employmentType: {
+      type: String,
+      enum: ["Full-time", "Part-time", "Contract", "Temporary", "Internship"],
+      required: true,
     },
-    description: {
-        type: String,
-        required: true,
-    },
-    createdAt: {
+    datePosted: {
       type: Date,
       default: Date.now,
+    },
+    applicationDeadline: {
+      type: Date,
+    },
+    status: {
+      type: String,
+      enum: ["Open", "Closed", "On Hold", "Canceled"],
+      default: "Open",
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Joblisting", joblistingSchema);
+module.exports = mongoose.model("JobListing", jobListingSchema);
