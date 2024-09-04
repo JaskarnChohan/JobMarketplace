@@ -12,6 +12,7 @@ import Dashboard from "./pages/home/Dashboard";
 import RequestResetPassword from "./pages/auth/RequestResetPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import { useAuth } from "./context/AuthContext";
+import ProfileForm from "./pages/profile/profileForm";
 
 const App = () => {
   const { isAuthenticated } = useAuth();
@@ -37,7 +38,12 @@ const App = () => {
         />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/reset-password" element={<ResetPassword noToken />} />
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home />} 
+        />
+         <Route
+          path="/profile"
+          element={isAuthenticated ? <ProfileForm /> : <Navigate to="/login" />}
+        />
       </Routes>
     </Router>
   );
