@@ -18,15 +18,14 @@ const ProfileForm = () => {
       formData.append("experience", data.experience);
       formData.append("certifications", data.certifications);
 
-      if (data.profilePhoto[0]) {
+      if (data.profilePhoto && data.profilePhoto.length > 0) {
         formData.append("profilePhoto", data.profilePhoto[0]);
       }
 
-      if (data.cvFile[0]) {
+      if (data.cvFile && data.cvFile.length > 0) {
         formData.append("cvFile", data.cvFile[0]);
       }
 
-      
       const response = await axios.put(`/api/profile/user/${data.userId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -103,14 +102,14 @@ const ProfileForm = () => {
         {...register("profilePhoto")}
         accept="image/*"
       />
-      <p>Upload Profile Picture</p>
+      <p>Upload Profile Picture (optional)</p>
 
       <input
         type="file"
         {...register("cvFile")}
         accept=".pdf,.doc,.docx"
       />
-      <p>Upload CV</p>
+      <p>Upload CV (optional)</p>
 
       <button type="submit">Save Profile</button>
     </form>
