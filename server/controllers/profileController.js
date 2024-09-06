@@ -23,3 +23,11 @@ exports.updateUserProfile = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
+
+exports.getCompanyProfile = (req, res) => {
+  res.send("Placeholder for getCompanyProfile function");
+};
+
+exports.updateCompanyProfile = (req, res) => {
+  res.send("Placeholder for updateCompanyProfile function");
+};
