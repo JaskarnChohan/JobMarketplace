@@ -12,7 +12,7 @@ import Dashboard from "./pages/home/Dashboard";
 import RequestResetPassword from "./pages/auth/RequestResetPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import { useAuth } from "./context/AuthContext";
-import ProfileForm from "./pages/profile/profileForm";
+import ProfileForm from "./pages/profile/ProfileForm";
 
 const App = () => {
   const { isAuthenticated } = useAuth();
