@@ -1,55 +1,38 @@
-import React, { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
+import React from "react";
+import { useForm } from "react-hook-form";
 import axios from "axios";
 import "./ProfileForm.css";
 
 const ProfileForm = () => {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState({
-    fullName: "",
-    email: user?.email || "",
-    location: "",
-    jobPreferences: "",
-    profilePhoto: "",
-    skills: "",
-    education: "",
-    experience: "",
-    certifications: "",
-    cvFile: "",
-  });
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axios.get(`/api/profile/user/${user._id}`);
-        setProfile(res.data);
-      } catch (error) {
-        console.error("Error fetching profile data:", error);
-      }
-    };
-    fetchProfile();
-  }, [user]);
-
-  const handleChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.value });
-  };
-
-  const handleFileChange = (e) => {
-    setProfile({ ...profile, [e.target.name]: e.target.files[0] });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     try {
       const formData = new FormData();
-      for (const key in profile) {
-        formData.append(key, profile[key]);
+      formData.append("fullName", data.fullName);
+      formData.append("location", data.location);
+      formData.append("email", data.email);
+      formData.append("jobPreferences", data.jobPreferences);
+      formData.append("skills", data.skills);
+      formData.append("education", data.education);
+      formData.append("experience", data.experience);
+      formData.append("certifications", data.certifications);
+
+      if (data.profilePhoto[0]) {
+        formData.append("profilePhoto", data.profilePhoto[0]);
       }
-      await axios.put(`/api/profile/user/${user._id}`, formData, {
+
+      if (data.cvFile[0]) {
+        formData.append("cvFile", data.cvFile[0]);
+      }
+
+      
+      const response = await axios.put(`/api/profile/user/${data.userId}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       });
+
       alert("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -58,75 +41,77 @@ const ProfileForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="profile-form">
+    <form onSubmit={handleSubmit(onSubmit)}>
       <input
         type="text"
-        name="fullName"
-        value={profile.fullName}
-        onChange={handleChange}
+        {...register("fullName", { required: "Full Name is required" })}
         placeholder="Full Name"
       />
-      <input
-        type="email"
-        name="email"
-        value={profile.email}
-        onChange={handleChange}
-        placeholder="Email"
-        disabled
-      />
+      {errors.fullName && <p>{errors.fullName.message}</p>}
+
       <input
         type="text"
-        name="location"
-        value={profile.location}
-        onChange={handleChange}
+        {...register("location", { required: "Location is required" })}
         placeholder="Location"
       />
+      {errors.location && <p>{errors.location.message}</p>}
+
       <input
-        type="text"
-        name="jobPreferences"
-        value={profile.jobPreferences}
-        onChange={handleChange}
-        placeholder="Jobs You're Looking For"
+        type="email"
+        {...register("email", { required: "Email is required" })}
+        placeholder="Email"
       />
+      {errors.email && <p>{errors.email.message}</p>}
+
       <input
         type="text"
-        name="skills"
-        value={profile.skills}
-        onChange={handleChange}
+        {...register("jobPreferences", { required: "Job preferences are required" })}
+        placeholder="Jobs you're looking for"
+      />
+      {errors.jobPreferences && <p>{errors.jobPreferences.message}</p>}
+
+      <input
+        type="text"
+        {...register("skills", { required: "Skills are required" })}
         placeholder="Skills"
       />
-      <textarea
-        name="education"
-        value={profile.education}
-        onChange={handleChange}
+      {errors.skills && <p>{errors.skills.message}</p>}
+
+      <input
+        type="text"
+        {...register("education", { required: "Education is required" })}
         placeholder="Education"
       />
-      <textarea
-        name="experience"
-        value={profile.experience}
-        onChange={handleChange}
-        placeholder="Work Experience"
+      {errors.education && <p>{errors.education.message}</p>}
+
+      <input
+        type="text"
+        {...register("experience", { required: "Experience is required" })}
+        placeholder="Experience"
       />
-      <textarea
-        name="certifications"
-        value={profile.certifications}
-        onChange={handleChange}
+      {errors.experience && <p>{errors.experience.message}</p>}
+
+      <input
+        type="text"
+        {...register("certifications", { required: "Certifications are required" })}
         placeholder="Achievements/Certifications"
       />
+      {errors.certifications && <p>{errors.certifications.message}</p>}
+
       <input
         type="file"
-        name="profilePhoto"
-        onChange={handleFileChange}
+        {...register("profilePhoto")}
         accept="image/*"
-        placeholder="Profile Photo"
       />
+      <p>Upload Profile Picture</p>
+
       <input
         type="file"
-        name="cvFile"
-        onChange={handleFileChange}
+        {...register("cvFile")}
         accept=".pdf,.doc,.docx"
-        placeholder="Upload CV"
       />
+      <p>Upload CV</p>
+
       <button type="submit">Save Profile</button>
     </form>
   );
