@@ -40,79 +40,81 @@ const ProfileForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <input
-        type="text"
-        {...register("fullName", { required: "Full Name is required" })}
-        placeholder="Full Name"
-      />
-      {errors.fullName && <p>{errors.fullName.message}</p>}
+    <div className="profile-form">
+      {/* Profile Picture Upload Icon */}
+      <div className="profile-picture" style={{ backgroundImage: `url('path/to/default-picture.jpg')` }}>
+        <input type="file" {...register("profilePhoto")} />
+      </div>
 
-      <input
-        type="text"
-        {...register("location", { required: "Location is required" })}
-        placeholder="Location"
-      />
-      {errors.location && <p>{errors.location.message}</p>}
+      <h2>Profile Information</h2>
 
-      <input
-        type="email"
-        {...register("email", { required: "Email is required" })}
-        placeholder="Email"
-      />
-      {errors.email && <p>{errors.email.message}</p>}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <input
+          type="text"
+          {...register("fullName")}
+          placeholder="Full Name"
+        />
+        {errors.fullName && <p>{errors.fullName.message}</p>}
 
-      <input
-        type="text"
-        {...register("jobPreferences", { required: "Job preferences are required" })}
-        placeholder="Jobs you're looking for"
-      />
-      {errors.jobPreferences && <p>{errors.jobPreferences.message}</p>}
+        <input
+          type="text"
+          {...register("location")}
+          placeholder="Location"
+        />
+        {errors.location && <p>{errors.location.message}</p>}
 
-      <input
-        type="text"
-        {...register("skills", { required: "Skills are required" })}
-        placeholder="Skills"
-      />
-      {errors.skills && <p>{errors.skills.message}</p>}
+        <input
+          type="email"
+          {...register("email")}
+          placeholder="Email"
+        />
+        {errors.email && <p>{errors.email.message}</p>}
 
-      <input
-        type="text"
-        {...register("education", { required: "Education is required" })}
-        placeholder="Education"
-      />
-      {errors.education && <p>{errors.education.message}</p>}
+        <input
+          type="text"
+          {...register("jobPreferences")}
+          placeholder="Jobs you're looking for"
+        />
+        {errors.jobPreferences && <p>{errors.jobPreferences.message}</p>}
 
-      <input
-        type="text"
-        {...register("experience", { required: "Experience is required" })}
-        placeholder="Experience"
-      />
-      {errors.experience && <p>{errors.experience.message}</p>}
+        <input
+          type="text"
+          {...register("skills")}
+          placeholder="Skills"
+        />
+        {errors.skills && <p>{errors.skills.message}</p>}
 
-      <input
-        type="text"
-        {...register("certifications", { required: "Certifications are required" })}
-        placeholder="Achievements/Certifications"
-      />
-      {errors.certifications && <p>{errors.certifications.message}</p>}
+        <input
+          type="text"
+          {...register("education")}
+          placeholder="Education"
+        />
+        {errors.education && <p>{errors.education.message}</p>}
 
-      <input
-        type="file"
-        {...register("profilePhoto")}
-        accept="image/*"
-      />
-      <p>Upload Profile Picture (optional)</p>
+        <input
+          type="text"
+          {...register("experience")}
+          placeholder="Experience"
+        />
+        {errors.experience && <p>{errors.experience.message}</p>}
 
-      <input
-        type="file"
-        {...register("cvFile")}
-        accept=".pdf,.doc,.docx"
-      />
-      <p>Upload CV (optional)</p>
+        <input
+          type="text"
+          {...register("certifications")}
+          placeholder="Achievements/Certifications"
+        />
+        {errors.certifications && <p>{errors.certifications.message}</p>}
 
-      <button type="submit">Save Profile</button>
-    </form>
+        <input
+          type="file"
+          {...register("cvFile")}
+          accept=".pdf,.doc,.docx"
+        />
+        <p>Upload CV (optional)</p>
+
+        <button type="submit">Save Profile</button>
+      </form>
+    </div>
   );
 };
 
