@@ -31,6 +31,10 @@ const Dashboard = () => {
         <p>
           Account Created At: {new Date(user.createdAt).toLocaleDateString()}
         </p>
+        <br></br>
+        <h3>Your applied applications</h3>
+        <p>{joblisting.title}</p>
+        <p>{joblisting.company}</p>
       </div>
     </div>
   );
