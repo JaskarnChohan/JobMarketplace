@@ -1,10 +1,27 @@
-import React from "react";
-import { useForm } from "react-hook-form";
+import React, { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
+import Modal from "react-modal";
 import "./ProfileForm.css";
 
 const ProfileForm = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors }, control } = useForm();
+  const [modalType, setModalType] = useState(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const openModal = (type) => {
+    setModalType(type);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
+
+  const handleModalSubmit = (data) => {
+    console.log("Modal data:", data); 
+    closeModal();
+  };
 
   const onSubmit = async (data) => {
     try {
@@ -41,7 +58,6 @@ const ProfileForm = () => {
 
   return (
     <div className="profile-form">
-      {/* Profile Picture Upload Icon */}
       <div className="profile-picture" style={{ backgroundImage: `url('path/to/default-picture.jpg')` }}>
         <input type="file" {...register("profilePhoto")} />
       </div>
@@ -112,8 +128,82 @@ const ProfileForm = () => {
         />
         <p>Upload CV (optional)</p>
 
+        <button type="button" onClick={() => openModal("experience")}>Add Experience</button>
+        <button type="button" onClick={() => openModal("skills")}>Add Skills</button>
+        <button type="button" onClick={() => openModal("education")}>Add Education</button>
+
         <button type="submit">Save Profile</button>
       </form>
+
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        contentLabel="Add Details"
+        className="modal"
+        overlayClassName="modal-overlay"
+      >
+        <h2>
+          {modalType === "experience" && "Add Experience"}
+          {modalType === "skills" && "Add Skills"}
+          {modalType === "education" && "Add Education"}
+        </h2>
+
+        {modalType === "experience" && (
+          <form onSubmit={handleSubmit(handleModalSubmit)}>
+            <Controller
+              name="jobTitle"
+              control={control}
+              defaultValue=""
+              render={({ field }) => <input {...field} placeholder="Job Title" />}
+            />
+            <Controller
+              name="company"
+              control={control}
+              defaultValue=""
+              render={({ field }) => <input {...field} placeholder="Company" />}
+            />
+            <Controller
+              name="timeWorked"
+              control={control}
+              defaultValue=""
+              render={({ field }) => <input {...field} placeholder="Time Worked" />}
+            />
+            <Controller
+              name="description"
+              control={control}
+              defaultValue=""
+              render={({ field }) => <textarea {...field} placeholder="Description" />}
+            />
+            <button type="submit">Submit Experience</button>
+          </form>
+        )}
+
+        {modalType === "skills" && (
+          <form onSubmit={handleSubmit(handleModalSubmit)}>
+            <Controller
+              name="skill"
+              control={control}
+              defaultValue=""
+              render={({ field }) => <input {...field} placeholder="Skill" />}
+            />
+            <button type="submit">Submit Skill</button>
+          </form>
+        )}
+
+        {modalType === "education" && (
+          <form onSubmit={handleSubmit(handleModalSubmit)}>
+            <Controller
+              name="education"
+              control={control}
+              defaultValue=""
+              render={({ field }) => <input {...field} placeholder="Education" />}
+            />
+            <button type="submit">Submit Education</button>
+          </form>
+        )}
+
+        <button onClick={closeModal}>Close</button>
+      </Modal>
     </div>
   );
 };
