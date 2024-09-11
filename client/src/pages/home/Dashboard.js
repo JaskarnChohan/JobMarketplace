@@ -1,12 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../components/header/Navbar";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../../global.css";
 
 const Dashboard = () => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
+  const [appliedJobs, setAppliedJobs] = useState([]);
+  const [errors, setErrors] = useState([]);
+
+  useEffect(() => {
+    if (user) {
+      const fetchAppliedJobs = async () => {
+        try {
+          const res = await axios.get(`http://localhost:5050/api/applications/${user._id}`);
+          setAppliedJobs(res.data);
+        } catch (err) {
+          setErrors([{ msg: 'An error occurred while fetching applied jobs: ' + err.message }]);
+        }
+      };
+
+      fetchAppliedJobs();
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -22,18 +40,32 @@ const Dashboard = () => {
       <Navbar isAuthenticated={true} handleLogout={handleLogout} />
       <div className="content">
         <h2>Welcome to your dashboard!</h2>
-        <p>
-          This is where you can manage your profile, job listings, and more.
-        </p>
+        <p>This is where you can manage your profile, job listings, and more.</p>
         <h3>Your Details:</h3>
         <p>Email: {user.email}</p>
         <p>Role: {user.role}</p>
-        <p>
-          Account Created At: {new Date(user.createdAt).toLocaleDateString()}
-        </p>
-        <br></br>
-        <h3>Your applied applications</h3>
-        {/* need to add small applied jobs box here with includes the status of the job */}
+        <p>Account Created At: {new Date(user.createdAt).toLocaleDateString()}</p>
+        <br />
+        <h3>Your Applied Applications</h3>
+        {appliedJobs.length > 0 ? (
+          <div className="applied-jobs-list">
+            {appliedJobs.map((application) => (
+              <div key={application._id} className="applied-job">
+                <p>Job ID: {application.jobId}</p>
+                <p>Status: {application.status}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>You have not applied to any jobs yet.</p>
+        )}
+        {errors.length > 0 && (
+          <div className="error-messages">
+            {errors.map((error, index) => (
+              <p key={index}>{error.msg}</p>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
