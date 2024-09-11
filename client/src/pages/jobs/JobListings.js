@@ -1,75 +1,75 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import Navbar from "../../components/header/Navbar";
-import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import "../../global.css";
-import "../auth/form.css";
-import Textarea from 'react-expanding-textarea';
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import Navbar from '../../components/header/Navbar';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import '../../global.css';
 
 const JobListings = () => {
-    const { isAuthenticated, logout, user } = useAuth();
-    const navigate = useNavigate();
-    const [jobListingData, setJobListingData] = useState([{
-        title: "",
-        description: "",
-        company: "",
-    },]);
-    const [errors, setErrors] = useState([]);
-    const { employer, title, description, company, location, jobCategory, requirements, benefits, salaryRange, employmentType, applicationDeadline, status } = jobListingData;
-    const getJobListings = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await axios.get("http://localhost:5050/api/jobs/", {
-                title,
-                description,
-                company,
-            });
-            setJobListingData(res.data)
-        } catch (err) {
-            if (err.response && err.response.data.errors) {
-                setErrors(err.response.data.errors);
-            } else {
-                console.error(err);
-                setErrors([{ msg: "An error occurred: " + err}]);
-            }
-        }
+  const { isAuthenticated, logout, user } = useAuth();
+  const navigate = useNavigate();
+  const [jobListings, setJobListings] = useState([]);
+  const [errors, setErrors] = useState([]);
+
+  // Fetch job listings
+  useEffect(() => {
+    async function fetchJobListings() {
+      try {
+        const res = await axios.get('http://localhost:5050/api/jobs'); // Assuming you have a backend endpoint
+        setJobListings(res.data);
+      } catch (err) {
+        setErrors([{ msg: 'An error occurred while fetching job listings: ' + err.message }]);
+      }
     }
 
-    const handleLogout = () => {
-        logout();
-        navigate("/");
-    };
+    fetchJobListings();
+  }, []);
 
-    return (
-        <div>
-            <Navbar isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
-            <div className="content">
-                <h1 className="lrg-heading">Job Listings</h1>
-                <button className="btn" onClick={getJobListings}>Get Job Listings</button>
-                <div className="form-container-wide">
-                    <div className="section">
-                        {Array.isArray(jobListingData) && jobListingData.map((item, index) => (
-                        <div className="form-container-wide">
-                            <h4 key={index}>{item.title}</h4>
-                            <h4 key={index}>{item.description}</h4>
-                            <h4 key={index}>{item.company}</h4>
-                        </div>
-                        ))}
-                    </div>
-                </div>
-                {errors.length > 0 && (
-                <div className="error-messages">
-                    {errors.map((error, index) => (
-                    <p key={index}>{error.msg}</p>
-                    ))}
-                </div>
-                )}
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  // Function to apply to a job
+  const applyToJob = async (jobId) => {
+    try {
+      const res = await axios.post('http://localhost:5050/api/apply', {
+        userId: user._id, // Pass the user ID
+        jobId, // Pass the job ID
+      });
+      alert('Applied to job successfully');
+    } catch (err) {
+      setErrors([{ msg: 'An error occurred while applying: ' + err.message }]);
+    }
+  };
+
+  return (
+    <div>
+      <Navbar isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
+      <div className="content">
+        <h1 className="lrg-heading">Job Listings</h1>
+        <div className="form-container-wide">
+          {jobListings.map((job, index) => (
+            <div key={index} className="job-listing">
+              <h4>{job.title}</h4>
+              <p>{job.description}</p>
+              <p>{job.company}</p>
+              <button className="btn" onClick={() => applyToJob(job._id)}>
+                Apply
+              </button>
             </div>
+          ))}
         </div>
-    );
+        {errors.length > 0 && (
+          <div className="error-messages">
+            {errors.map((error, index) => (
+              <p key={index}>{error.msg}</p>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default JobListings;

@@ -33,8 +33,7 @@ const Dashboard = () => {
         </p>
         <br></br>
         <h3>Your applied applications</h3>
-        <p>{joblisting.title}</p>
-        <p>{joblisting.company}</p>
+        {/* need to add small applied jobs box here with includes the status of the job */}
       </div>
     </div>
   );
