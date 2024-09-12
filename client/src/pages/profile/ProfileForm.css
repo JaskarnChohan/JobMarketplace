@@ -1,230 +1,183 @@
-:root {
-    --primary-color: #007bff;
-    --bg-color: #f0f4f7;
-    --text-color: #333;
-    --white-color: #ffffff;
-    --error-bg-color: #f8d7da;
-    --error-border-color: #f5c6cb;
-    --error-text-color: #721c24;
-    --success-bg-color: #d4edda;
-    --success-border-color: #c3e6cb;
-    --success-text-color: #155724;
-  }
-  
-  .profile-form {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: var(--white-color);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    position: relative;
-  }
-  
-  .profile-picture {
-    position: absolute;
-    top: -40px;
-    right: 20px;
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background-color: var(--primary-color);
-    background-size: cover;
-    background-position: center;
-    cursor: pointer;
-    border: 4px solid var(--white-color);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .profile-picture input[type="file"] {
-    display: none;
-  }
-  
-  .profile-form h2 {
-    background-color: var(--primary-color);
-    color: var(--white-color);
-    padding: 10px;
-    border-radius: 4px;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .profile-form input,
-  .profile-form textarea {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-  
-  .profile-form input:focus,
-  .profile-form textarea:focus {
-    border-color: var(--primary-color);
-    outline: none;
-  }
-  
-  .profile-form button {
-    background-color: var(--primary-color);
-    color: var(--white-color);
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-  }
-  
-  .profile-form button:hover {
-    background-color: #0056b3;
-  }
-  
-  .error-messages {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: var(--error-bg-color);
-    border: 1px solid var(--error-border-color);
-    border-radius: 4px;
-    color: var(--error-text-color);
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .success-messages {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: var(--success-bg-color);
-    border: 1px solid var(--success-border-color);
-    border-radius: 4px;
-    color: var(--success-text-color);
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .page-container {
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    height: 90vh;
-    background-color: var(--bg-color);
-  }
-  
-  .form-container {
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
+}
+
+.error-message::before {
+    content: "*";
+    margin-right: 5px;
+    color: red;
+}
+
+.profile-form {
+    background-color: var(--light-gray-color);
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background-color: var(--white-color);
+    display: flex;
+    flex-direction: column; 
+    position: relative; 
+}
+
+.profile-form h2 {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+    margin: 0 auto 20px; 
+    text-align: center; 
+}
+
+.profile-header {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-  }
-  
-  .form-container h1 {
-    text-align: center;
+    align-items: center;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 20px;
     margin-bottom: 20px;
-  }
-  
-  .form-container label {
-    font-weight: bold;
-  }
-  
-  .forgot-password,
-  .signup-link,
-  .login-link {
-    text-align: center;
+    margin-left: 0; 
+    width: 100%; 
+    text-align: center; 
+    position: relative; 
+}
+
+.profile-picture {
+    width: 150px; 
+    height: 150px; 
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
+    cursor: pointer;
+    position: absolute; 
+    top: -75px; 
+    left: 20px; 
+    border: 3px solid var(--primary-color); 
+}
+
+.profile-info {
+    margin-top: 70px; 
+}
+
+.profile-info-item {
+    margin-bottom: 10px;
+}
+
+.profile-info-item h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.profile-info-item p {
+    font-size: 18px;
+    margin: 0;
+}
+
+.profile-info-item .FaPencilAlt {
+    cursor: pointer;
+    color: blue;
+}
+
+.profile-section {
+    margin-bottom: 20px;
+}
+
+.profile-section h3 {
     color: var(--primary-color);
-    text-decoration: none;
-    margin-top: 10px;
-  }
-  
-  .forgot-password:hover,
-  .signup-link:hover,
-  .login-link:hover {
-    text-decoration: underline;
-  }
-  
-  .switch-auth {
-    text-align: center;
-    margin-top: 20px;
-  }
-  
-  .switch-auth a {
-    color: var(--primary-color);
-    text-decoration: none;
+    border-bottom: 1px solid var(--primary-color);
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.profile-section ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.profile-section li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.profile-section li .FaTimes {
+    cursor: pointer;
+    color: red;
+}
+
+.profile-section button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.profile-section button:hover {
+    background-color: var(--primary-dark-color);
+}
+
+.education-item {
+    margin-bottom: 15px;
+}
+
+.education-item h4 {
+    font-size: 20px;
     font-weight: bold;
-  }
-  
-  .switch-auth a:hover {
-    text-decoration: underline;
-  }
-  
-  .modal {
-    background-color: var(--white-color);
-    padding: 20px;
+    margin: 0;
+    color: var(--primary-color); 
+}
+
+.education-item p.major {
+    font-size: 18px;
+    margin: 5px 0;
+}
+
+.education-item p.duration {
+    font-size: 16px;
+    color: gray; 
+}
+
+.modal {
+    background-color: white;
     border-radius: 8px;
-    max-width: 500px;
-    margin: 0 auto;
+    padding: 20px;
     position: relative;
-  }
-  
-  .modal-overlay {
-    background-color: rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    margin: auto;
+}
+
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.5);
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     display: flex;
-    justify-content: center;
     align-items: center;
-  }
-  
-  .modal h2 {
+    justify-content: center;
+}
+
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+.modal button[type="submit"] {
     background-color: var(--primary-color);
-    color: var(--white-color);
+    color: white;
+    border: none;
     padding: 10px;
     border-radius: 4px;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .modal input,
-  .modal textarea {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-  
-  .modal input:focus,
-  .modal textarea:focus {
-    border-color: var(--primary-color);
-    outline: none;
-  }
-  
-  .modal button {
-    background-color: var(--primary-color);
-    color: var(--white-color);
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-  }
-  
-  .modal button:hover {
-    background-color: #0056b3;
-  }
-  
-  .modal button.close {
-    background-color: #ccc;
-  }
-  
-  .modal button.close:hover {
-    background-color: #aaa;
-  }  
+    margin-top: 20px; 
+}
+
+.modal button[type="submit"]:hover {
+    background-color: var(--primary-dark-color);
+}

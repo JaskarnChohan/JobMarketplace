@@ -1,16 +1,30 @@
 import React, { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import axios from "axios";
+import { useForm } from "react-hook-form";
 import Modal from "react-modal";
+import { FaPencilAlt, FaTimes } from "react-icons/fa";
 import "./ProfileForm.css";
 
+Modal.setAppElement('#root');
+
 const ProfileForm = () => {
-  const { register, handleSubmit, formState: { errors }, control } = useForm();
-  const [modalType, setModalType] = useState(null);
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [modalType, setModalType] = useState(null);
+
+  const [fullName, setFullName] = useState("");
+  const [location, setLocation] = useState("");
+  const [email, setEmail] = useState("");
+  const [jobPreferences, setJobPreferences] = useState([]);
+  const [skills, setSkills] = useState([]);
+  const [education, setEducation] = useState([]);
+  const [experience, setExperience] = useState([]);
+  const [certifications, setCertifications] = useState([]);
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [cvFile, setCvFile] = useState(null);
 
   const openModal = (type) => {
     setModalType(type);
+    reset();
     setModalIsOpen(true);
   };
 
@@ -19,190 +33,254 @@ const ProfileForm = () => {
   };
 
   const handleModalSubmit = (data) => {
-    console.log("Modal data:", data); 
+    switch (modalType) {
+      case "profileInfo":
+        setFullName(data.fullName);
+        setLocation(data.location);
+        setEmail(data.email);
+        break;
+      case "skills":
+        setSkills([...skills, data.skill]);
+        break;
+      case "education":
+        const educationData = {
+          institutionName: data.institutionName,
+          major: data.major,
+          startDate: data.startDate,
+          endDate: data.current ? "" : data.endDate
+        };
+        setEducation([...education, educationData]);
+        break;
+      case "experience":
+        setExperience([...experience, {
+          jobTitle: data.jobTitle,
+          company: data.company,
+          timeWorked: data.timeWorked,
+          description: data.description
+        }]);
+        break;
+      case "certifications":
+        setCertifications([...certifications, data.certifications]);
+        break;
+      case "jobPreferences":
+        setJobPreferences([...jobPreferences, data.jobPreference]);
+        break;
+      default:
+        break;
+    }
     closeModal();
   };
 
-  const onSubmit = async (data) => {
-    try {
-      const formData = new FormData();
-      formData.append("fullName", data.fullName);
-      formData.append("location", data.location);
-      formData.append("email", data.email);
-      formData.append("jobPreferences", data.jobPreferences);
-      formData.append("skills", data.skills);
-      formData.append("education", data.education);
-      formData.append("experience", data.experience);
-      formData.append("certifications", data.certifications);
+  const handleDelete = (type, index) => {
+    switch (type) {
+      case "skills":
+        setSkills(skills.filter((_, i) => i !== index));
+        break;
+      case "education":
+        setEducation(education.filter((_, i) => i !== index));
+        break;
+      case "experience":
+        setExperience(experience.filter((_, i) => i !== index));
+        break;
+      case "certifications":
+        setCertifications(certifications.filter((_, i) => i !== index));
+        break;
+      case "jobPreferences":
+        setJobPreferences(jobPreferences.filter((_, i) => i !== index));
+        break;
+      default:
+        break;
+    }
+  };
 
-      if (data.profilePhoto && data.profilePhoto.length > 0) {
-        formData.append("profilePhoto", data.profilePhoto[0]);
-      }
+  const handleProfilePictureChange = (e) => {
+    if (e.target.files.length > 0) {
+      setProfilePicture(URL.createObjectURL(e.target.files[0]));
+    }
+  };
 
-      if (data.cvFile && data.cvFile.length > 0) {
-        formData.append("cvFile", data.cvFile[0]);
-      }
-
-      const response = await axios.put(`/api/profile/user/${data.userId}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      alert("Profile updated successfully!");
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Failed to update profile.");
+  const handleCvFileChange = (e) => {
+    if (e.target.files.length > 0) {
+      setCvFile(e.target.files[0]);
     }
   };
 
   return (
     <div className="profile-form">
-      <div className="profile-picture" style={{ backgroundImage: `url('path/to/default-picture.jpg')` }}>
-        <input type="file" {...register("profilePhoto")} />
-      </div>
-
       <h2>Profile Information</h2>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <input
-          type="text"
-          {...register("fullName")}
-          placeholder="Full Name"
-        />
-        {errors.fullName && <p>{errors.fullName.message}</p>}
+      <div className="profile-header">
+        <div
+          className="profile-picture"
+          onClick={() => document.getElementById('profile-picture-input').click()}
+          style={{ backgroundImage: `url(${profilePicture})` }}
+        >
+          <input
+            type="file"
+            id="profile-picture-input"
+            onChange={handleProfilePictureChange}
+            style={{ display: 'none' }}
+          />
+        </div>
 
-        <input
-          type="text"
-          {...register("location")}
-          placeholder="Location"
-        />
-        {errors.location && <p>{errors.location.message}</p>}
+        <div className="profile-info">
+          <div className="profile-info-item">
+            <h1>{fullName || "Add Name"}</h1>
+          </div>
+          <div className="profile-info-item">
+            <p>{location || "Add Location"}</p>
+          </div>
+          <div className="profile-info-item">
+            <p>{email || "Add Email"}</p>
+            <FaPencilAlt onClick={() => openModal("profileInfo")} />
+          </div>
+        </div>
+      </div>
 
-        <input
-          type="email"
-          {...register("email")}
-          placeholder="Email"
-        />
-        {errors.email && <p>{errors.email.message}</p>}
+      <form>
+        <div className="profile-section">
+          <h3>Job Preferences</h3>
+          <ul>
+            {jobPreferences.map((preference, index) => (
+              <li key={index}>
+                {preference} <FaTimes onClick={() => handleDelete("jobPreferences", index)} />
+              </li>
+            ))}
+          </ul>
+          <button type="button" onClick={() => openModal("jobPreferences")}>Add Job Preferences</button>
+        </div>
 
-        <input
-          type="text"
-          {...register("jobPreferences")}
-          placeholder="Jobs you're looking for"
-        />
-        {errors.jobPreferences && <p>{errors.jobPreferences.message}</p>}
+        <div className="profile-section">
+          <h3>Skills</h3>
+          <ul>
+            {skills.map((skill, index) => (
+              <li key={index}>
+                {skill} <FaTimes onClick={() => handleDelete("skills", index)} />
+              </li>
+            ))}
+          </ul>
+          <button type="button" onClick={() => openModal("skills")}>Add Skills</button>
+        </div>
 
-        <input
-          type="text"
-          {...register("skills")}
-          placeholder="Skills"
-        />
-        {errors.skills && <p>{errors.skills.message}</p>}
+        <div className="profile-section">
+          <h3>Education</h3>
+          <div className="education-list">
+            {education.map((edu, index) => (
+              <div key={index} className="education-item">
+                <h4>{edu.institutionName}</h4>
+                {edu.major && <p className="major">{edu.major}</p>}
+                <p className="duration">{edu.startDate} - {edu.endDate || "Present"}</p>
+                <FaTimes onClick={() => handleDelete("education", index)} />
+              </div>
+            ))}
+          </div>
+          <button type="button" onClick={() => openModal("education")}>Add Education</button>
+        </div>
 
-        <input
-          type="text"
-          {...register("education")}
-          placeholder="Education"
-        />
-        {errors.education && <p>{errors.education.message}</p>}
+        <div className="profile-section">
+          <h3>Experience</h3>
+          <ul>
+            {experience.map((exp, index) => (
+              <li key={index}>
+                <div>Job Title: {exp.jobTitle}</div>
+                <div>Company: {exp.company}</div>
+                <div>Duration: {exp.timeWorked}</div>
+                <div>Description: {exp.description}</div>
+                <FaTimes onClick={() => handleDelete("experience", index)} />
+              </li>
+            ))}
+          </ul>
+          <button type="button" onClick={() => openModal("experience")}>Add Experience</button>
+        </div>
 
-        <input
-          type="text"
-          {...register("experience")}
-          placeholder="Experience"
-        />
-        {errors.experience && <p>{errors.experience.message}</p>}
+        <div className="profile-section">
+          <h3>Certifications</h3>
+          <ul>
+            {certifications.map((cert, index) => (
+              <li key={index}>
+                {cert} <FaTimes onClick={() => handleDelete("certifications", index)} />
+              </li>
+            ))}
+          </ul>
+          <button type="button" onClick={() => openModal("certifications")}>Add Certifications</button>
+        </div>
 
-        <input
-          type="text"
-          {...register("certifications")}
-          placeholder="Achievements/Certifications"
-        />
-        {errors.certifications && <p>{errors.certifications.message}</p>}
-
-        <input
-          type="file"
-          {...register("cvFile")}
-          accept=".pdf,.doc,.docx"
-        />
-        <p>Upload CV (optional)</p>
-
-        <button type="button" onClick={() => openModal("experience")}>Add Experience</button>
-        <button type="button" onClick={() => openModal("skills")}>Add Skills</button>
-        <button type="button" onClick={() => openModal("education")}>Add Education</button>
-
-        <button type="submit">Save Profile</button>
+        <div className="profile-section">
+          <h3>Upload CV</h3>
+          <input type="file" onChange={handleCvFileChange} />
+        </div>
       </form>
 
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
-        contentLabel="Add Details"
+        contentLabel="Modal"
         className="modal"
         overlayClassName="modal-overlay"
       >
         <h2>
-          {modalType === "experience" && "Add Experience"}
+          {modalType === "profileInfo" && "Edit Profile Information"}
           {modalType === "skills" && "Add Skills"}
           {modalType === "education" && "Add Education"}
+          {modalType === "experience" && "Add Experience"}
+          {modalType === "certifications" && "Add Certifications"}
+          {modalType === "jobPreferences" && "Add Job Preferences"}
         </h2>
-
-        {modalType === "experience" && (
-          <form onSubmit={handleSubmit(handleModalSubmit)}>
-            <Controller
-              name="jobTitle"
-              control={control}
-              defaultValue=""
-              render={({ field }) => <input {...field} placeholder="Job Title" />}
-            />
-            <Controller
-              name="company"
-              control={control}
-              defaultValue=""
-              render={({ field }) => <input {...field} placeholder="Company" />}
-            />
-            <Controller
-              name="timeWorked"
-              control={control}
-              defaultValue=""
-              render={({ field }) => <input {...field} placeholder="Time Worked" />}
-            />
-            <Controller
-              name="description"
-              control={control}
-              defaultValue=""
-              render={({ field }) => <textarea {...field} placeholder="Description" />}
-            />
-            <button type="submit">Submit Experience</button>
-          </form>
-        )}
-
-        {modalType === "skills" && (
-          <form onSubmit={handleSubmit(handleModalSubmit)}>
-            <Controller
-              name="skill"
-              control={control}
-              defaultValue=""
-              render={({ field }) => <input {...field} placeholder="Skill" />}
-            />
-            <button type="submit">Submit Skill</button>
-          </form>
-        )}
-
-        {modalType === "education" && (
-          <form onSubmit={handleSubmit(handleModalSubmit)}>
-            <Controller
-              name="education"
-              control={control}
-              defaultValue=""
-              render={({ field }) => <input {...field} placeholder="Education" />}
-            />
-            <button type="submit">Submit Education</button>
-          </form>
-        )}
-
-        <button onClick={closeModal}>Close</button>
+        <form onSubmit={handleSubmit(handleModalSubmit)}>
+          {modalType === "profileInfo" && (
+            <div>
+              <input type="text" {...register("fullName", { required: "Please enter details" })} placeholder="Full Name" defaultValue={fullName} />
+              {errors.fullName && <p className="error-message">{errors.fullName.message}</p>}
+              <input type="text" {...register("location", { required: "Please enter details" })} placeholder="Location" defaultValue={location} />
+              {errors.location && <p className="error-message">{errors.location.message}</p>}
+              <input type="email" {...register("email", { required: "Please enter details" })} placeholder="Email" defaultValue={email} />
+              {errors.email && <p className="error-message">{errors.email.message}</p>}
+            </div>
+          )}
+          {modalType === "skills" && (
+            <div>
+              <input type="text" {...register("skill", { required: "Please enter details" })} placeholder="Skill" />
+              {errors.skill && <p className="error-message">{errors.skill.message}</p>}
+            </div>
+          )}
+          {modalType === "education" && (
+            <div>
+              <input type="text" {...register("institutionName", { required: "Please enter details" })} placeholder="Institution Name" />
+              {errors.institutionName && <p className="error-message">{errors.institutionName.message}</p>}
+              <input type="text" {...register("major")} placeholder="Major (optional)" />
+              <input type="date" {...register("startDate", { required: "Please enter details" })} placeholder="Start Date" />
+              {errors.startDate && <p className="error-message">{errors.startDate.message}</p>}
+              <input type="date" {...register("endDate")} placeholder="End Date" />
+              <input type="checkbox" {...register("current")} /> Currently Studying
+            </div>
+          )}
+          {modalType === "experience" && (
+            <div>
+              <input type="text" {...register("jobTitle", { required: "Please enter details" })} placeholder="Job Title" />
+              {errors.jobTitle && <p className="error-message">{errors.jobTitle.message}</p>}
+              <input type="text" {...register("company", { required: "Please enter details" })} placeholder="Company" />
+              {errors.company && <p className="error-message">{errors.company.message}</p>}
+              <input type="text" {...register("timeWorked", { required: "Please enter details" })} placeholder="Time Worked" />
+              {errors.timeWorked && <p className="error-message">{errors.timeWorked.message}</p>}
+              <textarea {...register("description", { required: "Please enter details" })} placeholder="Description"></textarea>
+              {errors.description && <p className="error-message">{errors.description.message}</p>}
+            </div>
+          )}
+          {modalType === "certifications" && (
+            <div>
+              <input type="text" {...register("certifications", { required: "Please enter details" })} placeholder="Certifications" />
+              {errors.certifications && <p className="error-message">{errors.certifications.message}</p>}
+            </div>
+          )}
+          {modalType === "jobPreferences" && (
+            <div>
+              <input type="text" {...register("jobPreference", { required: "Please enter details" })} placeholder="Job Preference" />
+              {errors.jobPreference && <p className="error-message">{errors.jobPreference.message}</p>}
+            </div>
+          )}
+          <button type="submit">Save</button>
+          <button type="button" onClick={closeModal}>Cancel</button>
+        </form>
       </Modal>
     </div>
   );
