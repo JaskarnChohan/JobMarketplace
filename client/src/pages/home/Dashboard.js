@@ -51,7 +51,7 @@ const Dashboard = () => {
           <div className="applied-jobs-list">
           {appliedJobs.map((application) => (
             <div key={application._id} className="applied-job">
-              <p>Job Title: {application.jobId.title}</p> {/* Display the job title */}
+              <p>Job Title: {application.jobId.title}</p> 
               <p>Status: {application.status}</p>
             </div>
           ))} 
