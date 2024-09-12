@@ -49,12 +49,12 @@ const Dashboard = () => {
         <h3>Your Applied Applications</h3>
         {appliedJobs.length > 0 ? (
           <div className="applied-jobs-list">
-            {appliedJobs.map((application) => (
-              <div key={application._id} className="applied-job">
-                <p>Job ID: {application.jobId}</p>
-                <p>Status: {application.status}</p>
-              </div>
-            ))}
+          {appliedJobs.map((application) => (
+            <div key={application._id} className="applied-job">
+              <p>Job Title: {application.jobId.title}</p> {/* Display the job title */}
+              <p>Status: {application.status}</p>
+            </div>
+          ))} 
           </div>
         ) : (
           <p>You have not applied to any jobs yet.</p>

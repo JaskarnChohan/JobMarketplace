@@ -24,4 +24,24 @@ router.post('/apply', async (req, res) => {
   }
 });
 
+router.get('/applications/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Populate jobId to get the job title from JobListing
+    const applications = await Application.find({ userId }).populate({
+      path: 'jobId',
+      select: 'title' // Only fetch the 'title' field from JobListing
+    });
+
+    if (applications.length === 0) {
+      return res.status(404).json({ message: 'No applications found for this user.' });
+    }
+
+    res.status(200).json(applications);
+  } catch (err) {
+    res.status(500).json({ message: 'An error occurred while fetching applications', error: err.message });
+  }
+});
+
 module.exports = router;
