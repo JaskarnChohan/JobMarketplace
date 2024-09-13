@@ -11,11 +11,10 @@ const JobListings = () => {
   const [jobListings, setJobListings] = useState([]);
   const [errors, setErrors] = useState([]);
 
-  // Fetch job listings
   useEffect(() => {
     async function fetchJobListings() {
       try {
-        const res = await axios.get('http://localhost:5050/api/jobs'); // Assuming you have a backend endpoint
+        const res = await axios.get('http://localhost:5050/api/jobs'); 
         setJobListings(res.data);
       } catch (err) {
         setErrors([{ msg: 'An error occurred while fetching job listings: ' + err.message }]);
@@ -30,12 +29,11 @@ const JobListings = () => {
     navigate('/');
   };
 
-  // Function to apply to a job
   const applyToJob = async (jobId) => {
     try {
       const res = await axios.post('http://localhost:5050/api/apply', {
-        userId: user._id, // Pass the user ID
-        jobId, // Pass the job ID
+        userId: user._id, 
+        jobId, 
       });
       alert('Applied to job successfully');
     } catch (err) {

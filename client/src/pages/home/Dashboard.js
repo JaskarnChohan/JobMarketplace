@@ -50,6 +50,7 @@ const Dashboard = () => {
         {appliedJobs.length > 0 ? (
           <div className="applied-jobs-list">
           {appliedJobs.map((application) => (
+            // Displays the job title and status of their applications
             <div key={application._id} className="applied-job">
               <p>Job Title: {application.jobId.title}</p> 
               <p>Status: {application.status}</p>
@@ -57,6 +58,7 @@ const Dashboard = () => {
           ))} 
           </div>
         ) : (
+          // Outputs if user doesn't have any jobs applied.
           <p>You have not applied to any jobs yet.</p>
         )}
         {errors.length > 0 && (
