@@ -10,6 +10,13 @@
   --success-bg-color: #d4edda;
   --success-border-color: #c3e6cb;
   --success-text-color: #155724;
+  --spacing: 10px;  /* Space between form elements */
+  --input-padding: 8px;  /* Padding inside input and select elements */
+  --border-radius: 4px;  /* Radius for field corners */
+  --form-background: #f9f9f9;  /* Background color of the form */
+  --form-padding: 20px;  /* Padding around the form */
+  --form-gap: 20px;  /* Gap between filter elements */
+  --form-width: 90%;  /* Max width of the form to ensure centering */
 }
 
 /* Role Container Styling */
@@ -243,4 +250,84 @@ select:focus {
 
 .switch-auth a:hover {
   text-decoration: underline;
+}
+
+/* Main container for the filter form */
+.filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: space-evenly; /* Evenly distribute space around items */
+  padding: var(--form-padding);
+  background-color: var(--form-background);
+  gap: var(--form-gap);
+  border-radius: var(--border-radius);
+}
+
+/* Individual filter group styling */
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 180px; /* Minimum width to maintain form integrity */
+  max-width: auto; /* Maximum width to ensure responsiveness */
+}
+
+/* Individual filter group styling */
+.filter-group-wide {
+  display: flex;
+  flex-direction: column;
+  min-width: 380px; /* Minimum width to maintain form integrity */
+  max-width: auto; /* Maximum width to ensure responsiveness */
+}
+
+/* Styling for labels within the filter form */
+.filter-group-wide label,
+.filter-group label {
+  margin-bottom: var(--spacing);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Styling for inputs and select elements */
+.filter-group-wide input,
+.filter-group-wide select,
+.filter-group input,
+.filter-group select {
+  padding: var(--input-padding);
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  width: 100%; /* Ensure full width within the group */
+}
+
+/* Ensure the button is styled consistently */
+.filter-group-wide button,
+.filter-form button {
+  padding: var(--input-padding) var(--spacing);
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* Hover state for buttons */
+.filter-group-wide button:hover,
+.filter-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .filter-form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .filter-group-wide,
+  .filter-group {
+    max-width: 100%; /* Full width on smaller screens */
+    margin-bottom: var(--spacing); /* Add space between stacked items */
+  }
 }

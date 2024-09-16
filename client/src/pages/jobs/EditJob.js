@@ -2,90 +2,60 @@ import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import axios from "axios";
 import Navbar from "../../components/header/Navbar";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import "../../global.css";
 import "../auth/form.css";
 import Textarea from 'react-expanding-textarea';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const CreateJob = () => {
+const EditJob = () => {
+  const { _id } = useParams();
+  const [job, setJob] = useState({
+    employer: '',
+    title: '',
+    description: '',
+    company: '',
+    location: '',
+    jobCategory: '',
+    requirements: [],
+    benefits: [],
+    salaryRange: '',
+    employmentType: '',
+    applicationDeadline: new Date(),
+    status: '',
+  });
+  const [loading, setLoading] = useState(true);
+  const [errors, setError] = useState([]);
   const textareaRef = useRef(null)
   const { logout, user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  const [formData, setFormData] = useState({
-    employer: user._id,
-    title: "",
-    description: "",
-    company: "",
-    location: "",
-    jobCategory: "",
-    requirements: [],
-    benefits: [],
-    salaryRange: "",
-    employmentType: "",
-    applicationDeadline: new Date(),
-    status: "Draft",
-  });
-
-  const [errors, setErrors] = useState([]);
   // State to toggle between select and input
   const [isCustomInput, setIsCustomInput] = useState(false);
   const [isCustomInput2, setIsCustomInput2] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/dashboard");
-    }
-  }, [isAuthenticated, navigate]);
+    const fetchJob = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5050/api/jobs/${_id}`);
+        setJob(response.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch job');
+        setLoading(false);
+        console.error(err);
+      }
+    };
+
+    fetchJob();
+  }, [_id]);
 
   useEffect(() => {
     if (textareaRef.current && !loading) {  // Only focus if loading is complete
       textareaRef.current.focus();    // Focus only once after the job is fetched
     }
   }, [loading]);  // Now it only runs once when loading becomes false
-
-
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-  // const { employer, title, company, location, jobCategory, workType, pay, description  } = formData;
-  const { employer, title, description, company, location, jobCategory, requirements, benefits, salaryRange, employmentType, applicationDeadline, status } = formData;
-  const onChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  }
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post("http://localhost:5050/api/jobs/create", {
-        employer,
-        title,
-        description,
-        company,
-        location,
-        jobCategory,
-        requirements,
-        benefits,
-        salaryRange,
-        employmentType,
-        applicationDeadline,
-        status,
-      });
-      console.log(res.data);
-      navigate("/jobmanagement");
-    } catch (err) {
-      if (err.response && err.response.data.errors) {
-        setErrors(err.response.data.errors);
-      } else {
-        console.error(err);
-        setErrors([{ msg: "An error occurred. Please try again later." }]);
-      }
-    }
-  };
 
   const [requirementinputitem, setInputValue] = useState('');
   const [requirementslist, setItems] = useState([]);
@@ -122,6 +92,57 @@ const CreateJob = () => {
     }
   }, [user]); // Run the effect when 'user' changes
 
+  if (!isAuthenticated) {
+    navigate("/login");
+  }
+
+  if (loading) return <div>Loading...</div>;
+  if (!job) return <div>Job not found</div>;
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
+  const { employer, title, description, company, location, jobCategory, requirements, benefits, salaryRange, employmentType, applicationDeadline, status } = job;
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+  
+  const onChange = (e) => {
+    setJob({ ...job, [e.target.name]: e.target.value });
+  }
+
+  const handleToggleInput = () => {
+    setIsCustomInput(!isCustomInput); // Toggle between select and input
+  };
+
+  const handleToggleInput2 = () => {
+    setIsCustomInput2(!isCustomInput2); // Toggle between select and input
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+      const res = await axios.put(`http://localhost:5050/api/jobs/update/${_id}`, job, config);
+      console.log(res.data);
+      navigate("/jobmanagement");
+    } catch (err) {
+      if (err.response && err.response.data.errors) {
+        setError(err.response.data.errors);
+      } else {
+        console.error(err);
+        setError([{ msg: "An error occurred. Please try again later." }]);
+      }
+    }
+  };
+  
+
   // Handle input change
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
@@ -132,52 +153,40 @@ const CreateJob = () => {
 
   // Handle adding item to the list
   const handleAddItem = () => {
-    if (requirementinputitem.trim()) {  // Add only if input is not empty
-      const updatedRequirements = [...requirements, requirementinputitem];      setInputValue(''); // Clear the input field
-      setFormData({ ...formData, requirements: updatedRequirements });
+    if (requirementinputitem.trim()) {
+      const updatedRequirements = [...requirements, requirementinputitem];
+      setJob({ ...job, requirements: updatedRequirements });
       setInputValue(''); // Clear the input field
     }
   };
   const handleBenefitAddItem = () => {
-    if (benefitsinputitem.trim()) {  // Add only if input is not empty
+    if (benefitsinputitem.trim()) {
       const updatedBenefits = [...benefits, benefitsinputitem];
-      setFormData({ ...formData, benefits: updatedBenefits });
+      setJob({ ...job, benefits: updatedBenefits });
       setBenefitInputValue(''); // Clear the input field
     }
   };
 
-  const handleToggleInput = () => {
-    setIsCustomInput(!isCustomInput); // Toggle between select and input
-  };
-
-  const handleToggleInput2 = () => {
-    setIsCustomInput2(!isCustomInput2); // Toggle between select and input
-  };
-
-  // Function to remove an item based on index and item value
-  const removeItem = (index, item) => {
+  const removeItem = (index) => {
     const updatedRequirements = requirements.filter((_, i) => i !== index);
-    setFormData({ ...formData, requirements: updatedRequirements})
+    setJob({ ...job, requirements: updatedRequirements });
   };
-  const removeBenefitItem = (index, item) => {
+  const removeBenefitItem = (index) => {
     const updatedBenefits = benefits.filter((_, i) => i !== index);
-    setFormData({ ...formData,  benefits: updatedBenefits })
+    setJob({ ...job, benefits: updatedBenefits });
   };
 
   const handleDateChange = (date) => {
-    setFormData({...formData, ['applicationDeadline']: date});;
+    setJob({...job, ['applicationDeadline']: date});;
   };
-
-  if (!user) {
-    return <div>Loading...</div>;
-  }
+  
 
   return (
     <div>
       <Navbar isAuthenticated={true} handleLogout={handleLogout} user={user} />
       <div className="content">
           <form onSubmit={onSubmit}>
-            <h1 className="lrg-heading">Job Listing Form</h1>
+            <h1 className="lrg-heading">Job Listing Editor</h1>
             <div className="form-container-wide">
               <div className="section">
                 <label htmlFor="title">Title</label>
@@ -191,7 +200,7 @@ const CreateJob = () => {
                 required
                 />
 
-<label htmlFor="company">Company</label>
+                <label htmlFor="company">Company</label>
                 {/* Conditionally render either the select dropdown or input field */}
                 {isCustomInput ? (
                     <input
@@ -236,7 +245,7 @@ const CreateJob = () => {
                 required
                 />
 
-<label htmlFor="jobCategory">Job Category</label>
+                <label htmlFor="jobCategory">Job Category</label>
                 {/* Conditionally render either the select dropdown or input field */}
                 {isCustomInput2 ? (
                     <input
@@ -269,13 +278,13 @@ const CreateJob = () => {
                 <button type="button" className="small-btn button-blue" onClick={handleToggleInput2}>
                     {isCustomInput2 ? 'Select from List' : 'Enter Manually'}
                 </button>
-
+              
                 <label htmlFor="applicationdeadline">Application Deadline</label>
                 <DatePicker className="datepicker"
                   selected={applicationDeadline}
                   onChange={(date) => handleDateChange(date)}
                 />
-              </div>
+            </div>
 
                 {/* <label htmlFor="requirements">Requirements</label>
                 <input
@@ -315,13 +324,13 @@ const CreateJob = () => {
                 <div className="list-container">
                   <h3>Requirements:</h3>
                   <ul className="item-list">
-                    {requirementslist.map((item, index) => (
+                    {job.requirements.map((item, index) => (
                       <li key={index}>{item} <button className="red-btn" type="button" onClick={() => removeItem(index, item)}>Delete</button></li>
                     ))}
                   </ul>   
                 </div> 
                 <button className="btn" type="submit">
-                Post Job Listing
+                Save Job Listing
                 </button>
               </div>
 
@@ -394,7 +403,7 @@ const CreateJob = () => {
                 <div className="list-container">
                   <h3>Benefits:</h3>
                   <ul className="item-list">
-                    {benefitslist.map((item, index) => (
+                    {job.benefits.map((item, index) => (
                       <li key={index}>{item} <button className="red-btn" type="button" onClick={() => removeBenefitItem(index, item)}>Delete</button></li>
                     ))}
                   </ul>   
@@ -420,4 +429,4 @@ const CreateJob = () => {
   );
 };
 
-export default CreateJob;
+export default EditJob;

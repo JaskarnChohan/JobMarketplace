@@ -29,10 +29,11 @@ const jobListingSchema = new mongoose.Schema(
     },
     requirements: {
       type: [String], // An array of strings to list job requirements
-      required: true,
+      default: [],
     },
     benefits: {
       type: [String], // An array of strings to list job benefits
+      default: [],
     },
     salaryRange: {
       type: String,
@@ -54,11 +55,12 @@ const jobListingSchema = new mongoose.Schema(
     },
     applicationDeadline: {
       type: Date,
+      required: true,
     },
     status: {
       type: String,
-      enum: ["Open", "Closed", "On Hold", "Canceled"],
-      default: "Open",
+      enum: ["Open", "Closed", "On Hold", "Canceled", "Draft"],
+      default: "Draft",
     },
   },
   { timestamps: true }

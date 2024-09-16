@@ -14,6 +14,9 @@ import RequestResetPassword from "./pages/auth/RequestResetPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import { useAuth } from "./context/AuthContext";
 import JobListings from "./pages/jobs/JobListings";
+import JobManagement from "./pages/jobs/jobManagement";
+import EditJob from "./pages/jobs/EditJob";
+import JobView from "./pages/jobs/JobView";
 
 const App = () => {
   const { isAuthenticated } = useAuth();
@@ -40,6 +43,18 @@ const App = () => {
         <Route 
           path="/joblistings"
           element={<JobListings/>}
+        />
+        <Route
+          path="/editjob/:_id"
+          element={<EditJob/>}
+        />
+        <Route
+          path="/jobview/:_id"
+          element={<JobView/>}
+        />
+        <Route
+          path="/jobmanagement"
+          element={isAuthenticated ? <JobManagement/> : <Navigate to="/login" />}
         />
         <Route
           path="/request-reset-password"

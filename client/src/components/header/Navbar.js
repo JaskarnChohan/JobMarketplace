@@ -28,8 +28,8 @@ const Navbar = ({ isAuthenticated, handleLogout }) => {
         return (
           <>
             <Link to="/browse-employees">Browse Employees</Link>
-            <Link to="/joblistings">My Job Listings</Link>
-            <Link to="/createjob">Create Job Listing</Link>
+            <Link to="/joblistings">Job Listings</Link>
+            <Link to="/jobmanagement">Job Management</Link>
             <Link to="/applications">Applications</Link>
             <Link to="/profile">Profile</Link>
             <Link className="btn" onClick={handleLogout}>

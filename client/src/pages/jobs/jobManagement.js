@@ -9,8 +9,9 @@ import Textarea from 'react-expanding-textarea';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-const JobListings = () => {
+const JobManagement = () => {
     const { isAuthenticated, logout, user } = useAuth();
+    const token = localStorage.getItem("token");
     const navigate = useNavigate();
     const [jobListingData, setJobListingData] = useState([]);
     const [jobFilters, setJobFilters] = useState({
@@ -19,13 +20,13 @@ const JobListings = () => {
         jobCategory: "",
         description: "",
         company: "",
-        status: "Open",
+        status: "",
         applicationDeadline: "",
         salaryRange: "",
         employmentType: "",
     });
     const [errors, setErrors] = useState([]);
-    const [filteredCompanies, setFilteredCompanies] = useState([]); // Filtered companies for autocomplete
+
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [sortBy, setSortBy] = useState("newest"); // Sorting Option
@@ -50,7 +51,7 @@ const JobListings = () => {
             // Prepare Sort Parameter
             const sortParam = sortBy === "newest" ? -1 : 1; // -1 for descending, 1 for ascending
 
-            const res = await axios.get("http://localhost:5050/api/jobs/", {
+            const res = await axios.get(`http://localhost:5050/api/jobs/getbyemployer/${user._id}`, {
                 params: { ...jobFilters, page, sortBy: sortParam }
             });
             setJobListingData(res.data.jobs)
@@ -65,24 +66,17 @@ const JobListings = () => {
             }
         }
     }
-    const [companies, setCompanies] = useState([]);
-    const getCompanies = async () => {
-        try {
-            let res = await axios.get("http://localhost:5050/api/jobs/companies", {});
-            const uniqueCompanies = res.data.companies;
-            setCompanies(uniqueCompanies); // Assuming you have a state called 'companies'
-        } catch (err) {
-            console.error("Error fetching companies:", err);
-        }
-    };
 
-     // Use useEffect to call getJobListings when the component mounts
-     useEffect(() => {
+    // Use useEffect to call getJobListings when the component mounts
+    useEffect(() => {
         if (user && user._id) {
-            getJobListings();
-            getCompanies(); // Fetch unique companies when the component mounts
+        getJobListings();
         }
     }, [user]); // Run the effect when 'user' changes
+
+    const handleCreateJobButton = () => {
+        navigate("/createjob");
+    };
 
     const handleLogout = () => {
         logout();
@@ -104,27 +98,47 @@ const JobListings = () => {
         setSortBy(value);
     };
 
-    const handleApply = async (jobId) => {
+    const handleOnPublish = async (job, newStatus) => {
+        let jobId = job._id;
+        let updatedJob = { ...job, status: newStatus };  // Prepare the updated job object
+
         try {
-            const res = await axios.post(`http://localhost:5050/api/jobs/createapplication`, {
-                jobId: jobId,   // Send jobId
-                userId: user._id,  // Send userId
-              });
-            console.log(res.data);
-            alert("Successfully applied!");
-            navigate("/joblistings");
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            // Send a PUT request to update the job
+            const res = await axios.put(`http://localhost:5050/api/jobs/update/${jobId}`, updatedJob, config);
+            console.log("Update response:", res.data);
+            // Update the state to reflect changes without reloading
+            setJobListingData(jobListingData.map(j => j._id === jobId ? { ...j, status: newStatus } : j));
         } catch (err) {
-            console.error(err);
-            setErrors([{ msg: "An error occurred: " + err}]);
+            console.error(err.response.data); // Handle errors, e.g., show error message to user
         }
-      };
+    }
+
+    const handleOnDelete = async (job) => {
+        const confirmation = window.confirm("Are you sure you want to delete this job listing?");
+        let jobId = job._id;
+        if (confirmation) {
+            try {
+                await axios.delete(`http://localhost:5050/api/jobs/delete/${jobId}`);
+                alert("Job listing deleted successfully");
+                getJobListings();
+            } catch (err) {
+                console.error(err.response.data); // Handle errors, e.g., show error message to user
+            }
+        }
+    }
 
     return (
         <div>
             <Navbar isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
             <div className="content">
-                <h1 className="lrg-heading">Job Listings</h1>
-                {/* <button className="btn" onClick={getJobListings}>Refresh Job Listings</button> */}
+                <h1 className="lrg-heading">Your Job Listings</h1>
+                {/* <button className="btn button-blue" onClick={getJobListings}>Refresh Job Listings</button> */}
+                <button className="btn button-blue" onClick={handleCreateJobButton}>Create Job Listing</button>
                 {/* Filter Form */}
                 <form
                 onSubmit={(e) => {
@@ -143,23 +157,6 @@ const JobListings = () => {
                         onChange={handleFilterChange}
                         placeholder="Search by Title or Description"
                         />
-                    </div>
-                    {/* Company Filter */}
-                    <div className="filter-group">
-                        <label htmlFor="company">Company:</label>
-                        <select
-                        name="company"
-                        id="company"
-                        value={jobFilters.company}
-                        onChange={handleFilterChange}
-                        >
-                        <option value="">All Companies</option>
-                        {companies.map((company, index) => (
-                            <option key={index} value={company}>
-                            {company}
-                            </option>
-                        ))}
-                        </select>
                     </div>
 
                     {/* Salary Range Filter */}
@@ -235,7 +232,6 @@ const JobListings = () => {
                     Search
                     </button>
                 </form>
-
                 {/* Pagination Controls */}
                 <div className="pagination">
                     <button
@@ -265,7 +261,7 @@ const JobListings = () => {
                         {Array.isArray(jobListingData) && jobListingData.length > 0 ? (
                         jobListingData.map((item) => (
                             <div className="box" key={item._id}>
-                                <h3 htmlFor="title" onClick={() => navigate(`/jobview/${item._id}`)}>{item.title}</h3>
+                                <h3>{item.title}</h3>
                                 <p>Category: {item.jobCategory}</p>
                                 <p>Type: {item.employmentType}</p>
                                 <p>Company: {item.company}</p>
@@ -275,9 +271,15 @@ const JobListings = () => {
                                     Deadline:{" "}
                                     {new Date(item.applicationDeadline).toLocaleDateString()}
                                 </p>
-                                <button className="btn button-blue" onClick={() => handleApply(item._id)}>
-                                Apply Now
-                                </button>
+                                <button className="btn button-blue" onClick={() => navigate(`/editjob/${item._id}`)}>Edit</button>
+                                {/* Conditionally Render the Button */}
+                                {item.status === "Draft" && (
+                                    <button className="btn button-blue" onClick={() => handleOnPublish(item, 'Open')}>Publish</button>
+                                )}
+                                {item.status !== "Draft" && (
+                                    <button className="btn button-red" onClick={() => handleOnPublish(item, 'Draft')}>Unpublish</button>
+                                )}
+                                <button className="btn button-red" onClick={() => handleOnDelete(item)}>Delete</button>
                             </div>
                         ))
                         ) : (
@@ -297,4 +299,4 @@ const JobListings = () => {
     );
 };
 
-export default JobListings;
+export default JobManagement;
