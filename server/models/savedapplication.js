@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
-const applicationSchema = new mongoose.Schema({
+const applicationSchema = new mongoose.Schema(
+  {
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -10,6 +11,11 @@ const applicationSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'JobListing',
     required: true
+  },
+  status: {
+    type: String,
+    enum: ["Pending", "Reviewed", "Accepted", "Rejected"],
+    default: "Pending",
   },
   appliedAt: {
     type: Date,
