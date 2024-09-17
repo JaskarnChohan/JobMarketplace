@@ -13,16 +13,18 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (user) {
-      const fetchAppliedJobs = async () => {
-        try {
-          const res = await axios.get(`http://localhost:5050/api/applications/${user._id}`);
-          setAppliedJobs(res.data);
-        } catch (err) {
-          setErrors([{ msg: 'An error occurred while fetching applied jobs: ' + err.message }]);
-        }
-      };
+      if (user.role !== 'employer') {
+        const fetchAppliedJobs = async () => {
+          try {
+            const res = await axios.get(`http://localhost:5050/api/applications/${user._id}`);
+            setAppliedJobs(res.data);
+          } catch (err) {
+            setErrors([{ msg: 'An error occurred while fetching applied jobs: ' + err.message }]);
+          }
+        };
 
-      fetchAppliedJobs();
+        fetchAppliedJobs();
+      }
     }
   }, [user]);
 
@@ -46,20 +48,24 @@ const Dashboard = () => {
         <p>Role: {user.role}</p>
         <p>Account Created At: {new Date(user.createdAt).toLocaleDateString()}</p>
         <br />
-        <h3>Your Applied Applications</h3>
-        {appliedJobs.length > 0 ? (
-          <div className="applied-jobs-list">
-          {appliedJobs.map((application) => (
-            // Displays the job title and status of their applications
-            <div key={application._id} className="applied-job">
-              <p>Job Title: {application.jobId.title}</p> 
-              <p>Status: {application.status}</p>
-            </div>
-          ))} 
-          </div>
+        {user.role !== 'employer' ? (
+          <>
+            <h3>Your Applied Applications</h3>
+            {appliedJobs.length > 0 ? (
+              <div className="applied-jobs-list">
+                {appliedJobs.map((application) => (
+                  <div key={application._id} className="applied-job">
+                    <p>Job Title: {application.job.title}</p>
+                    <p>Status: {application.status}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>You have not applied to any jobs yet.</p>
+            )}
+          </>
         ) : (
-          // Outputs if user doesn't have any jobs applied.
-          <p>You have not applied to any jobs yet.</p>
+          <p></p>
         )}
         {errors.length > 0 && (
           <div className="error-messages">
