@@ -48,6 +48,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Server Error" });
 });
 
+app.use((req, res, next) => {
+  console.log(`Received ${req.method} request for '${req.originalUrl}'`);
+  next();
+});
+
 // Define PORT
 const PORT = process.env.PORT || 5050;
 

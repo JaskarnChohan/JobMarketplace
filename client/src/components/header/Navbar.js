@@ -11,7 +11,7 @@ const Navbar = ({ isAuthenticated, handleLogout }) => {
     if (!isAuthenticated) {
       return (
         <>
-          <Link to="/job-listings">Job Listings</Link>
+          <Link to="/joblistings">Job Listings</Link>
           <Link to="/browse-employers">Browse Employers</Link>
           <Link className="btn" to="/login">
             Login
@@ -28,8 +28,8 @@ const Navbar = ({ isAuthenticated, handleLogout }) => {
         return (
           <>
             <Link to="/browse-employees">Browse Employees</Link>
-            <Link to="/job-listings">My Job Listings</Link>
-            <Link to="/post-job">Post a Job</Link>
+            <Link to="/joblistings">Job Listings</Link>
+            <Link to="/jobmanagement">Job Management</Link>
             <Link to="/applications">Applications</Link>
             <Link to="/profile">Profile</Link>
             <Link className="btn" onClick={handleLogout}>
@@ -40,7 +40,7 @@ const Navbar = ({ isAuthenticated, handleLogout }) => {
       case "jobSeeker":
         return (
           <>
-            <Link to="/job-listings">Job Listings</Link>
+            <Link to="/joblistings">Job Listings</Link>
             <Link to="/browse-employers">Browse Employers</Link>
             <Link to="/dashboard">Dashboard</Link>
             <Link to="/profile">Profile</Link>
@@ -52,7 +52,7 @@ const Navbar = ({ isAuthenticated, handleLogout }) => {
       default:
         return (
           <>
-            <Link to="/job-listings">Job Listings</Link>
+            <Link to="/joblistings">Job Listings</Link>
             <Link to="/browse-employers">Browse Employers</Link>
             <Link className="btn" onClick={handleLogout}>
               Logout

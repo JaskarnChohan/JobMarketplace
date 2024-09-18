@@ -10,6 +10,13 @@
   --success-bg-color: #d4edda;
   --success-border-color: #c3e6cb;
   --success-text-color: #155724;
+  --spacing: 10px;  /* Space between form elements */
+  --input-padding: 8px;  /* Padding inside input and select elements */
+  --border-radius: 4px;  /* Radius for field corners */
+  --form-background: #f9f9f9;  /* Background color of the form */
+  --form-padding: 20px;  /* Padding around the form */
+  --form-gap: 20px;  /* Gap between filter elements */
+  --form-width: 90%;  /* Max width of the form to ensure centering */
 }
 
 /* Role Container Styling */
@@ -53,14 +60,18 @@
 
 /* General Container Styling */
 .page-container {
+  position: relative; /* Ensure it remains in the normal document flow */
+  margin-top: 0; /* No upward margin */
   display: flex;
   justify-content: center;
+  flex-direction: column;
   align-items: center;
   height: 90vh;
   background-color: var(--bg-color);
 }
 
 .form-container {
+  margin-top: 0; /* No upward margin */
   width: 550px;
   margin: 0 auto;
   padding: 20px;
@@ -81,11 +92,86 @@
   font-weight: bold;
 }
 
+.form-container-wide {
+  margin-top: 0; /* No upward margin */
+  width: auto;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: var(--white-color);
+  display: flex;            /* Set as a flex container */
+  align-items: stretch; /* Ensure items fill the container width */
+  flex-direction: row;      /* Arrange children (sections) in a row */
+  justify-content: center;  /* Center the content horizontally */
+  gap: 20px;                /* Add space between sections */
+}
+
+.form-container-wide .section {
+  flex: 1;                  /* Allow sections to take equal space */
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  width: 30vw;              /* Allow the width to be determined by content */
+  height: auto;
+  display: flex;            /* Ensure internal content can flex if needed */
+  flex-direction: column;   /* If you want items inside the section to stack vertically */
+  justify-content: center;
+}
+
+.form-container-wide .section .btn {
+  display: inline-block;
+  font-family: var(--secondary-font);
+  background: var(--primary-color);
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.6rem;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin-top: auto; /* Pushes the button to the bottom of the container */
+}
+
+.form-container-wide .section .datepicker {
+  text-align: center;
+}
+
+.form-container-wide h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-container-wide label {
+  flex-direction: row;
+  font-weight: bold;
+}
+
+.expandable-textarea {
+  width: 100%; /* Full width */
+  min-height: 50px; /* Minimum height */
+  padding: 10px;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: none; /* Disables manual resizing */
+  overflow: hidden;  /* Hide scrollbar if text exceeds height */
+  /* max-height: 500px; Optional: Set a maximum height if needed */
+  height: auto;  /* Allow height to adjust automatically */
+}
+
 /* Form Styling */
 form {
   display: flex;
   flex-direction: column;
   width: auto;
+  overflow: visible; 
+  margin-top: 0; /* Prevent any margin that could cause upward expansion */
 }
 
 input,
@@ -164,4 +250,84 @@ select:focus {
 
 .switch-auth a:hover {
   text-decoration: underline;
+}
+
+/* Main container for the filter form */
+.filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: space-evenly; /* Evenly distribute space around items */
+  padding: var(--form-padding);
+  background-color: var(--form-background);
+  gap: var(--form-gap);
+  border-radius: var(--border-radius);
+}
+
+/* Individual filter group styling */
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 180px; /* Minimum width to maintain form integrity */
+  max-width: auto; /* Maximum width to ensure responsiveness */
+}
+
+/* Individual filter group styling */
+.filter-group-wide {
+  display: flex;
+  flex-direction: column;
+  min-width: 380px; /* Minimum width to maintain form integrity */
+  max-width: auto; /* Maximum width to ensure responsiveness */
+}
+
+/* Styling for labels within the filter form */
+.filter-group-wide label,
+.filter-group label {
+  margin-bottom: var(--spacing);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Styling for inputs and select elements */
+.filter-group-wide input,
+.filter-group-wide select,
+.filter-group input,
+.filter-group select {
+  padding: var(--input-padding);
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  width: 100%; /* Ensure full width within the group */
+}
+
+/* Ensure the button is styled consistently */
+.filter-group-wide button,
+.filter-form button {
+  padding: var(--input-padding) var(--spacing);
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* Hover state for buttons */
+.filter-group-wide button:hover,
+.filter-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .filter-form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .filter-group-wide,
+  .filter-group {
+    max-width: 100%; /* Full width on smaller screens */
+    margin-bottom: var(--spacing); /* Add space between stacked items */
+  }
 }
