@@ -7,52 +7,68 @@ const profileSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    fullName: {
+    firstName: {
       type: String,
       required: true,
     },
-    location: {
+    lastName: {
       type: String,
       required: true,
+    },
+    homeLocation: {
+      type: String,
+      required: true,
+    },
+    preferredClassification: {
+      type: String,
+      enum: [
+        "Accounting",
+        "Administration & Office Support",
+        "Advertising, Arts & Media",
+        "Banking & Financial Services",
+        "Call Centre & Customer Service",
+        "CEO & General Management",
+        "Community Services & Development",
+        "Construction",
+        "Consulting & Strategy",
+        "Design & Architecture",
+        "Education & Training",
+        "Engineering",
+        "Farming, Animals & Conservation",
+        "Government & Defence",
+        "Healthcare & Medical",
+        "Hospitality & Tourism",
+        "Human Resources & Recruitment",
+        "Information & Communication Technology",
+        "Insurance & Superannuation",
+        "Legal",
+        "Manufacturing, Transport & Logistics",
+        "Marketing & Communications",
+        "Mining, Resources & Energy",
+        "Real Estate & Property",
+        "Retail & Consumer Products",
+        "Sales",
+        "Science & Technology",
+        "Self Employment",
+        "Sport & Recreation",
+        "Trades & Services",
+      ],
+      required: true,
+    },
+    profilePicture: {
+      type: String,
+    },
+    resume: {
+      type: String,
+    },
+    bio: {
+      type: String,
+      maxlength: 600,
     },
     phoneNumber: {
       type: String,
       required: true,
     },
-    bio: {
-      type: String,
-      maxlength: 500,
-    },
-    profilePhoto: {
-      type: String, 
-    },
-    cvFile: {
-      type: String, 
-    },
-    skills: [String], 
-    education: [
-      {
-        school: String,
-        degree: String,
-        fieldOfStudy: String,
-        startDate: Date,
-        endDate: Date,
-      },
-    ],
-    jobPreferences: {
-      type: String,
-    },
-    experience: [
-      {
-        title: String,
-        company: String,
-        location: String,
-        startDate: Date,
-        endDate: Date,
-        description: String,
-      },
-    ],
-    certifications: [String], 
   },
   { timestamps: true }
 );

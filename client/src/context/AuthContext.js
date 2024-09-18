@@ -6,6 +6,7 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -29,6 +30,8 @@ export const AuthProvider = ({ children }) => {
       } catch (err) {
         setIsAuthenticated(false);
         console.error("Failed to check authentication status", err);
+      } finally {
+        setIsLoading(false); // Indicate that loading is complete
       }
     };
 
@@ -70,7 +73,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, user }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, login, logout, user, isLoading }}
+    >
       {children}
     </AuthContext.Provider>
   );
