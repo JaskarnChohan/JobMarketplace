@@ -54,36 +54,35 @@ const App = () => {
               isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />
             }
           />
+          <Route
+            path="/createjob"
+            element={isAuthenticated ? <CreateJob /> : <Navigate to="/login" />}
+          />
+          <Route 
+            path="/joblistings"
+            element={<JobListings/>}
+          />
+          <Route
+            path="/editjob/:_id"
+            element={<EditJob/>}
+          />
+          <Route
+            path="/jobview/:_id"
+            element={<JobView/>}
+          />
+          <Route
+            path="/jobmanagement"
+            element={isAuthenticated ? <JobManagement/> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/request-reset-password"
+            element={<RequestResetPassword />}
+          />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/reset-password" element={<ResetPassword noToken />} />
+          <Route path="/" element={<Home />} />
         </Routes>
       </AuthLoader>
-        <Route
-          path="/createjob"
-          element={isAuthenticated ? <CreateJob /> : <Navigate to="/login" />}
-        />
-        <Route 
-          path="/joblistings"
-          element={<JobListings/>}
-        />
-        <Route
-          path="/editjob/:_id"
-          element={<EditJob/>}
-        />
-        <Route
-          path="/jobview/:_id"
-          element={<JobView/>}
-        />
-        <Route
-          path="/jobmanagement"
-          element={isAuthenticated ? <JobManagement/> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/request-reset-password"
-          element={<RequestResetPassword />}
-        />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/reset-password" element={<ResetPassword noToken />} />
-        <Route path="/" element={<Home />} />
-      </Routes>
     </Router>
   );
 };

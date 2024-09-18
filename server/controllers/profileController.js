@@ -5,6 +5,7 @@ const path = require("path");
 
 // Fetch profile data
 exports.getProfile = async (req, res) => {
+  console.log("getProfile called")
   try {
     // Check if the profile exists
     const profile = await Profile.findOne({ user: req.user.id });
