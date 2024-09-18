@@ -54,8 +54,6 @@ const App = () => {
               isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />
             }
           />
-        </Routes>
-      </AuthLoader>
         <Route
           path="/createjob"
           element={isAuthenticated ? <CreateJob /> : <Navigate to="/login" />}
@@ -83,7 +81,8 @@ const App = () => {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/reset-password" element={<ResetPassword noToken />} />
         <Route path="/" element={<Home />} />
-      </Routes>
+        </Routes>
+      </AuthLoader>
     </Router>
   );
 };
