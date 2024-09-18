@@ -3,8 +3,8 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Navbar from "../../components/header/Navbar";
-import "../../global.css";
-import "./form.css";
+import "../../styles/Global.css";
+import "../../styles/auth/Form.css";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });

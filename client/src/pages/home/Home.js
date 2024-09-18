@@ -3,7 +3,7 @@ import Navbar from "../../components/header/Navbar";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import "../../global.css";
+import "../../styles/Global.css";
 
 const Home = () => {
   const { isAuthenticated, logout } = useAuth();
