@@ -39,6 +39,9 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/settings", settingsRoutes);
 
+// Serve static files from the 'uploads' directory
+app.use("/uploads", express.static("uploads"));
+
 // Global error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

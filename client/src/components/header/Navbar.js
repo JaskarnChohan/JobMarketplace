@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "./nav.css";
-import "../../global.css";
+import "../../styles/Nav.css";
+import "../../styles/Global.css";
 import { useAuth } from "../../context/AuthContext";
 
 const Navbar = ({ isAuthenticated, handleLogout }) => {
@@ -42,7 +42,7 @@ const Navbar = ({ isAuthenticated, handleLogout }) => {
           <>
             <Link to="/joblistings">Job Listings</Link>
             <Link to="/browse-employers">Browse Employers</Link>
-            <Link to="/browse-employers">Dashboard</Link>
+            <Link to="/dashboard">Dashboard</Link>
             <Link to="/profile">Profile</Link>
             <Link className="btn" onClick={handleLogout}>
               Logout

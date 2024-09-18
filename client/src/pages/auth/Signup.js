@@ -3,8 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import Navbar from "../../components/header/Navbar";
-import "../../global.css";
-import "./form.css";
+import "../../styles/Global.css";
+import "../../styles/auth/Form.css";
 
 const Signup = () => {
   const [formData, setFormData] = useState({

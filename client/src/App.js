@@ -12,7 +12,9 @@ import Dashboard from "./pages/home/Dashboard";
 import CreateJob from "./pages/jobs/CreateJob";
 import RequestResetPassword from "./pages/auth/RequestResetPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import ProfilePage from "./pages/profile/ProfilePage";
 import { useAuth } from "./context/AuthContext";
+import AuthLoader from "./context/AuthLoader";
 import JobListings from "./pages/jobs/JobListings";
 import JobManagement from "./pages/jobs/jobManagement";
 import EditJob from "./pages/jobs/EditJob";
@@ -23,19 +25,37 @@ const App = () => {
 
   return (
     <Router>
-      <Routes>
-        <Route
-          path="/signup"
-          element={!isAuthenticated ? <Signup /> : <Navigate to="/dashboard" />}
-        />
-        <Route
-          path="/login"
-          element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" />}
-        />
-        <Route
-          path="/dashboard"
-          element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
-        />
+      <AuthLoader>
+        <Routes>
+          <Route
+            path="/signup"
+            element={
+              isAuthenticated ? <Navigate to="/dashboard" /> : <Signup />
+            }
+          />
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
+          />
+          <Route
+            path="/dashboard"
+            element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/request-reset-password"
+            element={<RequestResetPassword />}
+          />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/reset-password" element={<ResetPassword noToken />} />
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/profile"
+            element={
+              isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />
+            }
+          />
+        </Routes>
+      </AuthLoader>
         <Route
           path="/createjob"
           element={isAuthenticated ? <CreateJob /> : <Navigate to="/login" />}
