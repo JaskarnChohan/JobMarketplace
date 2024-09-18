@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [errors, setErrors] = useState([]);
 
   useEffect(() => {
-    if (user) {
+    if (user && user.role !== 'employer') {
       const fetchAppliedJobs = async () => {
         try {
           const res = await axios.get(`http://localhost:5050/api/applications/${user._id}`);
@@ -21,7 +21,6 @@ const Dashboard = () => {
           setErrors([{ msg: 'An error occurred while fetching applied jobs: ' + err.message }]);
         }
       };
-
       fetchAppliedJobs();
     }
   }, [user]);
@@ -46,20 +45,22 @@ const Dashboard = () => {
         <p>Role: {user.role}</p>
         <p>Account Created At: {new Date(user.createdAt).toLocaleDateString()}</p>
         <br />
-        <h3>Your Applied Applications</h3>
-        {appliedJobs.length > 0 ? (
-          <div className="applied-jobs-list">
-          {appliedJobs.map((application) => (
-            // Displays the job title and status of their applications
-            <div key={application._id} className="applied-job">
-              <p>Job Title: {application.jobId.title}</p> 
-              <p>Status: {application.status}</p>
-            </div>
-          ))} 
-          </div>
-        ) : (
-          // Outputs if user doesn't have any jobs applied.
-          <p>You have not applied to any jobs yet.</p>
+        {user.role !== 'employer' && (
+          <>
+            <h3>Your Applied Applications</h3>
+            {appliedJobs.length > 0 ? (
+              <div className="applied-jobs-list">
+                {appliedJobs.map((application) => (
+                  <div key={application._id} className="applied-job">
+                    <p>Job Title: {application.jobId.title}</p> 
+                    <p>Status: {application.status}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>You have not applied to any jobs yet.</p>
+            )}
+          </>
         )}
         {errors.length > 0 && (
           <div className="error-messages">
