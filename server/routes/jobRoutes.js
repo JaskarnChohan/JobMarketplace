@@ -10,6 +10,7 @@ const {
   getUniqueCategories,
   deleteJobListing,
   createApplication,
+  getLatestJobs,
 } = require("../controllers/jobController");
 
 const router = express.Router();
@@ -22,6 +23,7 @@ router.post("/createapplication", createApplication);
 router.get("/getbyemployer/:employerId", getJobsByEmployer);
 router.get("/", getJobs);
 router.post("/create", createJob);
+router.get("/latest", getLatestJobs);
 router.post("/:jobId/apply", applyToJob);
 router.get("/:jobId", getJobDetails);
 

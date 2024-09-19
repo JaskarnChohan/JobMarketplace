@@ -16,12 +16,12 @@ import ProfilePage from "./pages/profile/ProfilePage";
 import { useAuth } from "./context/AuthContext";
 import AuthLoader from "./context/AuthLoader";
 import JobListings from "./pages/jobs/JobListings";
-import JobManagement from "./pages/jobs/jobManagement";
+import JobManagement from "./pages/jobs/JobManagement";
 import EditJob from "./pages/jobs/EditJob";
 import JobView from "./pages/jobs/JobView";
 
 const App = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isEmployer, isJobSeeker } = useAuth();
 
   return (
     <Router>
@@ -54,33 +54,45 @@ const App = () => {
               isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />
             }
           />
-        <Route
-          path="/createjob"
-          element={isAuthenticated ? <CreateJob /> : <Navigate to="/login" />}
-        />
-        <Route 
-          path="/joblistings"
-          element={<JobListings/>}
-        />
-        <Route
-          path="/editjob/:_id"
-          element={<EditJob/>}
-        />
-        <Route
-          path="/jobview/:_id"
-          element={<JobView/>}
-        />
-        <Route
-          path="/jobmanagement"
-          element={isAuthenticated ? <JobManagement/> : <Navigate to="/login" />}
-        />
-        <Route
-          path="/request-reset-password"
-          element={<RequestResetPassword />}
-        />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/reset-password" element={<ResetPassword noToken />} />
-        <Route path="/" element={<Home />} />
+          <Route
+            path="/createjob"
+            element={
+              isAuthenticated && isEmployer() ? (
+                <CreateJob />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route path="/joblistings" element={<JobListings />} />
+          <Route
+            path="/editjob/:_id"
+            element={
+              isAuthenticated && isEmployer() ? (
+                <EditJob />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route path="/jobview/:_id" element={<JobView />} />
+          <Route
+            path="/jobmanagement"
+            element={
+              isAuthenticated && isEmployer() ? (
+                <JobManagement />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/request-reset-password"
+            element={<RequestResetPassword />}
+          />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/reset-password" element={<ResetPassword noToken />} />
+          <Route path="/" element={<Home />} />
         </Routes>
       </AuthLoader>
     </Router>

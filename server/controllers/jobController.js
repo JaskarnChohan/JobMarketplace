@@ -1,24 +1,58 @@
 const jobListing = require("../models/jobListing.js");
 const application = require("../models/application.js");
-const { validationResult, check, body } = require("express-validator");
-const sendTokenResponse = require("../utils/sendTokenResponse");
-const nodemailer = require("nodemailer");
-const crypto = require("crypto");
-const { URL } = require("url");
+const { validationResult, check } = require("express-validator");
 const mongoose = require("mongoose");
 
 // George Haeberlin: Create Job Listing Validation rules
 const createJobValidationRules = [
-  check("title", "Please provide a valid title")
-    .notEmpty()
-    .isString(),
+  check("title", "Please provide a valid title").notEmpty().isString(),
   check("description", "Please enter a description").notEmpty(),
   check("location", "Please enter a location").notEmpty(),
   check("jobCategory", "Please select a job category").notEmpty(),
   check("salaryRange", "Please select a salary range").notEmpty(),
   check("employmentType", "Please select an employment type").notEmpty(),
-  check("applicationDeadline", "Please enter an application deadline").notEmpty(),
+  check(
+    "applicationDeadline",
+    "Please enter an application deadline"
+  ).notEmpty(),
 ];
+
+exports.getLatestJobs = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 9;
+    const page = parseInt(req.query.page) || 1;
+    const sortBy = parseInt(req.query.sortBy) || -1;
+
+    const query = { ...req.query };
+    delete query.page;
+    delete query.sortBy;
+
+    query.status = "Open";
+
+    const escapeRegex = (string) => {
+      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // Escape special characters
+    };
+
+    ["title", "jobCategory", "description", "company"].forEach((field) => {
+      if (query[field]) {
+        query[field] = {
+          $regex: new RegExp(escapeRegex(query[field]), "i"),
+        };
+      }
+    });
+
+    const totalJobs = await jobListing.countDocuments(query);
+    const jobs = await jobListing
+      .find(query)
+      .sort({ datePosted: sortBy })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.json({ jobs, totalPages: Math.ceil(totalJobs / limit) });
+  } catch (err) {
+    res.status(500).json({ errors: [{ msg: "Server error" }] });
+  }
+};
 
 exports.getJobs = async (req, res) => {
   try {
@@ -28,16 +62,19 @@ exports.getJobs = async (req, res) => {
     const page = parseInt(req.query.page) || 1; // Retrieve page from query
     const sortBy = parseInt(req.query.sortBy) || -1; // Default to newest
 
-    delete query.page
-    delete query.sortBy
-    
-    if (query.status === '') {
-      query.status = { $regex: `.*Open.*|.*Close.*|.*Canceled.*|.*On Hold.*`, $options: 'i' };
+    delete query.page;
+    delete query.sortBy;
+
+    if (query.status === "") {
+      query.status = {
+        $regex: `.*Open.*|.*Close.*|.*Canceled.*|.*On Hold.*`,
+        $options: "i",
+      };
     }
 
     // Remove fields with empty strings
-    Object.keys(query).forEach(key => {
-      if (query[key] === '') {
+    Object.keys(query).forEach((key) => {
+      if (query[key] === "") {
         delete query[key];
       }
     });
@@ -46,8 +83,8 @@ exports.getJobs = async (req, res) => {
     if (query.search) {
       const escapedSearch = escapeRegex(query.search);
       query.$or = [
-        { title: { $regex: `.*${escapedSearch}.*`, $options: 'i' } },
-        { description: { $regex: `.*${escapedSearch}.*`, $options: 'i' } },
+        { title: { $regex: `.*${escapedSearch}.*`, $options: "i" } },
+        { description: { $regex: `.*${escapedSearch}.*`, $options: "i" } },
       ];
       delete query.search;
     }
@@ -66,9 +103,12 @@ exports.getJobs = async (req, res) => {
     // }
 
     // Additional filters with regex for partial matching
-    ['title', 'jobCategory', 'description', 'company'].forEach(field => {
+    ["title", "jobCategory", "description", "company"].forEach((field) => {
       if (query[field]) {
-        query[field] = { $regex: `.*${escapeRegex(query[field])}.*`, $options: 'i' };
+        query[field] = {
+          $regex: `.*${escapeRegex(query[field])}.*`,
+          $options: "i",
+        };
       }
     });
 
@@ -85,13 +125,13 @@ exports.getJobs = async (req, res) => {
     // Pagination calculations
     const totalJobs = await jobListing.countDocuments(query);
     const totalPages = Math.ceil(totalJobs / limit);
-    const jobs = await jobListing.find(query)
+    const jobs = await jobListing
+      .find(query)
       .sort({ datePosted: sortBy }) // Assuming 'datePosted' exists
       .skip((page - 1) * limit)
       .limit(limit);
 
     res.send({ jobs, totalPages });
-
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ errors: [{ msg: "Server error" }] });
@@ -100,7 +140,7 @@ exports.getJobs = async (req, res) => {
 
 // Helper Function to Escape Regex Special Characters
 const escapeRegex = (text) => {
-  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 };
 
 exports.createApplication = async (req, res) => {
@@ -110,7 +150,10 @@ exports.createApplication = async (req, res) => {
   const userId = req.body.userId;
 
   // Validate if jobId and userId are valid ObjectIds
-  if (!mongoose.Types.ObjectId.isValid(jobId) || !mongoose.Types.ObjectId.isValid(userId)) {
+  if (
+    !mongoose.Types.ObjectId.isValid(jobId) ||
+    !mongoose.Types.ObjectId.isValid(userId)
+  ) {
     return res.status(400).json({ msg: "Invalid jobId or userId format" });
   }
 
@@ -119,23 +162,23 @@ exports.createApplication = async (req, res) => {
   try {
     // Create a new application with the valid ObjectId fields
     const newApplication = new application({
-      job: new mongoose.Types.ObjectId(jobId),  // Assign jobId to the 'job' field
-      user: new mongoose.Types.ObjectId(userId),  // Assign userId to the 'user' field
+      job: new mongoose.Types.ObjectId(jobId), // Assign jobId to the 'job' field
+      user: new mongoose.Types.ObjectId(userId), // Assign userId to the 'user' field
     });
 
-    await newApplication.save();  // Save the application to the database
+    await newApplication.save(); // Save the application to the database
 
     res.status(200).json({ msg: "Application successfully created!" });
   } catch (error) {
     console.error("Error creating application:", error);
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
-}
+};
 
 exports.deleteJobListing = async (req, res) => {
   console.log("deleteJobListing called");
   const { _id } = req.params;
-  console.log(`Recieved id: ${_id}`)
+  console.log(`Recieved id: ${_id}`);
   try {
     const job = await jobListing.findByIdAndDelete(_id);
     if (!job) {
@@ -144,7 +187,7 @@ exports.deleteJobListing = async (req, res) => {
 
     res.json({ msg: "Job successfully deleted!" });
   } catch (err) {
-    console.errror(err.message);
+    console.error(err.message);
     res.status(404).json({ errors: [{ msg: "Server error" }] });
   }
 };
@@ -156,7 +199,8 @@ exports.updateJobListing = async (req, res) => {
   console.log(req.body);
   try {
     const job = await jobListing.findByIdAndUpdate(_id, req.body, {
-      new: true, runValidators: true
+      new: true,
+      runValidators: true,
     });
     if (!job) {
       return res.status(404).json({ msg: "Job not found" });
@@ -191,7 +235,7 @@ exports.getUniqueCategories = async (req, res) => {
 };
 
 exports.getJobsByEmployer = async (req, res) => {
-  console.log('getJobsByEmployer called');
+  console.log("getJobsByEmployer called");
   const employerId = req.params.employerId;
   try {
     // Create a copy of the query
@@ -200,12 +244,12 @@ exports.getJobsByEmployer = async (req, res) => {
     const page = parseInt(req.query.page) || 1; // Retrieve page from query
     const sortBy = parseInt(req.query.sortBy) || -1; // Default to newest
 
-    delete query.page
-    delete query.sortBy
+    delete query.page;
+    delete query.sortBy;
 
     // Remove fields with empty strings
-    Object.keys(query).forEach(key => {
-      if (query[key] === '') {
+    Object.keys(query).forEach((key) => {
+      if (query[key] === "") {
         delete query[key];
       }
     });
@@ -214,16 +258,19 @@ exports.getJobsByEmployer = async (req, res) => {
     if (query.search) {
       const escapedSearch = escapeRegex(query.search);
       query.$or = [
-        { title: { $regex: `.*${escapedSearch}.*`, $options: 'i' } },
-        { description: { $regex: `.*${escapedSearch}.*`, $options: 'i' } },
+        { title: { $regex: `.*${escapedSearch}.*`, $options: "i" } },
+        { description: { $regex: `.*${escapedSearch}.*`, $options: "i" } },
       ];
       delete query.search;
     }
 
     // Additional filters with regex for partial matching
-    ['title', 'jobCategory', 'description', 'company'].forEach(field => {
+    ["title", "jobCategory", "description", "company"].forEach((field) => {
       if (query[field]) {
-        query[field] = { $regex: `.*${escapeRegex(query[field])}.*`, $options: 'i' };
+        query[field] = {
+          $regex: `.*${escapeRegex(query[field])}.*`,
+          $options: "i",
+        };
       }
     });
 
@@ -242,7 +289,8 @@ exports.getJobsByEmployer = async (req, res) => {
     // Pagination calculations
     const totalJobs = await jobListing.countDocuments(query);
     const totalPages = Math.ceil(totalJobs / limit);
-    const jobs = await jobListing.find(query)
+    const jobs = await jobListing
+      .find(query)
       .sort({ datePosted: sortBy }) // Assuming 'datePosted' exists
       .skip((page - 1) * limit)
       .limit(limit);
@@ -254,13 +302,13 @@ exports.getJobsByEmployer = async (req, res) => {
 };
 
 exports.getJobDetails = async (req, res) => {
-  console.log('getJobDetails called');
+  console.log("getJobDetails called");
   const jobId = req.params.jobId;
   try {
     console.log("Received job id:", jobId); // Add this line
-    const job = await jobListing.findById(jobId)
+    const job = await jobListing.findById(jobId);
     if (!job) {
-      console.log('job not found!');
+      console.log("job not found!");
       return res.status(404).json({ errors: [{ msg: "Job not found" }] });
     }
     res.send(job);
@@ -280,25 +328,58 @@ exports.createJob = [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { employer, title, description, company, location, 
-      jobCategory, requirements, benefits, salaryRange, employmentType,
-      applicationDeadline, status } = req.body;
+    const {
+      employer,
+      title,
+      description,
+      company,
+      location,
+      jobCategory,
+      requirements,
+      benefits,
+      salaryRange,
+      employmentType,
+      applicationDeadline,
+      status,
+    } = req.body;
     try {
-      let joblisting = await jobListing.findOne({ employer, title, description, company, location, 
-        jobCategory, requirements, benefits, salaryRange, employmentType,
-        applicationDeadline, status });
-      
+      let joblisting = await jobListing.findOne({
+        employer,
+        title,
+        description,
+        company,
+        location,
+        jobCategory,
+        requirements,
+        benefits,
+        salaryRange,
+        employmentType,
+        applicationDeadline,
+        status,
+      });
+
       if (joblisting) {
         return res
           .status(400)
           .json({ errors: [{ msg: "Identical job listing already exists" }] });
       }
 
-      joblisting = new jobListing({ employer, title, description, company, location, 
-        jobCategory, requirements, benefits, salaryRange, employmentType,
-        applicationDeadline, status });
+      joblisting = new jobListing({
+        employer,
+        title,
+        description,
+        company,
+        location,
+        jobCategory,
+        requirements,
+        benefits,
+        salaryRange,
+        employmentType,
+        applicationDeadline,
+        status,
+      });
       await joblisting.save();
-      
+
       res.status(200).json({ success: true });
     } catch (err) {
       console.error(err.message);

@@ -5,7 +5,8 @@ import Experience from "./Experience";
 import Education from "./Education";
 import Skills from "./Skills";
 import ResumeUpload from "./ResumeUpload";
-import Navbar from "../../components/header/Navbar";
+import Navbar from "../../components/layout/Navbar";
+import Footer from "../../components/layout/Footer";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../../components/Spinner/Spinner";
@@ -157,6 +158,7 @@ const ProfilePage = ({ onProfileUpdate }) => {
           )}
         </div>
       )}
+      <Footer />
     </div>
   );
 };

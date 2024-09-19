@@ -1,45 +1,51 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Navbar from "../../components/header/Navbar";
+import Navbar from "../../components/layout/Navbar";
+import Footer from "../../components/layout/Footer";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate, useParams } from "react-router-dom";
-import "../../global.css";
-import "../auth/form.css";
-import "./jobView.css";  // New CSS file for job view
-import Textarea from 'react-expanding-textarea';
-import DatePicker from "react-datepicker";
+import "../../styles/job/JobView.css";
+import Spinner from "../../components/Spinner/Spinner";
+import {
+  FaMapMarkerAlt,
+  FaMoneyBillWave,
+  FaCalendarAlt,
+  FaClock,
+  FaBriefcase,
+} from "react-icons/fa";
 import "react-datepicker/dist/react-datepicker.css";
 
 const JobView = () => {
   const { _id } = useParams();
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user, isJobSeeker } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [errors, setError] = useState([]);
-  const token = localStorage.getItem("token");
+
   const [job, setJob] = useState({
-    employer: '',
-    title: '',
-    description: '',
-    company: '',
-    location: '',
-    jobCategory: '',
+    employer: "",
+    title: "",
+    description: "",
+    company: "",
+    location: "",
+    jobCategory: "",
     requirements: [],
     benefits: [],
-    salaryRange: '',
-    employmentType: '',
+    salaryRange: "",
+    employmentType: "",
     applicationDeadline: new Date(),
-    status: '',
+    status: "",
+    datePosted: "",
   });
 
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const response = await axios.get(`http://localhost:5050/api/jobs/${_id}`);
+        const response = await axios.get(
+          `http://localhost:5050/api/jobs/${_id}`
+        );
         setJob(response.data);
         setLoading(false);
       } catch (err) {
-        setError('Failed to fetch job');
         setLoading(false);
         console.error(err);
       }
@@ -48,39 +54,43 @@ const JobView = () => {
     fetchJob();
   }, [_id]);
 
-  if (!isAuthenticated) {
-    navigate("/login");
-  }
+  if (loading) return <Spinner />;
+  if (!job)
+    return (
+      <div>
+        <h1 className="lrg-heading">Job Not Found</h1>
+      </div>
+    );
 
-  const { employer, title, description, company, location, jobCategory, requirements, benefits, salaryRange, employmentType, applicationDeadline, status } = job;
-
-  if (loading) return <div>Loading...</div>;
-  if (!job) return <div>Job not found</div>;
-  if (!user) {
-    return <div>Loading...</div>;
-  }
+  const daysAgo = Math.floor(
+    (new Date() - new Date(job.datePosted)) / (1000 * 60 * 60 * 24)
+  );
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
-  const handleApply = async () => {
-    try {
-        let listingId = _id
-        const res = await axios.post(`http://localhost:5050/api/jobs/createapplication`, {
-            jobId: _id,   // Send jobId
-            userId: user._id,  // Send userId
-          });
-        console.log(res.data);
-        alert("Successfully applied!");
-        navigate("/joblistings");
-    } catch (err) {
-        console.error(err);
-        setError([{ msg: "An error occurred: " + err}]);
-    }
+  const handleLoginRedirect = () => {
+    navigate("/login");
   };
 
+  const handleApply = async () => {
+    try {
+      const res = await axios.post(
+        `http://localhost:5050/api/jobs/createapplication`,
+        {
+          jobId: _id,
+          userId: user._id,
+        }
+      );
+      console.log(res.data);
+      alert("Successfully applied!");
+      navigate("/joblistings");
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div>
@@ -89,27 +99,56 @@ const JobView = () => {
         <h1 className="lrg-heading">Job Listing</h1>
         <div className="job-details-container">
           <div className="job-header">
-            <h2>{title}</h2>
-            <p className="company-info">{company}</p>
-            <p className="location-info">{location}</p>
+            <h2>{job.title}</h2>
+            <p className="company-info">{job.company}</p>
           </div>
 
-          <div className="job-details">
-            <p><strong>Category:</strong> {jobCategory}</p>
-            <p><strong>Employment Type:</strong> {employmentType}</p>
-            <p><strong>Salary Range:</strong> {salaryRange}</p>
-            <p><strong>Application Deadline:</strong> {new Date(applicationDeadline).toLocaleDateString()}</p>
-          </div>
+          <div className="job-icons">
+            <p>
+              <FaMapMarkerAlt /> {job.location}
+            </p>
+            <p>
+              <FaMoneyBillWave /> {job.salaryRange}
+            </p>
+            <p>
+              <FaBriefcase /> {job.jobCategory}
+            </p>
+            <p>
+              <FaClock /> {job.employmentType}
+            </p>
+            <p>
+              <FaCalendarAlt /> Application Deadline:{" "}
+              {new Date(job.applicationDeadline).toLocaleDateString()}
+            </p>
+            <p>
+              {daysAgo === 0 ? "Posted Today" : `Posted ${daysAgo} days ago`}
+            </p>
 
+            {isAuthenticated ? (
+              isJobSeeker() ? (
+                <div className="apply-button-container">
+                  <button className="btn" onClick={handleApply}>
+                    Quick Apply
+                  </button>
+                </div>
+              ) : null
+            ) : (
+              <div className="login-prompt-container">
+                <button className="btn" onClick={handleLoginRedirect}>
+                  Login to Apply
+                </button>
+              </div>
+            )}
+          </div>
           <div className="job-description">
-            <h3>Job Description</h3>
-            <p>{description}</p>
+            <h3>Description</h3>
+            <pre className="job-description">{job.description}</pre>
           </div>
 
           <div className="job-requirements">
             <h3>Requirements</h3>
             <ul>
-              {requirements.map((req, index) => (
+              {job.requirements.map((req, index) => (
                 <li key={index}>
                   <p>{req}</p>
                 </li>
@@ -120,21 +159,16 @@ const JobView = () => {
           <div className="job-benefits">
             <h3>Benefits</h3>
             <ul>
-              {benefits.map((benefit, index) => (
+              {job.benefits.map((benefit, index) => (
                 <li key={index}>
                   <p>{benefit}</p>
                 </li>
               ))}
             </ul>
           </div>
-
-          <div className="apply-button-container">
-            <button className="apply-button" onClick={handleApply}>
-              Apply Now
-            </button>
-          </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

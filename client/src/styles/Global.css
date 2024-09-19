@@ -10,21 +10,20 @@ html {
 }
 
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Roboto', sans-serif;
   background-color: #f4f6f8;
   margin: 0;
   padding: 0;
 }
 
+pre {
+  font-family: 'Roboto', sans-serif;
+}
 :root {
   /* Main Colors */
   --primary-color: #fcc707; 
   --secondary-color: #6b6b6c; 
   --text-color: #d0e1f9;
-
-  /* Fonts */
-  --heading-font: 'Montserrat', sans-serif;
-  --secondary-font: 'Lato', sans-serif;
 }
 
 /* Default Heading Styling */
@@ -35,31 +34,53 @@ body {
 }
 
 .med-heading {
-  font-family: var(--secondary-font);
-  color: var(--secondary-color);
+  color: #292929;
   font-size: 2rem;
   font-weight: 800;
 }
 
 /* Banner */
 #banner {
-  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-      url('../assets/banner.jpg') no-repeat center/cover;
+  background: 
+      url('../assets/banner.png') no-repeat center/cover;
   height: 550px;
   border-bottom: 2px solid #333;
 }
 
 #banner .banner-content {
-  text-align: center;
-  padding-top: 9rem;
-}
-
-#banner .banner-content h1 {
-  font-size: 6rem;
+  text-align: left;
+  padding-top: 6.5rem;
+  margin-left: 180px;
+  max-width: 800px;
 }
 
 #banner .banner-content .btn {
   margin-top: 3rem;
+}
+
+#banner .logo {
+  width: 500px;
+  margin-bottom: 20px;
+}
+
+#banner .btn {
+  font-size: 1.5rem;
+}
+
+.home-section-wrapper {
+  border-bottom: 2px solid #333;
+}
+.home-section {
+  margin: 5rem;
+}
+.home-section .med-heading {
+  margin-bottom: 0.2rem;
+}
+
+.home-section-text {
+  color: var(--secondary-color);
+  margin-bottom: 1.5rem;
+  font-size: 18px;
 }
 
 /* Button */
@@ -83,8 +104,22 @@ body {
   transform: scale(1.05); 
 }
 
-.content {
-  padding: 20px;
-  text-align: center;
+.small-btn {
+  display: inline-block;
+  background: #292929;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.small-btn:hover {
+  background-color: var(--secondary-color);
+  text-decoration: underline;
 }
 

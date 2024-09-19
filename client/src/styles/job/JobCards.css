@@ -1,0 +1,49 @@
+.home-section .job-listing-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+    margin: 0%;
+  }
+  
+  .job-card {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  
+  .job-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    word-wrap: break-word; 
+  }
+  
+  .company-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  .job-info {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .job-info svg {
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  
+  .error-messages {
+    color: red;
+    margin: 20px 0;
+  }

@@ -4,7 +4,6 @@ import Modal from "react-modal";
 import { FaPencilAlt, FaPlus, FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
 import "../../styles/profile/Profile.css";
-import "../../styles/profile/Profile.css";
 
 Modal.setAppElement("#root");
 

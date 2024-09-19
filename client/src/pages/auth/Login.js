@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import Navbar from "../../components/header/Navbar";
+import Navbar from "../../components/layout/Navbar";
+import Footer from "../../components/layout/Footer";
 import "../../styles/Global.css";
 import "../../styles/auth/Form.css";
 
@@ -100,6 +101,7 @@ const Login = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
