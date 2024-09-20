@@ -15,6 +15,7 @@ import {
 } from "react-icons/fa";
 import Navbar from "../../../components/layout/Navbar";
 import Footer from "../../../components/layout/Footer";
+import Spinner from "../../../components/Spinner/Spinner";
 import { useAuth } from "../../../context/AuthContext";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/ProfileInfo.css";
@@ -69,7 +70,7 @@ const ViewCompany = () => {
     fetchCompanyData();
   }, [id]);
 
-  if (!companyData) return <div>Loading...</div>;
+  if (!companyData) return <Spinner />;
 
   return (
     <div className="profile-container">

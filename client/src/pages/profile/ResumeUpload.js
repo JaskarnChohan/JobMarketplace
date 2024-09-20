@@ -6,7 +6,7 @@ import {
   FaTrashAlt,
   FaDownload,
   FaFileAlt,
-} from "react-icons/fa"; // Import download icon
+} from "react-icons/fa";
 import "../../styles/profile/Profile.css";
 import "../../styles/profile/Resume.css";
 
@@ -104,7 +104,7 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
         Upload your resume to enhance your profile!
       </p>
       {existingResume ? (
-        <div className="resume-card">
+        <div className="resume-card last">
           <div className="resume-card-content">
             <div className="resume-card-icon">
               <FaFileAlt size={50} />
