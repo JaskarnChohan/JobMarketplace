@@ -108,49 +108,48 @@ const ViewCompany = () => {
             </p>
           </div>
         </div>
-        <div>
-          <div className="section">
-            <h2 className="section-title">About {companyData.name}</h2>
-            <pre className="section-text wrap">{companyData.description}</pre>
-          </div>
-          <div className="section">
-            <h2 className="section-title">Active Job Listings</h2>
-            <div className="job-listing-container">
-              {Array.isArray(jobListings) && jobListings.length > 0 ? (
-                jobListings.map((job) => (
-                  <div className="job-card" key={job._id}>
-                    <h3 className="job-title">{job.title}</h3>
-                    <p className="job-info">
-                      <FaBuilding /> {job.jobCategory}
-                    </p>
-                    <p className="job-info">
-                      <FaMapMarkerAlt /> {job.location}
-                    </p>
-                    <p className="job-info">
-                      <FaClock /> {job.employmentType}
-                    </p>
-                    <p className="job-info">
-                      <FaTag /> {job.status}
-                    </p>
-                    <p className="job-info">
-                      <FaDollarSign /> {job.salaryRange}
-                    </p>
-                    <p className="job-info">
-                      <FaCalendarAlt />
-                      {" Deadline: "}{" "}
-                      {new Date(job.applicationDeadline).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="section-text">
-                  No active job listings available.
-                </p>
-              )}
-            </div>
+      </div>
+      <div>
+        <div className="section">
+          <h2 className="section-title">About {companyData.name}</h2>
+          <pre className="section-text wrap">{companyData.description}</pre>
+        </div>
+        <div className="section">
+          <h2 className="section-title">Active Job Listings</h2>
+          <div className="job-listing-container">
+            {Array.isArray(jobListings) && jobListings.length > 0 ? (
+              jobListings.map((job) => (
+                <div className="job-card" key={job._id}>
+                  <h3 className="job-title">{job.title}</h3>
+                  <p className="job-info">
+                    <FaBuilding /> {job.jobCategory}
+                  </p>
+                  <p className="job-info">
+                    <FaMapMarkerAlt /> {job.location}
+                  </p>
+                  <p className="job-info">
+                    <FaClock /> {job.employmentType}
+                  </p>
+                  <p className="job-info">
+                    <FaTag /> {job.status}
+                  </p>
+                  <p className="job-info">
+                    <FaDollarSign /> {job.salaryRange}
+                  </p>
+                  <p className="job-info">
+                    <FaCalendarAlt />
+                    {" Deadline: "}{" "}
+                    {new Date(job.applicationDeadline).toLocaleDateString()}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="section-text">No active job listings available.</p>
+            )}
           </div>
         </div>
       </div>
+
       <Footer />
     </div>
   );

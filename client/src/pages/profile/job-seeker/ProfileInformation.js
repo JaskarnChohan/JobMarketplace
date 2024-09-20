@@ -255,8 +255,8 @@ const ProfileInformation = ({
               {...register("phoneNumber", {
                 required: "Phone number is required",
                 pattern: {
-                  value: /^\+?[0-9]{10,14}$/,
-                  message: "Phone number must be between 10 and 14 digits.",
+                  value: /^\+?[0-9]{6,14}$/,
+                  message: "Phone number must be between 6 and 14 digits.",
                 },
               })}
             />
@@ -310,11 +310,11 @@ const ProfileInformation = ({
               </p>
             )}
 
-            <div className="modal-buttons">
-              <button className="btn" type="submit">
+            <div className="btn-container">
+              <button className="btn btn-save" type="submit">
                 Save
               </button>
-              <button className="btn cancel" onClick={closeModal}>
+              <button className="btn btn-cancel" onClick={closeModal}>
                 Cancel
               </button>
             </div>
@@ -333,11 +333,11 @@ const ProfileInformation = ({
           <form onSubmit={handleImageUpload}>
             <input type="file" accept="image/*" onChange={handleFileChange} />
             <p className="file-name">{fileName}</p>
-            <div className="modal-buttons">
-              <button className="btn" type="submit">
+            <div className="btn-container">
+              <button className="btn btn-save" type="submit">
                 Upload
               </button>
-              <button className="btn cancel" onClick={closePictureModal}>
+              <button className="btn btn-cancel" onClick={closePictureModal}>
                 Cancel
               </button>
             </div>

@@ -26,7 +26,14 @@ pre, textarea{
 }
 
 .hover:hover {
+  cursor: pointer;
   text-decoration: underline;
+}
+
+.min-height {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Ensure body takes full height */
 }
 
 :root {
@@ -91,6 +98,65 @@ pre, textarea{
   color: var(--secondary-color);
   margin-bottom: 1.5rem;
   font-size: 18px;
+}
+
+/* Dashboard */
+.dashboard .lrg-heading, .dashboard .med-heading {
+  text-align: center;
+}
+.dashboard .med-heading {
+  font-size: 1.5rem;
+  margin-top: 5px 0px 10px 0px;
+}
+
+.dashboard .lrg-heading{
+margin-top: 20px;
+}
+
+.dashboard .job-card {
+  margin-bottom: 20px;
+}
+
+.dashboard-title {
+  margin-bottom: 10px;
+}
+
+.dashboard h4 {
+  margin-bottom: 10px;
+}
+
+.dashboard h3 {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.dashboard .user-name {
+  font-size: 1rem;
+  font-weight: 400;
+  margin-bottom: 10px;
+}
+.dashboard .small-btn {
+  margin-top: 10px;
+  width: 100%;
+}
+.sub-headings {
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 10px 0px;
+}
+
+.applicant {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.applicants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* This should work fine */
+  gap: 20px;
+  margin-bottom: 30px;
 }
 
 /* Button */

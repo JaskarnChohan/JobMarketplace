@@ -151,7 +151,10 @@ const JobView = () => {
             {isAuthenticated ? (
               isJobSeeker() && job.status === "Open" && !hasApplied ? (
                 <div className="apply-button-container">
-                  <button className="btn" onClick={() => openConfirmationModal}>
+                  <button
+                    className="btn"
+                    onClick={() => openConfirmationModal(true)}
+                  >
                     Quick Apply
                   </button>
                 </div>

@@ -21,6 +21,7 @@ const BrowseEmployers = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [searched, setSearched] = useState(false); // New state to track search
 
   // Fetch employers based on search term and current page
   const fetchEmployers = async () => {
@@ -29,19 +30,20 @@ const BrowseEmployers = () => {
       const res = await axios.get("http://localhost:5050/api/employer", {
         params: { search, page: currentPage },
       });
-      setEmployerData(res.data.employers); // Update state with fetched employers
-      setTotalPages(res.data.totalPages); // Update total pages for pagination
+      setEmployerData(res.data.employers);
+      setTotalPages(res.data.totalPages);
+      setSearched(true); // Set searched to true when fetching employers
     } catch (err) {
-      setErrors([{ msg: "An error occurred: " + err }]); // Handle any errors
+      setErrors([{ msg: "An error occurred: " + err }]);
     } finally {
-      setLoading(false); // Loading is complete
+      setLoading(false);
     }
   };
 
   // Handle user logout
   const handleLogout = () => {
     logout();
-    navigate("/"); // Redirect to home on logout
+    navigate("/");
   };
 
   // Update search input state
@@ -85,7 +87,10 @@ const BrowseEmployers = () => {
         <div className="wrapper">
           <div className="job-listing-container">
             {loading && <Spinner />}
-            {!loading && Array.isArray(employerData) && employerData.length > 0
+            {!loading &&
+            searched &&
+            Array.isArray(employerData) &&
+            employerData.length > 0
               ? employerData.map((item) => (
                   <div className="job-card" key={item._id}>
                     <h3
@@ -108,7 +113,8 @@ const BrowseEmployers = () => {
                     </p>
                   </div>
                 ))
-              : !loading && (
+              : !loading &&
+                searched && (
                   <div className="no-results">
                     <img src={noresults} alt="No results" />
                     <p>We couldn't find any employers.</p>

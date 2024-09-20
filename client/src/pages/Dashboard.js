@@ -5,43 +5,42 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
 import "../styles/Global.css";
-import {
-  FaBuilding,
-  FaMapMarkerAlt,
-  FaClock,
-  FaTag,
-  FaDollarSign,
-} from "react-icons/fa";
+import "../styles/job/Job.css";
+import "../styles/job/JobCards.css";
+import { FaTag } from "react-icons/fa";
+import Spinner from "../components/Spinner/Spinner";
 
 const Dashboard = () => {
-  const { logout, user } = useAuth();
+  const { logout, user } = useAuth(); // Get logout function and user info from context
   const navigate = useNavigate();
-  const [userJobs, setUserJobs] = useState([]);
-  const [jobApplicationsMap, setJobApplicationsMap] = useState({});
-  const [userProfilesMap, setUserProfilesMap] = useState({});
-  const [groupedApplications, setGroupedApplications] = useState({});
-  const [errors, setErrors] = useState([]);
-  const [currentApplication, setCurrentApplication] = useState(null);
-  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
+  const [userJobs, setUserJobs] = useState([]); // State to hold user's jobs
+  const [jobApplicationsMap, setJobApplicationsMap] = useState({}); // Map to track job applications
+  const [userProfilesMap, setUserProfilesMap] = useState({}); // Map to track user profiles
+  const [groupedApplications, setGroupedApplications] = useState({}); // Group applications by status
+  const [errors, setErrors] = useState([]); // State to hold error messages
+  const [currentApplication, setCurrentApplication] = useState(null); // Current application for deletion
+  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // Modal visibility state
 
+  // Fetch user jobs or applications based on user role
   useEffect(() => {
     if (user) {
       if (user.role === "employer") {
-        fetchUserJobs();
+        fetchUserJobs(); // Employers fetch their jobs
       } else if (user.role === "jobSeeker") {
-        fetchUserApplications();
+        fetchUserApplications(); // Job seekers fetch their applications
       }
     }
   }, [user]);
 
+  // Fetch jobs for the logged-in employer
   const fetchUserJobs = async () => {
     try {
       const res = await axios.get(
         `http://localhost:5050/api/jobs/getbyemployer/${user._id}`
       );
       const openJobs = res.data.jobs.filter((job) => job.status === "Open");
-      setUserJobs(openJobs);
-      await fetchApplicationsForJobs(openJobs);
+      setUserJobs(openJobs); // Set state with open jobs
+      await fetchApplicationsForJobs(openJobs); // Fetch applications for these jobs
     } catch (err) {
       setErrors([
         { msg: "An error occurred while fetching your jobs: " + err.message },
@@ -49,6 +48,7 @@ const Dashboard = () => {
     }
   };
 
+  // Fetch job applications for the logged-in job seeker
   const fetchUserApplications = async () => {
     try {
       const res = await axios.get(
@@ -56,6 +56,7 @@ const Dashboard = () => {
       );
       const applications = res.data.applications;
 
+      // Group applications by their status
       const grouped = applications.reduce((acc, application) => {
         const status = application.status || "Unknown";
         if (!acc[status]) acc[status] = [];
@@ -63,7 +64,7 @@ const Dashboard = () => {
         return acc;
       }, {});
 
-      setGroupedApplications(grouped);
+      setGroupedApplications(grouped); // Set state with grouped applications
     } catch (err) {
       setErrors([
         {
@@ -75,6 +76,7 @@ const Dashboard = () => {
     }
   };
 
+  // Fetch applications for the given jobs
   const fetchApplicationsForJobs = async (jobs) => {
     const newJobApplicationsMap = {};
     const newUserProfilesMap = {};
@@ -84,7 +86,7 @@ const Dashboard = () => {
         const res = await axios.get(
           `http://localhost:5050/api/application/job/${job._id}`
         );
-        newJobApplicationsMap[job._id] = res.data; // Store applications by job ID
+        newJobApplicationsMap[job._id] = res.data; // Map applications by job ID
 
         // Fetch user profiles for each application
         await Promise.all(
@@ -93,7 +95,7 @@ const Dashboard = () => {
               const profileRes = await axios.get(
                 `http://localhost:5050/api/profile/user/${app.userId._id}`
               );
-              newUserProfilesMap[app.userId] = profileRes.data; // Store the profile
+              newUserProfilesMap[app.userId] = profileRes.data; // Map user profile
             }
             app.userProfile = newUserProfilesMap[app.userId]; // Associate profile with application
           })
@@ -101,35 +103,40 @@ const Dashboard = () => {
       })
     );
 
-    setJobApplicationsMap(newJobApplicationsMap);
-    setUserProfilesMap(newUserProfilesMap);
+    setJobApplicationsMap(newJobApplicationsMap); // Update job applications map
+    setUserProfilesMap(newUserProfilesMap); // Update user profiles map
   };
 
+  // Handle user logout
   const handleLogout = () => {
-    logout();
-    navigate("/");
+    logout(); // Call logout from context
+    navigate("/"); // Redirect to home page
   };
 
+  // Open confirmation modal for deleting an application
   const openConfirmationModal = (application) => {
-    setCurrentApplication(application);
-    setConfirmationModalIsOpen(true);
+    setCurrentApplication(application); // Set current application
+    setConfirmationModalIsOpen(true); // Open modal
   };
 
+  // Close confirmation modal
   const closeConfirmationModal = () => {
-    setConfirmationModalIsOpen(false);
-    setCurrentApplication(null);
+    setConfirmationModalIsOpen(false); // Close modal
+    setCurrentApplication(null); // Clear current application
   };
 
+  // Handle application deletion
   const handleDeleteApplication = async () => {
     try {
       await axios.delete(
         `http://localhost:5050/api/application/${currentApplication._id}`
       );
-      closeConfirmationModal();
+      closeConfirmationModal(); // Close modal after deletion
+      // Refresh jobs or applications based on user role
       if (user.role === "employer") {
-        fetchUserJobs(); // Refresh applications after status update
+        fetchUserJobs();
       } else {
-        fetchUserApplications(); // Refresh applications after status update
+        fetchUserApplications();
       }
     } catch (err) {
       setErrors([
@@ -141,15 +148,17 @@ const Dashboard = () => {
     }
   };
 
+  // Handle status change for an application
   const handleStatusChange = async (appId, newStatus) => {
     try {
       await axios.put(`http://localhost:5050/api/application/${appId}`, {
         status: newStatus,
       });
+      // Refresh jobs or applications based on user role
       if (user.role === "employer") {
-        fetchUserJobs(); // Refresh applications after status update
+        fetchUserJobs();
       } else {
-        fetchUserApplications(); // Refresh applications after status update
+        fetchUserApplications();
       }
     } catch (err) {
       setErrors([
@@ -162,85 +171,92 @@ const Dashboard = () => {
     }
   };
 
+  // Show spinner while loading user data
   if (!user) {
-    return <div>Loading...</div>;
+    return <Spinner />;
   }
 
   return (
-    <div>
+    <div className="min-height">
       <Navbar isAuthenticated={true} handleLogout={handleLogout} />
-      <div className="content">
-        <h2>Welcome to your dashboard!</h2>
-        <h3>Your Details:</h3>
-        <p>Email: {user.email}</p>
-        <p>Role: {user.role}</p>
-        <p>
-          Account Created At: {new Date(user.createdAt).toLocaleDateString()}
-        </p>
+      <div className="section dashboard">
+        <h2 className="lrg-heading">Application Dashboard</h2>
+        <p className="med-heading">Manage all your applications here!</p>
         <br />
 
         {user.role === "employer" ? (
           <>
-            <h3>Your Open Job Listings</h3>
+            <h3 className="dashboard-title">Open Job Listings</h3>
             {userJobs.length > 0 ? (
               <div className="user-jobs-list">
                 {userJobs.map((job) => (
                   <div key={job._id} className="job-card">
-                    <h4 onClick={() => navigate(`/jobview/${job._id}`)}>
+                    <h3
+                      className="job-title hover"
+                      onClick={() => navigate(`/jobview/${job._id}`)}
+                    >
                       {job.title}
-                    </h4>
-                    <p>Status: {job.status}</p>
-                    <h5>Applicants:</h5>
-                    {jobApplicationsMap[job._id] &&
-                    jobApplicationsMap[job._id].length > 0 ? (
-                      jobApplicationsMap[job._id].map((app) => (
-                        <div key={app._id}>
-                          <p>
-                            {app.userProfile
-                              ? `${app.userProfile.firstName} ${app.userProfile.lastName}`
-                              : "Unknown User"}{" "}
-                            -
-                            <select
-                              value={app.status}
-                              onChange={(e) =>
-                                handleStatusChange(app._id, e.target.value)
-                              }
-                            >
-                              <option value="Pending">Pending</option>
-                              <option value="Reviewed">Reviewed</option>
-                              <option value="Accepted">Accepted</option>
-                              <option value="Rejected">Rejected</option>
-                            </select>
-                            <button
-                              className="btn"
-                              onClick={() => openConfirmationModal(app)}
-                            >
-                              Delete Application
-                            </button>
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <p>No applicants yet.</p>
-                    )}
+                    </h3>
+                    <h4>Applicants:</h4>
+                    <div className="applicants-grid">
+                      {jobApplicationsMap[job._id] &&
+                      jobApplicationsMap[job._id].length > 0 ? (
+                        jobApplicationsMap[job._id].map((app) => (
+                          <div className="applicant" key={app._id}>
+                            <p>
+                              <p
+                                className="user-name hover"
+                                onClick={() =>
+                                  navigate(`/viewprofile/${app.userId._id}`)
+                                }
+                              >
+                                {app.userProfile
+                                  ? `${app.userProfile.firstName} ${app.userProfile.lastName}`
+                                  : "Unknown User"}{" "}
+                              </p>
+                              <select
+                                value={app.status}
+                                onChange={(e) =>
+                                  handleStatusChange(app._id, e.target.value)
+                                }
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Reviewed">Reviewed</option>
+                                <option value="Accepted">Accepted</option>
+                                <option value="Rejected">Rejected</option>
+                              </select>
+                              <button
+                                className="small-btn"
+                                onClick={() => openConfirmationModal(app)}
+                              >
+                                Delete Application
+                              </button>
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="sub-headings">No applicants yet.</p>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p>You have no job listings yet.</p>
+              <p className="sub-headings">You have no job listings yet.</p>
             )}
           </>
         ) : user.role === "jobSeeker" ? (
           <>
-            <h3>Your Applications</h3>
+            <h3 className="page-title">Your Applications</h3>
             {Object.keys(groupedApplications).map((status) => (
               <div key={status}>
-                <h4>{status}</h4>
+                <h4 className="sub-headings">{status}</h4>
                 {groupedApplications[status].length > 0 ? (
-                  <div className="applied-jobs-list">
+                  <div className="applicants-grid">
                     {groupedApplications[status].map((application) => (
-                      <div key={application._id} className="job-card">
+                      <div key={application._id} className="applicant">
                         <h4
+                          className="job-title hover"
                           onClick={() =>
                             navigate(`/jobview/${application.jobId._id}`)
                           }
@@ -255,65 +271,24 @@ const Dashboard = () => {
                           {new Date(application.appliedAt).toLocaleDateString()}
                         </p>
                         <button
-                          className="btn"
+                          className="small-btn"
                           onClick={() => openConfirmationModal(application)}
                         >
                           Delete Application
                         </button>
-
-                        {/* Show Job Details Below Application */}
-                        {jobApplicationsMap[application.jobId._id] && (
-                          <div className="job-details">
-                            <h1>
-                              {jobApplicationsMap[application.jobId._id].title}
-                            </h1>
-                            <p>
-                              {
-                                jobApplicationsMap[application.jobId._id]
-                                  .description
-                              }
-                            </p>
-                            <p className="job-info">
-                              <FaBuilding />{" "}
-                              {
-                                jobApplicationsMap[application.jobId._id]
-                                  .jobCategory
-                              }
-                            </p>
-                            <p className="job-info">
-                              <FaMapMarkerAlt />{" "}
-                              {
-                                jobApplicationsMap[application.jobId._id]
-                                  .location
-                              }
-                            </p>
-                            <p className="job-info">
-                              <FaClock />{" "}
-                              {
-                                jobApplicationsMap[application.jobId._id]
-                                  .employmentType
-                              }
-                            </p>
-                            <p className="job-info">
-                              <FaDollarSign />{" "}
-                              {
-                                jobApplicationsMap[application.jobId._id]
-                                  .salaryRange
-                              }
-                            </p>
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p>No applications for {status}.</p>
+                  <p className="sub-headings">No applications for {status}.</p>
                 )}
               </div>
             ))}
           </>
         ) : (
-          <p>You are not authorized to view this section.</p>
+          <p className="sub-headings">
+            You are not authorized to view this section.
+          </p>
         )}
 
         {errors.length > 0 && (

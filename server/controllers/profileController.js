@@ -1,4 +1,7 @@
 const Profile = require("../models/profile");
+const Skill = require("../models/skill");
+const Experience = require("../models/experience");
+const Education = require("../models/education");
 const User = require("../models/user");
 const fs = require("fs");
 const path = require("path");
@@ -285,10 +288,10 @@ exports.deleteResume = async (req, res) => {
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
-
 // Fetch profile by user ID
 exports.getProfileByUserId = async (req, res) => {
   try {
+    // Fetch the profile using the user ID
     const profile = await Profile.findOne({ user: req.params.userId });
 
     // If profile is not found, return a default profile with a flag indicating no profile exists
@@ -298,11 +301,16 @@ exports.getProfileByUserId = async (req, res) => {
         email: null,
         profilePicture: "uploads/profile-pictures/default.png",
         profileExists: false,
+        skills: [],
+        education: [],
+        experience: [],
       });
     }
 
     // Fetch user's email
     const user = await User.findById(req.params.userId).select("email");
+
+    // If user is not found, return an error
     if (!user) {
       return res.status(404).json({ errors: [{ msg: "User not found" }] });
     }
@@ -311,15 +319,22 @@ exports.getProfileByUserId = async (req, res) => {
     const profilePicture =
       profile.profilePicture || "uploads/profile-pictures/default.png";
 
-    // Return the profile data
-    const profileWithEmail = {
+    // Fetch related skills, education, and experience
+    const skills = await Skill.find({ profile: profile._id });
+    const education = await Education.find({ profile: profile._id });
+    const experience = await Experience.find({ profile: profile._id });
+
+    // Return the profile data with related skills, education, and experience
+    const profileWithDetails = {
       ...profile.toObject(),
       email: user.email,
       profilePicture,
       profileExists: true,
+      skills,
+      education,
+      experience,
     };
-
-    res.json(profileWithEmail);
+    res.json(profileWithDetails);
   } catch (err) {
     // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
