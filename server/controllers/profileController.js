@@ -261,3 +261,39 @@ exports.deleteResume = async (req, res) => {
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
+
+// Fetch profile by user ID
+exports.getProfileByUserId = async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ user: req.params.userId });
+
+    if (!profile) {
+      return res.json({
+        profile: null,
+        email: null,
+        profilePicture: "uploads/profile-pictures/default.png",
+        profileExists: false,
+      });
+    }
+
+    const user = await User.findById(req.params.userId).select("email");
+    if (!user) {
+      return res.status(404).json({ errors: [{ msg: "User not found" }] });
+    }
+
+    const profilePicture =
+      profile.profilePicture || "uploads/profile-pictures/default.png";
+
+    const profileWithEmail = {
+      ...profile.toObject(),
+      email: user.email,
+      profilePicture,
+      profileExists: true,
+    };
+
+    res.json(profileWithEmail);
+  } catch (err) {
+    console.error("Error fetching profile:", err.message);
+    res.status(500).json({ errors: [{ msg: "Server error" }] });
+  }
+};

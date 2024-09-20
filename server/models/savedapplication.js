@@ -1,15 +1,16 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const applicationSchema = new mongoose.Schema({
+const applicationSchema = new mongoose.Schema(
+  {
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+    ref: 'User',
+    required: true
   },
   jobId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "JobListing",
-    required: true,
+    ref: 'JobListing',
+    required: true
   },
   status: {
     type: String,
@@ -18,10 +19,10 @@ const applicationSchema = new mongoose.Schema({
   },
   appliedAt: {
     type: Date,
-    default: Date.now,
-  },
+    default: Date.now
+  }
 });
 
-const Application = mongoose.model("Application", applicationSchema);
+const Application = mongoose.model('Application', applicationSchema);
 
 module.exports = Application;

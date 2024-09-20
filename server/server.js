@@ -6,6 +6,7 @@ const jobRoutes = require("./routes/jobRoutes");
 const employerRoutes = require("./routes/employerRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const applicationRoutes = require("./routes/applicationRoutes");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
@@ -34,8 +35,8 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/employer", employerRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/application", applicationRoutes);
 
-// Serve static files from the 'uploads' directory
 app.use("/uploads", express.static("uploads"));
 
 // Global error handling middleware
