@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import Navbar from "../../components/header/Navbar";
-import "../../global.css";
-import "./form.css";
+import Navbar from "../../components/layout/Navbar";
+import Footer from "../../components/layout/Footer";
+import "../../styles/Global.css";
+import "../../styles/auth/Form.css";
 
 const RequestResetPassword = () => {
   const [email, setEmail] = useState("");
@@ -74,6 +75,7 @@ const RequestResetPassword = () => {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

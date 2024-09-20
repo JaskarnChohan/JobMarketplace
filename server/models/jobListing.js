@@ -17,7 +17,7 @@ const jobListingSchema = new mongoose.Schema(
     },
     company: {
       type: String,
-      required: true,
+      required: false,
     },
     location: {
       type: String,
@@ -29,17 +29,27 @@ const jobListingSchema = new mongoose.Schema(
     },
     requirements: {
       type: [String], // An array of strings to list job requirements
-      required: true,
+      default: [],
     },
     benefits: {
       type: [String], // An array of strings to list job benefits
+      default: [],
     },
     salaryRange: {
       type: String,
-      enum: ["$0-$10,000", "$10,000-$20,000", "$20,000-$40,000", "$40,000-$60,000",
-        "$60,000-$80,000", "$80,000-$100,000", "$100,000-$120,000",
-        "$120,000-$140,000", "$140,000-$160,000", "$160,000-$180,000",
-        "$180,000-$200,000", "$200,000+"
+      enum: [
+        "$0-$10,000",
+        "$10,000-$20,000",
+        "$20,000-$40,000",
+        "$40,000-$60,000",
+        "$60,000-$80,000",
+        "$80,000-$100,000",
+        "$100,000-$120,000",
+        "$120,000-$140,000",
+        "$140,000-$160,000",
+        "$160,000-$180,000",
+        "$180,000-$200,000",
+        "$200,000+",
       ],
       required: true,
     },
@@ -54,11 +64,12 @@ const jobListingSchema = new mongoose.Schema(
     },
     applicationDeadline: {
       type: Date,
+      required: true,
     },
     status: {
       type: String,
-      enum: ["Open", "Closed", "On Hold", "Canceled"],
-      default: "Open",
+      enum: ["Open", "Closed", "On Hold", "Cancelled", "Draft"],
+      default: "Draft",
     },
   },
   { timestamps: true }

@@ -1,0 +1,135 @@
+/* Resetting margins, padding, and box-sizing */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  white-space: normal;
+  word-break: break-all; 
+  overflow-wrap: break-word;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+
+pre, textarea{
+  font-family: 'Roboto', sans-serif;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.hover:hover {
+  text-decoration: underline;
+}
+
+:root {
+  /* Main Colors */
+  --primary-color: #fcc707; 
+  --secondary-color: #6b6b6c; 
+  --text-color: #d0e1f9;
+}
+
+/* Default Heading Styling */
+.lrg-heading {
+  color: #292929;
+  font-size: 3rem;
+  font-weight: 900;
+}
+
+.med-heading {
+  color: #292929;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+/* Banner */
+#banner {
+  background: 
+      url('../assets/banner.png') no-repeat center/cover;
+  height: 550px;
+  border-bottom: 2px solid #333;
+}
+
+#banner .banner-content {
+  text-align: left;
+  padding-top: 6.5rem;
+  margin-left: 180px;
+  max-width: 800px;
+}
+
+#banner .banner-content .btn {
+  margin-top: 3rem;
+}
+
+#banner .logo {
+  width: 500px;
+  margin-bottom: 20px;
+}
+
+#banner .btn {
+  font-size: 1.5rem;
+}
+
+.home-section-wrapper {
+  border-bottom: 2px solid #333;
+}
+.home-section {
+  margin: 5rem;
+}
+.home-section .med-heading {
+  margin-bottom: 0.2rem;
+}
+
+.home-section-text {
+  color: var(--secondary-color);
+  margin-bottom: 1.5rem;
+  font-size: 18px;
+}
+
+/* Button */
+.btn {
+  display: inline-block;
+  background: #292929;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 5px solid #292929;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+}
+
+.btn:hover {
+  background-color: var(--secondary-color);
+  border: 5px solid #292929;
+  transform: scale(1.05); 
+}
+
+.small-btn {
+  display: inline-block;
+  background: #292929;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.small-btn:hover {
+  background-color: var(--secondary-color);
+  text-decoration: underline;
+}
+
