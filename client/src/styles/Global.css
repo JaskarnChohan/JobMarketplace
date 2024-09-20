@@ -3,6 +3,9 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  white-space: normal;
+  word-break: break-all; 
+  overflow-wrap: break-word;
 }
 
 html {
@@ -16,9 +19,16 @@ body {
   padding: 0;
 }
 
-pre {
+pre, textarea{
   font-family: 'Roboto', sans-serif;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
+
+.hover:hover {
+  text-decoration: underline;
+}
+
 :root {
   /* Main Colors */
   --primary-color: #fcc707; 

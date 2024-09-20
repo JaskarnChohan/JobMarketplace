@@ -89,7 +89,9 @@
 .profile-email,
 .profile-phone,
 .profile-bio,
-.profile-classification {
+.profile-classification,
+.profile-industry,
+.profile-website {
     margin: 5px 0;
     font-size: 1rem;
     display: flex;
@@ -100,11 +102,13 @@
 .profile-email svg,
 .profile-phone svg,
 .profile-bio svg,
-.profile-classification svg {
+.profile-classification svg,
+.profile-industry svg,
+.profile-website svg {
     margin-right: 10px;
 }
 
-.profile-bio {
+.profile-bio, .profile-description {
     margin-top: 20px;
 }
 

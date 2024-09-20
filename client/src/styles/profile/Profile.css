@@ -16,6 +16,12 @@
     color: #777575;
 }
 
+.profile-information-container .section {
+    max-width: 100% !important;
+    padding: 20px;
+    border-radius: 10px;
+}
+
 .med-text {
     font-size: 18px; 
     line-height: 1.6; 
@@ -98,6 +104,9 @@
     color: #dc3545;
 }
 
+.browse-employees {
+    text-align: center;
+}
 /* Modal Content */
 .modal-wrapper {
     display: flex;

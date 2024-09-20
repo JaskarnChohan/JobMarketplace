@@ -8,6 +8,8 @@ const storage = multer.diskStorage({
       cb(null, "uploads/profile-pictures");
     } else if (file.fieldname === "resume") {
       cb(null, "uploads/resumes");
+    } else if (file.fieldname === "logo") {
+      cb(null, "uploads/logos");
     } else {
       cb(new Error("Invalid file field name"), null);
     }

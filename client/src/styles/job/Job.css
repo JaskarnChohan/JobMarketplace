@@ -137,6 +137,17 @@ select {
     padding: 25px;
 }
 
+.section .job-listing-container {
+    width: 100%;
+    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Responsive columns */
+    gap: 20px; /* Space between items */
+    padding: 25px; /* Padding around the grid */
+    box-sizing: border-box; /* Ensure padding doesn't affect total width */
+}
+
+
 @media (max-width: 800px) {
     .wrapper .job-listing-container {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

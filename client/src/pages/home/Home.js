@@ -62,13 +62,19 @@ const Home = () => {
             <div className="job-listing-container">
               {Array.isArray(jobListingData) && jobListingData.length > 0 ? (
                 jobListingData.map((item) => (
-                  <div
-                    className="job-card"
-                    key={item._id}
-                    onClick={() => navigate(`/jobview/${item._id}`)}
-                  >
-                    <h3 className="job-title">{item.title}</h3>
-                    <p className="company-name">{item.company}</p>
+                  <div className="job-card" key={item._id}>
+                    <h3
+                      className="job-title hover"
+                      onClick={() => navigate(`/jobview/${item._id}`)}
+                    >
+                      {item.title}
+                    </h3>
+                    <p
+                      className="company-name"
+                      onClick={() => navigate(`/viewcompany/${item.employer}`)}
+                    >
+                      {item.company}
+                    </p>
                     <p className="job-info">
                       <FaMapMarkerAlt /> {item.location}
                     </p>
@@ -95,50 +101,6 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="home-section-wrapper">
-        <div className="home-section">
-          <h2 className="med-heading">Top Hiring Employers</h2>
-          <p className="home-section-text">
-            Discover the companies actively seeking new talent and leading the
-            way in opportunities.
-          </p>
-          <div className="recent-job-listings">
-            <div className="job-listing-container">
-              {Array.isArray(jobListingData) && jobListingData.length > 0 ? (
-                jobListingData.map((item) => (
-                  <div className="job-card" key={item._id}>
-                    <h3
-                      className="job-title"
-                      onClick={() => navigate(`/jobview/${item._id}`)}
-                    >
-                      {item.title}
-                    </h3>
-                    <p className="company-name">{item.company}</p>
-                    <p className="job-info">
-                      <FaMapMarkerAlt /> {item.location}
-                    </p>
-                    <p className="job-info">
-                      <FaSuitcase /> {item.employmentType}
-                    </p>
-                    <p className="job-info">
-                      <FaDollarSign /> {item.salaryRange}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p>No job listings found.</p>
-              )}
-            </div>
-            {errors.length > 0 && (
-              <div className="error-messages">
-                {errors.map((error, index) => (
-                  <p key={index}>{error.msg}</p>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
       <Footer />
     </div>
   );

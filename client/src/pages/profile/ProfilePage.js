@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ProfileInformation from "./ProfileInformation";
-import Experience from "./Experience";
-import Education from "./Education";
-import Skills from "./Skills";
-import ResumeUpload from "./ResumeUpload";
+import ProfileInformation from "./job-seeker/ProfileInformation";
+import Experience from "./job-seeker/Experience";
+import Education from "./job-seeker/Education";
+import Skills from "./job-seeker/Skills";
+import ResumeUpload from "./job-seeker/ResumeUpload";
+import EmployerProfileInformation from "./employer/EmployerProfileInformation";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { useAuth } from "../../context/AuthContext";
@@ -18,7 +19,7 @@ const ProfilePage = ({ onProfileUpdate }) => {
   const [skills, setSkills] = useState([]);
   const [profileExists, setProfileExists] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { logout } = useAuth();
+  const { logout, isEmployer } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -26,26 +27,48 @@ const ProfilePage = ({ onProfileUpdate }) => {
     navigate("/");
   };
 
+  // Fetch profile data based on whether the user is an employer or job seeker
   const fetchProfileData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        "http://localhost:5050/api/profile/fetch",
-        {
-          withCredentials: true,
-        }
-      );
+      if (isEmployer()) {
+        // Fetch employer profile data
+        const response = await axios.get(
+          "http://localhost:5050/api/employer/profile/fetch", // Employer profile API
+          {
+            withCredentials: true,
+          }
+        );
 
-      if (response.data) {
-        setFormData(response.data);
-        if (response.data._id) {
-          setProfileExists(true);
-          fetchExperiences(response.data._id);
-          fetchEducations(response.data._id);
-          fetchSkills(response.data._id);
-          fetchResume(response.data._id);
-        } else {
-          setProfileExists(false);
+        if (response.data) {
+          setFormData(response.data);
+          if (response.data._id) {
+            setProfileExists(true);
+            // Add any additional employer-specific data fetches here if necessary
+          } else {
+            setProfileExists(false);
+          }
+        }
+      } else {
+        // Fetch job seeker profile data
+        const response = await axios.get(
+          "http://localhost:5050/api/profile/fetch", // Job seeker profile API
+          {
+            withCredentials: true,
+          }
+        );
+
+        if (response.data) {
+          setFormData(response.data);
+          if (response.data._id) {
+            setProfileExists(true);
+            fetchExperiences(response.data._id);
+            fetchEducations(response.data._id);
+            fetchSkills(response.data._id);
+            fetchResume(response.data._id);
+          } else {
+            setProfileExists(false);
+          }
         }
       }
     } catch (error) {
@@ -122,38 +145,50 @@ const ProfilePage = ({ onProfileUpdate }) => {
         <Spinner />
       ) : (
         <div className="profile-container">
-          <ProfileInformation
-            formData={formData}
-            setFormData={setFormData}
-            profileExists={profileExists}
-            onProfileUpdate={handleProfileUpdate}
-          />
-          {profileExists && (
+          {/* Conditional Rendering based on Employer or Job Seeker */}
+          {isEmployer() ? (
+            <EmployerProfileInformation
+              formData={formData}
+              setFormData={setFormData}
+              profileExists={profileExists}
+              onProfileUpdate={handleProfileUpdate}
+            />
+          ) : (
             <>
-              <Experience
-                experiences={experiences}
-                setExperiences={setExperiences}
+              <ProfileInformation
                 formData={formData}
+                setFormData={setFormData}
+                profileExists={profileExists}
                 onProfileUpdate={handleProfileUpdate}
               />
-              <Education
-                educations={educations}
-                setEducations={setEducations}
-                formData={formData}
-                onProfileUpdate={handleProfileUpdate}
-              />
-              <Skills
-                skills={skills}
-                setSkills={setSkills}
-                formData={formData}
-                onProfileUpdate={handleProfileUpdate}
-              />
-              <ResumeUpload
-                firstName={formData.firstName}
-                lastName={formData.lastName}
-                formData={formData}
-                onProfileUpdate={handleProfileUpdate}
-              />
+              {profileExists && (
+                <>
+                  <Experience
+                    experiences={experiences}
+                    setExperiences={setExperiences}
+                    formData={formData}
+                    onProfileUpdate={handleProfileUpdate}
+                  />
+                  <Education
+                    educations={educations}
+                    setEducations={setEducations}
+                    formData={formData}
+                    onProfileUpdate={handleProfileUpdate}
+                  />
+                  <Skills
+                    skills={skills}
+                    setSkills={setSkills}
+                    formData={formData}
+                    onProfileUpdate={handleProfileUpdate}
+                  />
+                  <ResumeUpload
+                    firstName={formData.firstName}
+                    lastName={formData.lastName}
+                    formData={formData}
+                    onProfileUpdate={handleProfileUpdate}
+                  />
+                </>
+              )}
             </>
           )}
         </div>

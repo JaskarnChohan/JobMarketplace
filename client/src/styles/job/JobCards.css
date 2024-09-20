@@ -16,6 +16,7 @@
   }
   
   .job-title {
+    text-align: left;
     font-size: 18px;
     font-weight: bold;
     color: var(--primary-color);
@@ -28,6 +29,10 @@
     font-weight: 600;
     color: #555;
     margin-bottom: 10px;
+  }
+
+  .company-name:hover {
+    text-decoration: underline;
   }
   
   .job-info {

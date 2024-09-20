@@ -15,12 +15,13 @@ import { FaTrash } from "react-icons/fa";
 
 const CreateJob = () => {
   const textareaRef = useRef(null);
-  const { logout, user, isAuthenticated } = useAuth();
+  const { logout, user, isAuthenticated, isEmployer } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     employer: user._id,
     title: "",
     description: "",
+    company: "",
     location: "",
     jobCategory: "",
     requirements: [],
@@ -32,12 +33,41 @@ const CreateJob = () => {
   });
 
   const [errors, setErrors] = useState([]);
+  const [profileExists, setProfileExists] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/dashboard");
+    } else if (isEmployer()) {
+      // Fetch employer profile data
+      const fetchProfile = async () => {
+        try {
+          const response = await axios.get(
+            "http://localhost:5050/api/employer/profile/fetch",
+            {
+              withCredentials: true,
+            }
+          );
+
+          if (response.data) {
+            if (response.data._id) {
+              setProfileExists(true);
+              setFormData((prevData) => ({
+                ...prevData,
+                company: response.data.name,
+              }));
+            } else {
+              setProfileExists(false);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to fetch employer profile:", err);
+        }
+      };
+
+      fetchProfile();
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isEmployer, navigate]);
 
   const handleLogout = () => {
     logout();
@@ -63,12 +93,22 @@ const CreateJob = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+
+    // Check if the profile exists
+    if (!profileExists) {
+      setErrors([
+        { msg: "You must create your profile before creating a job." },
+      ]);
+      return;
+    }
+
     try {
       const res = await axios.post(
         "http://localhost:5050/api/jobs/create",
         formData
       );
       console.log(res.data);
+      console.log(formData);
       navigate("/jobmanagement");
     } catch (err) {
       if (err.response && err.response.data.errors) {
@@ -324,17 +364,14 @@ const CreateJob = () => {
           <button className="btn" type="submit">
             Create Job Listing
           </button>
-        </form>
-        {errors.length > 0 && (
-          <div>
-            <h3>Errors:</h3>
-            <ul>
+          {errors.length > 0 && (
+            <div className="error-messages">
               {errors.map((error, index) => (
-                <li key={index}>{error.msg}</li>
+                <p key={index}>{error.msg}</p>
               ))}
-            </ul>
-          </div>
-        )}
+            </div>
+          )}
+        </form>
       </div>
       <Footer />
     </div>

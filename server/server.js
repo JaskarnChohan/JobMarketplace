@@ -31,7 +31,7 @@ app.use(
 app.use("/", homeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
-app.use("/api/employers", employerRoutes);
+app.use("/api/employer", employerRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 

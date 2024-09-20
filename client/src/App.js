@@ -17,6 +17,8 @@ import { useAuth } from "./context/AuthContext";
 import AuthLoader from "./context/AuthLoader";
 import JobListings from "./pages/jobs/JobListings";
 import JobManagement from "./pages/jobs/JobManagement";
+import ViewCompanyProfile from "./pages/profile/employer/ViewCompanyProfile";
+import BrowseEmployers from "./pages/profile/employer/BrowseEmployers";
 import EditJob from "./pages/jobs/EditJob";
 import JobView from "./pages/jobs/JobView";
 
@@ -90,6 +92,8 @@ const App = () => {
             path="/request-reset-password"
             element={<RequestResetPassword />}
           />
+          <Route path="/viewcompany/:id" element={<ViewCompanyProfile />} />
+          <Route path="/browse-employers" element={<BrowseEmployers />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/reset-password" element={<ResetPassword noToken />} />
           <Route path="/" element={<Home />} />
