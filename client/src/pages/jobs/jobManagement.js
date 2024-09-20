@@ -287,12 +287,17 @@ const JobManagement = () => {
               ? jobListingData.map((item) => (
                   <div className="job-card job-management-card" key={item._id}>
                     <h3
-                      className="job-title"
+                      className="job-title hover"
                       onClick={() => navigate(`/jobview/${item._id}`)}
                     >
                       {item.title}
                     </h3>
-                    <p className="company-name">{item.company}</p>
+                    <p
+                      className="company-name"
+                      onClick={() => navigate(`/viewcompany/${item.employer}`)}
+                    >
+                      {item.company}
+                    </p>
                     <p className="job-info">
                       <FaBuilding /> {item.jobCategory}
                     </p>
@@ -351,7 +356,8 @@ const JobManagement = () => {
                 !loading && (
                   <div className="no-results">
                     <img src={noresults} alt="No results" />
-                    <p>We couldn't find any job listings. Please try again.</p>
+                    <p>We couldn't find any job listings.</p>
+                    <p>Please try again.</p>
                   </div>
                 )}
           </div>
