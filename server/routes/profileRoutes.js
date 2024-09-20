@@ -29,9 +29,9 @@ router.get("/resume/fetch", authenticate, profileController.getResume);
 
 router.delete("/resume/delete", authenticate, profileController.deleteResume);
 
+
 // Fetch profile by user ID
 router.get("/user/:userId", profileController.getProfileByUserId);
-
 // Experience routes
 router.post(
   "/:profileId/experience/create",

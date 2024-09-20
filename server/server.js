@@ -37,6 +37,8 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/application", applicationRoutes);
 
+app.use("/uploads", express.static("uploads"));
+
 // Global error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);

@@ -42,6 +42,7 @@ const Navbar = ({ isAuthenticated, handleLogout }) => {
 
         {user.role === "jobSeeker" && (
           <>
+            <Link to="/dashboard">Dashboard</Link>
             <Link to="/joblistings">Job Listings</Link>
             <Link to="/browse-employers">Browse Employers</Link>
           </>
