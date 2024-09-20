@@ -4,6 +4,7 @@ const path = require("path");
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
+    // Check the file field name and set the destination folder
     if (file.fieldname === "profilePicture") {
       cb(null, "uploads/profile-pictures");
     } else if (file.fieldname === "resume") {
@@ -19,6 +20,4 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
-
-module.exports = upload;
+module.exports = multer({ storage: storage });

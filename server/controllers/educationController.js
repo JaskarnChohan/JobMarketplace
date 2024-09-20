@@ -17,6 +17,7 @@ exports.createEducation = async (req, res) => {
     } = req.body;
     const { profileId } = req.params;
 
+    // Validate profile ID
     if (!mongoose.isValidObjectId(profileId)) {
       return res.status(400).json({ errors: [{ msg: "Invalid Profile ID" }] });
     }
@@ -37,7 +38,7 @@ exports.createEducation = async (req, res) => {
     await education.save();
     res.json(education);
   } catch (err) {
-    console.error("Error in createEducation:", err.message);
+    // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
@@ -59,10 +60,12 @@ exports.updateEducation = async (req, res) => {
     } = req.body;
 
     let education = await Education.findById(id).populate("profile");
+    // Check if education exists
     if (!education) {
       return res.status(404).json({ errors: [{ msg: "Education not found" }] });
     }
 
+    // Authorization check
     if (education.profile.user.toString() !== req.user.id) {
       return res.status(403).json({ errors: [{ msg: "Not authorized" }] });
     }
@@ -74,6 +77,7 @@ exports.updateEducation = async (req, res) => {
     education.startMonth = startMonth || education.startMonth;
     education.startYear = startYear || education.startYear;
 
+    // If current is true, set end date to null
     if (current) {
       education.endMonth = null;
       education.endYear = null;
@@ -88,7 +92,7 @@ exports.updateEducation = async (req, res) => {
     await education.save();
     res.json(education);
   } catch (err) {
-    console.error("Error in updateEducation:", err.message);
+    // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
@@ -99,10 +103,12 @@ exports.deleteEducation = async (req, res) => {
     const { id } = req.params;
 
     let education = await Education.findById(id).populate("profile");
+    // Check if education exists
     if (!education) {
       return res.status(404).json({ errors: [{ msg: "Education not found" }] });
     }
 
+    // Authorisation check
     if (education.profile.user.toString() !== req.user.id) {
       return res.status(403).json({ errors: [{ msg: "Not authorized" }] });
     }
@@ -110,7 +116,7 @@ exports.deleteEducation = async (req, res) => {
     await Education.findByIdAndDelete(id);
     res.json({ msg: "Education removed" });
   } catch (err) {
-    console.error("Error in deleteEducation:", err.message);
+    // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
@@ -120,6 +126,7 @@ exports.getEducation = async (req, res) => {
   try {
     const { profileId } = req.params;
 
+    // Validate profile ID
     if (!mongoose.isValidObjectId(profileId)) {
       return res.status(400).json({ errors: [{ msg: "Invalid Profile ID" }] });
     }
@@ -127,7 +134,7 @@ exports.getEducation = async (req, res) => {
     const educationRecords = await Education.find({ profile: profileId });
     res.json(educationRecords);
   } catch (error) {
-    console.error("Error fetching education records:", error.message);
+    // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };

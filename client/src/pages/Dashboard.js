@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Navbar from "../../components/layout/Navbar";
-import { useAuth } from "../../context/AuthContext";
+import Navbar from "../components/layout/Navbar";
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Modal from "react-modal";
-import "../../styles/Global.css";
+import "../styles/Global.css";
 import {
   FaBuilding,
   FaMapMarkerAlt,

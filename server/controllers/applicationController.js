@@ -1,5 +1,3 @@
-// controllers/applicationController.js
-
 const Application = require("../models/application");
 
 // Create a new application
@@ -45,6 +43,7 @@ exports.updateApplicationStatus = async (req, res) => {
       { status },
       { new: true }
     );
+    // Check if application exists
     if (!application) {
       return res.status(404).json({ message: "Application not found" });
     }
@@ -62,6 +61,7 @@ exports.deleteApplication = async (req, res) => {
 
   try {
     const application = await Application.findByIdAndDelete(applicationId);
+    // Check if application exists
     if (!application) {
       return res.status(404).json({ message: "Application not found" });
     }
@@ -73,12 +73,14 @@ exports.deleteApplication = async (req, res) => {
   }
 };
 
+// Check if user has applied to a job
 exports.checkApplication = async (req, res) => {
   const { jobId, userId } = req.query;
 
   try {
     const application = await Application.findOne({ jobId, userId });
 
+    // Check if application exists
     if (application) {
       return res.json({ hasApplied: true });
     } else {
@@ -90,6 +92,7 @@ exports.checkApplication = async (req, res) => {
   }
 };
 
+// Get applications by job ID
 exports.getApplicationsByJobId = async (req, res) => {
   const { jobId } = req.params;
 

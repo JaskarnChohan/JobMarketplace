@@ -22,6 +22,5 @@ const applicationSchema = new mongoose.Schema({
   },
 });
 
-const Application = mongoose.model("Application", applicationSchema);
-
-module.exports = Application;
+// Export the model
+module.exports = mongoose.model("Application", applicationSchema);

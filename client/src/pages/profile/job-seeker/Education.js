@@ -7,6 +7,7 @@ import "../../../styles/profile/Profile.css";
 
 Modal.setAppElement("#root");
 
+// Define valid month names for dropdown selection
 const validMonths = [
   "Jan",
   "Feb",
@@ -30,6 +31,7 @@ const Education = ({ educations, setEducations, formData }) => {
     formState: { errors },
   } = useForm();
 
+  // State management for modals and education editing
   const [educationModalIsOpen, setEducationModalIsOpen] = useState(false);
   const [editingEducation, setEditingEducation] = useState(null);
   const [isCurrentlyStudying, setIsCurrentlyStudying] = useState(false);
@@ -38,23 +40,25 @@ const Education = ({ educations, setEducations, formData }) => {
   const [startDateError, setStartDateError] = useState("");
   const [endDateError, setEndDateError] = useState("");
 
-  // Add states for month and year
+  // State for managing month and year selections
   const [startMonth, setStartMonth] = useState("");
   const [startYear, setStartYear] = useState("");
   const [endMonth, setEndMonth] = useState("");
   const [endYear, setEndYear] = useState("");
 
+  // Function to open the education modal for adding or editing
   const openEducationModal = (education = null) => {
     setEditingEducation(education);
     setIsCurrentlyStudying(education?.current || false);
 
     if (education) {
+      // Normalize month to ensure consistent representation
       const normalizeMonth = (month) => {
         const monthIndex = validMonths.findIndex((m) => m === month);
         return monthIndex >= 0 ? validMonths[monthIndex] : "";
       };
 
-      // Set start date values
+      // Set start date values from the selected education
       const startMonth = normalizeMonth(education.startMonth);
       const startYear = education.startYear;
 
@@ -86,8 +90,9 @@ const Education = ({ educations, setEducations, formData }) => {
         endYear: education.current ? "" : education.endYear,
       };
 
-      reset(formattedEducation);
+      reset(formattedEducation); // Reset form with formatted education data
     } else {
+      // Reset form for new education entry
       reset({
         school: "",
         degree: "",
@@ -106,23 +111,25 @@ const Education = ({ educations, setEducations, formData }) => {
       setEndDateError("");
     }
 
-    setEducationModalIsOpen(true);
+    setEducationModalIsOpen(true); // Open the education modal
   };
 
   const closeEducationModal = () => {
     setEducationModalIsOpen(false);
-    reset({});
+    reset({}); // Reset form on close
   };
 
+  // Handle checkbox for currently studying
   const handleCheckboxChange = (e) => {
     const isChecked = e.target.checked;
     setIsCurrentlyStudying(isChecked);
     if (isChecked) {
-      setEndMonth("");
+      setEndMonth(""); // Clear end date if currently studying
       setEndYear("");
     }
   };
 
+  // Validate start and end dates
   const validateDates = (
     startMonth,
     startYear,
@@ -150,9 +157,10 @@ const Education = ({ educations, setEducations, formData }) => {
       }
     }
 
-    return errors;
+    return errors; // Return any validation errors
   };
 
+  // Handle form submission for education
   const handleEducationSubmit = async (data) => {
     const { startDateError, endDateError } = validateDates(
       startMonth,
@@ -166,24 +174,25 @@ const Education = ({ educations, setEducations, formData }) => {
     setEndDateError(endDateError || "");
 
     if (startDateError || endDateError) {
-      return;
+      return; // Exit if there are validation errors
     }
 
     try {
       if (isCurrentlyStudying) {
-        data.current = true;
+        data.current = true; // Mark as currently studying
       } else {
         data.current = false;
-        data.endMonth = endMonth;
+        data.endMonth = endMonth; // Set end date if not currently studying
         data.endYear = endYear;
       }
 
       const education = {
         ...data,
-        profileId: formData._id,
+        profileId: formData._id, // Attach profile ID to the education entry
       };
 
       if (editingEducation) {
+        // Update existing education entry
         const response = await axios.put(
           `http://localhost:5050/api/profile/${formData._id}/education/${editingEducation._id}/update`,
           education,
@@ -198,6 +207,7 @@ const Education = ({ educations, setEducations, formData }) => {
           )
         );
       } else {
+        // Create new education entry
         const response = await axios.post(
           `http://localhost:5050/api/profile/${formData._id}/education/create`,
           education,
@@ -209,12 +219,13 @@ const Education = ({ educations, setEducations, formData }) => {
         setEducations((prevEducations) => [...prevEducations, response.data]);
       }
 
-      closeEducationModal();
+      closeEducationModal(); // Close modal after submission
     } catch (error) {
       console.error("Failed to save education:", error);
     }
   };
 
+  // Handle education deletion
   const handleDeleteEducation = async () => {
     try {
       await axios.delete(
@@ -227,12 +238,13 @@ const Education = ({ educations, setEducations, formData }) => {
       setEducations((prevEducations) =>
         prevEducations.filter((edu) => edu._id !== educationToDelete)
       );
-      closeConfirmationModal();
+      closeConfirmationModal(); // Close confirmation modal
     } catch (error) {
       console.error("Failed to delete education:", error);
     }
   };
 
+  // Open modal for confirming deletion
   const openConfirmationModal = (educationId) => {
     setEducationToDelete(educationId);
     setConfirmationModalIsOpen(true);
@@ -240,6 +252,7 @@ const Education = ({ educations, setEducations, formData }) => {
 
   const closeConfirmationModal = () => setConfirmationModalIsOpen(false);
 
+  // Generate dropdown options for months and years
   const generateOptions = (type) => {
     const options = [];
     if (type === "month") {
@@ -260,7 +273,7 @@ const Education = ({ educations, setEducations, formData }) => {
         );
       }
     }
-    return options;
+    return options; // Return generated options
   };
 
   return (

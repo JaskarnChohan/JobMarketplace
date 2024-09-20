@@ -22,34 +22,38 @@ import "../../../styles/profile/ProfileInfo.css";
 import "../../../styles/Global.css";
 
 const ViewCompany = () => {
-  const { id } = useParams(); // Get the company ID from the URL
-  const [companyData, setCompanyData] = useState(null);
-  const [jobListings, setJobListings] = useState([]);
+  // Retrieve the company ID from the URL parameters
+  const { id } = useParams();
+  const [companyData, setCompanyData] = useState(null); // State to hold company data
+  const [jobListings, setJobListings] = useState([]); // State to hold job listings
 
-  const { isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth(); // Authentication context
+  const navigate = useNavigate(); // Hook for navigation
 
+  // Handle user logout and navigate to home
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
   useEffect(() => {
+    // Function to fetch company data
     const fetchCompanyData = async () => {
       try {
         const response = await axios.get(
           `http://localhost:5050/api/employer/profile/fetch/${id}`,
           {
-            withCredentials: true,
+            withCredentials: true, // Include cookies for authentication
           }
         );
-        setCompanyData(response.data);
-        fetchJobListings();
+        setCompanyData(response.data); // Set the company data from the response
+        fetchJobListings(); // Fetch job listings for the company
       } catch (error) {
         console.error("Failed to fetch company data:", error);
       }
     };
 
+    // Function to fetch job listings for the company
     const fetchJobListings = async () => {
       try {
         const response = await axios.get(
@@ -59,17 +63,18 @@ const ViewCompany = () => {
           }
         );
         const openJobListings = response.data.jobs.filter(
-          (job) => job.status === "Open"
+          (job) => job.status === "Open" // Filter to get only open job listings
         );
-        setJobListings(openJobListings);
+        setJobListings(openJobListings); // Set the filtered job listings
       } catch (error) {
         console.error("Failed to fetch job listings:", error);
       }
     };
 
-    fetchCompanyData();
+    fetchCompanyData(); // Initiate fetch when component mounts
   }, [id]);
 
+  // If company data is not yet available, show a loading spinner
   if (!companyData) return <Spinner />;
 
   return (

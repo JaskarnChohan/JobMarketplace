@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import Modal from "react-modal";
-import { FaPencilAlt, FaPlus, FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
+import { FaPencilAlt, FaPlus, FaTrashAlt } from "react-icons/fa";
 import "../../../styles/profile/Profile.css";
 
 Modal.setAppElement("#root");
 
+// Valid months array for dropdowns
 const validMonths = [
   "Jan",
   "Feb",
@@ -30,6 +31,7 @@ const Experience = ({ experiences, setExperiences, formData }) => {
     formState: { errors },
   } = useForm();
 
+  // State variables for modals and editing
   const [experienceModalIsOpen, setExperienceModalIsOpen] = useState(false);
   const [editingExperience, setEditingExperience] = useState(null);
   const [isCurrentlyEmployed, setIsCurrentlyEmployed] = useState(false);
@@ -38,12 +40,13 @@ const Experience = ({ experiences, setExperiences, formData }) => {
   const [startDateError, setStartDateError] = useState("");
   const [endDateError, setEndDateError] = useState("");
 
-  // Add states for month and year
+  // States for start and end month/year
   const [startMonth, setStartMonth] = useState("");
   const [startYear, setStartYear] = useState("");
   const [endMonth, setEndMonth] = useState("");
   const [endYear, setEndYear] = useState("");
 
+  // Open experience modal for adding or editing experience
   const openExperienceModal = (experience = null) => {
     setEditingExperience(experience);
     setIsCurrentlyEmployed(experience?.current || false);
@@ -111,11 +114,13 @@ const Experience = ({ experiences, setExperiences, formData }) => {
     setExperienceModalIsOpen(true);
   };
 
+  // Close the experience modal
   const closeExperienceModal = () => {
     setExperienceModalIsOpen(false);
     reset({});
   };
 
+  // Handle changes in the "Currently Employed" checkbox
   const handleCheckboxChange = (e) => {
     const isChecked = e.target.checked;
     setIsCurrentlyEmployed(isChecked);
@@ -125,6 +130,7 @@ const Experience = ({ experiences, setExperiences, formData }) => {
     }
   };
 
+  // Validate start and end dates
   const validateDates = (
     startMonth,
     startYear,
@@ -157,6 +163,7 @@ const Experience = ({ experiences, setExperiences, formData }) => {
     return errors;
   };
 
+  // Handle form submission for experience
   const handleExperienceSubmit = async (data) => {
     const { startDateError, endDateError } = validateDates(
       startMonth,
@@ -176,6 +183,7 @@ const Experience = ({ experiences, setExperiences, formData }) => {
     }
 
     try {
+      // Set employment status in data
       if (isCurrentlyEmployed) {
         data.current = true;
       } else {
@@ -190,6 +198,7 @@ const Experience = ({ experiences, setExperiences, formData }) => {
       };
 
       if (editingExperience) {
+        // Update existing experience
         const response = await axios.put(
           `http://localhost:5050/api/profile/${formData._id}/experience/${editingExperience._id}/update`,
           experience,
@@ -204,6 +213,7 @@ const Experience = ({ experiences, setExperiences, formData }) => {
           )
         );
       } else {
+        // Create new experience
         const response = await axios.post(
           `http://localhost:5050/api/profile/${formData._id}/experience/create`,
           experience,
@@ -224,6 +234,7 @@ const Experience = ({ experiences, setExperiences, formData }) => {
     }
   };
 
+  // Handle experience deletion
   const handleDeleteExperience = async () => {
     try {
       await axios.delete(
@@ -242,14 +253,16 @@ const Experience = ({ experiences, setExperiences, formData }) => {
     }
   };
 
+  // Open confirmation modal for deletion
   const openConfirmationModal = (experienceId) => {
     setExperienceToDelete(experienceId);
     setConfirmationModalIsOpen(true);
   };
 
+  // Close confirmation modal
   const closeConfirmationModal = () => setConfirmationModalIsOpen(false);
 
-  // Generate month and year options
+  // Generate month and year options for dropdowns
   const generateOptions = (type) => {
     const options = [];
     if (type === "month") {

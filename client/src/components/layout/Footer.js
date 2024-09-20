@@ -49,10 +49,10 @@ const Footer = () => {
               <Link to="/browse-employers">Browse Employers</Link>
             </li>
             <li>
-              <Link to="/contact">Profile</Link>
+              <Link to="/dashboard">Applied Jobs</Link>
             </li>
             <li>
-              <Link to="/dashboard">Dashboard</Link>
+              <Link to="/profile">Profile</Link>
             </li>
           </ul>
         </div>
@@ -64,13 +64,13 @@ const Footer = () => {
               <Link to="/jobmanagement">Job Management</Link>
             </li>
             <li>
-              <Link to="/browse-employees">Browse Employees</Link>
+              <Link to="/dashboard">Applications</Link>
             </li>
             <li>
-              <Link to="/contact">Profile</Link>
+              <Link to="/profile">Profile</Link>
             </li>
             <li>
-              <Link to="/applications">Applications</Link>
+              <Link to="/createjob">Create Job</Link>
             </li>
           </ul>
         </div>

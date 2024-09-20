@@ -246,8 +246,12 @@ select {
 }
 
 .form-section textarea {
-    height: 330px;
+    height: 290px;
     resize: none;
+}
+
+.form-section .small-btn {
+    margin: 0px 0px 10px 0px;
 }
 
 /* Create job button */

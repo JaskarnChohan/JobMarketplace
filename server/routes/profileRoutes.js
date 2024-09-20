@@ -1,3 +1,4 @@
+// Import necessary modules
 const express = require("express");
 const router = express.Router();
 const profileController = require("../controllers/profileController");
@@ -8,90 +9,88 @@ const authenticate = require("../middleware/authMiddleware");
 const upload = require("../middleware/multer");
 
 // Profile routes
-router.post("/create", authenticate, profileController.createProfile);
-router.put("/update", authenticate, profileController.updateProfile);
-router.get("/fetch", authenticate, profileController.getProfile);
+router.post("/create", authenticate, profileController.createProfile); // Create a new profile
+router.put("/update", authenticate, profileController.updateProfile); // Update existing profile
+router.get("/fetch", authenticate, profileController.getProfile); // Fetch the profile
 router.post(
   "/update-picture",
   authenticate,
   upload.single("profilePicture"),
-  profileController.updateProfilePicture
+  profileController.updateProfilePicture // Update profile picture
 );
-
 router.post(
   "/resume/upload",
   authenticate,
   upload.single("resume"),
-  profileController.updateResume
+  profileController.updateResume // Upload resume
 );
-
-router.get("/resume/fetch", authenticate, profileController.getResume);
-
-router.delete("/resume/delete", authenticate, profileController.deleteResume);
-
+router.get("/resume/fetch", authenticate, profileController.getResume); // Fetch resume
+router.delete("/resume/delete", authenticate, profileController.deleteResume); // Delete resume
 
 // Fetch profile by user ID
-router.get("/user/:userId", profileController.getProfileByUserId);
+router.get("/user/:userId", profileController.getProfileByUserId); // Fetch profile by user ID
+
 // Experience routes
 router.post(
   "/:profileId/experience/create",
   authenticate,
-  experienceController.createExperience
+  experienceController.createExperience // Create new experience entry
 );
 router.put(
   "/:profileId/experience/:id/update",
   authenticate,
-  experienceController.updateExperience
+  experienceController.updateExperience // Update experience entry
 );
 router.delete(
   "/:profileId/experience/:id/delete",
   authenticate,
-  experienceController.deleteExperience
+  experienceController.deleteExperience // Delete experience entry
 );
 router.get(
   "/:profileId/experience/fetch",
   authenticate,
-  experienceController.getExperience
+  experienceController.getExperience // Fetch experience entries
 );
 
 // Education routes
 router.post(
   "/:profileId/education/create",
   authenticate,
-  educationController.createEducation
+  educationController.createEducation // Create new education entry
 );
 router.put(
   "/:profileId/education/:id/update",
   authenticate,
-  educationController.updateEducation
+  educationController.updateEducation // Update education entry
 );
 router.delete(
   "/:profileId/education/:id/delete",
   authenticate,
-  educationController.deleteEducation
+  educationController.deleteEducation // Delete education entry
 );
 router.get(
   "/:profileId/education/fetch",
   authenticate,
-  educationController.getEducation
+  educationController.getEducation // Fetch education entries
 );
 
 // Skills routes
 router.post(
   "/:profileId/skill/create",
   authenticate,
-  skillController.createSkill
+  skillController.createSkill // Create new skill entry
 );
 router.put(
   "/:profileId/skill/:id/update",
   authenticate,
-  skillController.updateSkill
+  skillController.updateSkill // Update skill entry
 );
 router.delete(
   "/:profileId/skill/:id/delete",
   authenticate,
-  skillController.deleteSkill
+  skillController.deleteSkill // Delete skill entry
 );
-router.get("/:profileId/skill/fetch", authenticate, skillController.getSkills);
+router.get("/:profileId/skill/fetch", authenticate, skillController.getSkills); // Fetch skills
 
+// Export the router for use in other modules
 module.exports = router;

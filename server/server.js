@@ -1,16 +1,17 @@
+// Import necessary modules
 const express = require("express");
-const connectDatabase = require("./config/database");
+const connectDatabase = require("./config/database"); // Function to connect to the database
+// Route imports
 const authRoutes = require("./routes/authRoutes");
-const homeRoutes = require("./routes/homeRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const employerRoutes = require("./routes/employerRoutes");
 const profileRoutes = require("./routes/profileRoutes");
-const dashboardRoutes = require("./routes/dashboardRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-require("dotenv").config();
+const cors = require("cors"); // Middleware to enable CORS
+const cookieParser = require("cookie-parser"); // Middleware to parse cookies
+require("dotenv").config(); // Load environment variables from .env file
 
+// Initialise the Express application
 const app = express();
 
 // Connect to the Database
@@ -29,14 +30,13 @@ app.use(
 );
 
 // Define API Routes
-app.use("/", homeRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/employer", employerRoutes);
 app.use("/api/profile", profileRoutes);
-app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/application", applicationRoutes);
 
+// Serve static files in the uploads folder
 app.use("/uploads", express.static("uploads"));
 
 // Global error handling middleware
@@ -45,13 +45,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Server Error" });
 });
 
+// Middleware for logging incoming requests
 app.use((req, res, next) => {
   console.log(`Received ${req.method} request for '${req.originalUrl}'`);
   next();
 });
 
 // Define PORT
-const PORT = process.env.PORT || 5050;
+const PORT = 5050;
 
 // Start the server
 app.listen(PORT, () => {

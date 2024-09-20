@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Define the skill schema
 const skillSchema = new mongoose.Schema(
   {
     profile: {
@@ -24,4 +25,5 @@ const skillSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Export the model
 module.exports = mongoose.model("Skill", skillSchema);

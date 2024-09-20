@@ -10,10 +10,10 @@
 
 /* Profile Header (Yellow Banner) */
 .profile-header {
-    background-color: #fcc707; /* Yellow banner */
+    background-color: #fcc707;
     width: 100%;
     padding: 30px;
-    border-radius: 20px; /* Curved top edges */
+    border-radius: 20px; 
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -77,7 +77,7 @@
 
 .profile-info-details {
     flex-grow: 1;
-    color: #292929; /* Dark color for text */
+    color: #292929;
 }
 
 .profile-name {
@@ -126,8 +126,8 @@
     text-align: center;
     padding: 20px;
     border-radius: 10px;
-    background-color: #f9f9f9; /* Optional: Add a background color for better visibility */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for better emphasis */
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .create-profile-container img {

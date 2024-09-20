@@ -16,16 +16,19 @@ exports.createExperience = async (req, res) => {
     } = req.body;
     const { profileId } = req.params;
 
+    // Validate profile ID
     if (!mongoose.isValidObjectId(profileId)) {
       return res.status(400).json({ errors: [{ msg: "Invalid Profile ID" }] });
     }
 
+    // Check for required fields
     if (current && (endMonth || endYear)) {
       return res.status(400).json({
         errors: [{ msg: "End date should be empty if currently employed" }],
       });
     }
 
+    // Create new experience instance
     const experience = new Experience({
       profile: new mongoose.Types.ObjectId(profileId),
       company,
@@ -41,7 +44,7 @@ exports.createExperience = async (req, res) => {
     await experience.save();
     res.json(experience);
   } catch (err) {
-    console.error("Error in createExperience:", err.message);
+    // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
@@ -62,12 +65,15 @@ exports.updateExperience = async (req, res) => {
     } = req.body;
 
     let experience = await Experience.findById(id).populate("profile");
+
+    // Check if experience exists
     if (!experience) {
       return res
         .status(404)
         .json({ errors: [{ msg: "Experience not found" }] });
     }
 
+    // Authorization check
     if (experience.profile.user.toString() !== req.user.id) {
       return res.status(403).json({ errors: [{ msg: "Not authorized" }] });
     }
@@ -77,6 +83,7 @@ exports.updateExperience = async (req, res) => {
     experience.startMonth = startMonth || experience.startMonth;
     experience.startYear = startYear || experience.startYear;
 
+    // If the user is currently employed, set end date to null
     if (current) {
       experience.endMonth = null;
       experience.endYear = null;
@@ -91,7 +98,7 @@ exports.updateExperience = async (req, res) => {
     await experience.save();
     res.json(experience);
   } catch (err) {
-    console.error("Error in updateExperience:", err.message);
+    // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
@@ -102,12 +109,15 @@ exports.deleteExperience = async (req, res) => {
     const { id } = req.params;
 
     let experience = await Experience.findById(id).populate("profile");
+
+    // Check if experience exists
     if (!experience) {
       return res
         .status(404)
         .json({ errors: [{ msg: "Experience not found" }] });
     }
 
+    // Authorization check
     if (experience.profile.user.toString() !== req.user.id) {
       return res.status(403).json({ errors: [{ msg: "Not authorized" }] });
     }
@@ -115,7 +125,7 @@ exports.deleteExperience = async (req, res) => {
     await Experience.findByIdAndDelete(id);
     res.json({ msg: "Experience removed" });
   } catch (err) {
-    console.error("Error in deleteExperience:", err.message);
+    // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
@@ -125,6 +135,7 @@ exports.getExperience = async (req, res) => {
   try {
     const { profileId } = req.params;
 
+    // Validate profile ID
     if (!mongoose.isValidObjectId(profileId)) {
       return res.status(400).json({ errors: [{ msg: "Invalid Profile ID" }] });
     }
@@ -132,7 +143,7 @@ exports.getExperience = async (req, res) => {
     const experiences = await Experience.find({ profile: profileId });
     res.json(experiences);
   } catch (error) {
-    console.error("Error fetching experiences:", error.message);
+    // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };

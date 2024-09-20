@@ -17,13 +17,13 @@ import {
 import "react-datepicker/dist/react-datepicker.css";
 
 const JobView = () => {
-  const { _id } = useParams();
-  const { isAuthenticated, logout, user, isJobSeeker } = useAuth();
-  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
-  const [jobToApply, setJobToApply] = useState(null);
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const { _id } = useParams(); // Extract the job ID from the URL
+  const { isAuthenticated, logout, user, isJobSeeker } = useAuth(); // Grab authentication details from context
+  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // State to manage modal visibility
+  const navigate = useNavigate(); // Hook to navigate programmatically
+  const [loading, setLoading] = useState(true); // State to manage loading status
 
+  // State to hold job details
   const [job, setJob] = useState({
     employer: "",
     title: "",
@@ -40,15 +40,16 @@ const JobView = () => {
     datePosted: "",
   });
 
-  const [hasApplied, setHasApplied] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false); // Track if the user has applied
 
+  // Fetch job details on component mount
   useEffect(() => {
     const fetchJob = async () => {
       try {
         const response = await axios.get(
           `http://localhost:5050/api/jobs/${_id}`
-        );
-        setJob(response.data);
+        ); // Get job data
+        setJob(response.data); // Set job data in state
 
         // Check if the user has already applied for this job
         if (isAuthenticated && user) {
@@ -61,55 +62,57 @@ const JobView = () => {
               },
             }
           );
-          setHasApplied(applicationResponse.data.hasApplied);
+          setHasApplied(applicationResponse.data.hasApplied); // Update the application status
         }
 
-        setLoading(false);
+        setLoading(false); // Set loading to false after data fetch
       } catch (err) {
-        setLoading(false);
-        console.error(err);
+        setLoading(false); // Handle errors and stop loading
+        console.error(err); // Log any errors to the console
       }
     };
 
-    fetchJob();
-  }, [_id, isAuthenticated, user]);
+    fetchJob(); // Call the function to fetch job data
+  }, [_id, isAuthenticated, user]); // Re-run if job ID or authentication status changes
 
-  if (loading) return <Spinner />;
+  if (loading) return <Spinner />; // Show loading spinner while data is being fetched
   if (!job)
+    // If job data isn't found
     return (
       <div>
-        <h1 className="lrg-heading">Job Not Found</h1>
+        <h1 className="lrg-heading">Job Not Found</h1>{" "}
+        {/* Display not found message */}
       </div>
     );
 
+  // Calculate how many days ago the job was posted
   const daysAgo = Math.floor(
     (new Date() - new Date(job.datePosted)) / (1000 * 60 * 60 * 24)
   );
 
+  // Handle user logout
   const handleLogout = () => {
-    logout();
-    navigate("/");
+    logout(); // Call logout function
+    navigate("/"); // Redirect to home page
   };
 
-  const openConfirmationModal = (job) => {
-    setJobToApply(job);
-    setConfirmationModalIsOpen(true);
+  const openConfirmationModal = () => {
+    setConfirmationModalIsOpen(true); // Open the confirmation modal
   };
 
-  const closeConfirmationModal = () => setConfirmationModalIsOpen(false);
+  const closeConfirmationModal = () => setConfirmationModalIsOpen(false); // Close the modal
 
   const handleApply = async () => {
     try {
-      const res = await axios.post(`http://localhost:5050/api/application/`, {
+      // Send application request
+      await axios.post(`http://localhost:5050/api/application/`, {
         jobId: _id,
         userId: user._id,
       });
-      console.log(res.data);
-      setHasApplied(true);
-      navigate("/dashboard");
+      setHasApplied(true); // Update applied status
+      navigate("/dashboard"); // Redirect to dashboard
     } catch (err) {
-      closeConfirmationModal();
-      console.error(err);
+      closeConfirmationModal(); // Close modal on error
     }
   };
 
@@ -148,10 +151,7 @@ const JobView = () => {
             {isAuthenticated ? (
               isJobSeeker() && job.status === "Open" && !hasApplied ? (
                 <div className="apply-button-container">
-                  <button
-                    className="btn"
-                    onClick={() => openConfirmationModal(job)}
-                  >
+                  <button className="btn" onClick={() => openConfirmationModal}>
                     Quick Apply
                   </button>
                 </div>

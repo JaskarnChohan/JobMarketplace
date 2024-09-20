@@ -5,10 +5,10 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Home from "./pages/home/Home";
+import Home from "./pages/Home";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
-import Dashboard from "./pages/home/Dashboard";
+import Dashboard from "./pages/Dashboard";
 import CreateJob from "./pages/jobs/CreateJob";
 import RequestResetPassword from "./pages/auth/RequestResetPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
@@ -24,39 +24,51 @@ import EditJob from "./pages/jobs/EditJob";
 import JobView from "./pages/jobs/JobView";
 
 const App = () => {
-  const { isAuthenticated, isEmployer, isJobSeeker } = useAuth();
+  // Extract authentication information from the context
+  const { isAuthenticated, isEmployer } = useAuth();
 
   return (
     <Router>
+      {/* AuthLoader ensures user session is authenticated before loading routes */}
       <AuthLoader>
         <Routes>
+          {/* Redirect authenticated users to dashboard on signup */}
           <Route
             path="/signup"
             element={
               isAuthenticated ? <Navigate to="/dashboard" /> : <Signup />
             }
           />
+          {/* Redirect authenticated users to dashboard on login */}
           <Route
             path="/login"
             element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
           />
+          {/* Allow only authenticated users to access the dashboard */}
           <Route
             path="/dashboard"
             element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
           />
+          {/* Reset password routes */}
           <Route
             path="/request-reset-password"
             element={<RequestResetPassword />}
           />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/reset-password" element={<ResetPassword noToken />} />
+
+          {/* Home page accessible to all users */}
           <Route path="/" element={<Home />} />
+
+          {/* Profile page only for authenticated users */}
           <Route
             path="/profile"
             element={
               isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />
             }
           />
+
+          {/* Only employers can access job creation page */}
           <Route
             path="/createjob"
             element={
@@ -67,7 +79,11 @@ const App = () => {
               )
             }
           />
+
+          {/* Job listings accessible to all */}
           <Route path="/joblistings" element={<JobListings />} />
+
+          {/* Only employers can edit jobs */}
           <Route
             path="/editjob/:_id"
             element={
@@ -78,7 +94,11 @@ const App = () => {
               )
             }
           />
+
+          {/* Job view page accessible to all */}
           <Route path="/jobview/:_id" element={<JobView />} />
+
+          {/* Only employers can manage jobs */}
           <Route
             path="/jobmanagement"
             element={
@@ -89,15 +109,28 @@ const App = () => {
               )
             }
           />
-          <Route
-            path="/request-reset-password"
-            element={<RequestResetPassword />}
-          />
+
+          {/* Employer and user profile views */}
           <Route path="/viewcompany/:id" element={<ViewCompanyProfile />} />
-          <Route path="/viewprofile/:id" element={<ViewUserProfile />} />
+          <Route
+            path="/viewprofile/:id"
+            element={
+              isAuthenticated && isEmployer() ? (
+                <ViewUserProfile />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+
+          {/* Browse employers page accessible to all */}
           <Route path="/browse-employers" element={<BrowseEmployers />} />
+
+          {/* Reset password routes (duplicate paths cleaned) */}
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/reset-password" element={<ResetPassword noToken />} />
+
+          {/* Home page (duplicate route cleaned) */}
           <Route path="/" element={<Home />} />
         </Routes>
       </AuthLoader>

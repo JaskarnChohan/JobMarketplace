@@ -1,34 +1,36 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../../components/layout/Navbar";
-import Footer from "../../components/layout/Footer";
-import { useAuth } from "../../context/AuthContext";
+import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
+import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
-import "../../styles/Global.css";
-import "../../styles/job/JobCards.css";
+import "../styles/Global.css";
+import "../styles/job/JobCards.css";
 import { FaMapMarkerAlt, FaDollarSign, FaSuitcase } from "react-icons/fa";
 
 const Home = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth(); // Destructure auth methods
   const navigate = useNavigate();
-  const [jobListingData, setJobListingData] = useState([]);
-  const [errors, setErrors] = useState([]);
+  const [jobListingData, setJobListingData] = useState([]); // State to hold job listings
+  const [errors, setErrors] = useState([]); // State to hold error messages
 
+  // Function to handle user logout
   const handleLogout = () => {
-    logout();
-    navigate("/");
+    logout(); // Call the logout function
+    navigate("/"); // Navigate to the home page after logout
   };
 
+  // useEffect to fetch latest job listings on component mount
   useEffect(() => {
     const fetchJobs = async () => {
       try {
-        const response = await fetch("http://localhost:5050/api/jobs/latest");
-        const data = await response.json();
-        setJobListingData(data.jobs || []);
+        const response = await fetch("http://localhost:5050/api/jobs/latest"); // Fetch latest jobs
+        const data = await response.json(); // Parse the JSON response
+        setJobListingData(data.jobs || []); // Set job data or empty array if no jobs
       } catch (error) {
-        setErrors([{ msg: "Failed to load job listings." }]);
+        setErrors([{ msg: "Failed to load job listings." }]); // Set error if fetch fails
       }
     };
-    fetchJobs();
+    fetchJobs(); // Call the fetch function
   }, []);
 
   return (
@@ -38,7 +40,7 @@ const Home = () => {
         <div className="banner-content">
           <img
             className="logo"
-            src={require("../../assets/logo.png")}
+            src={require("../assets/logo.png")}
             alt="logo"
           />
           <h2 className="banner-heading">

@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
+import Spinner from "../../../components/Spinner/Spinner";
+import { FaMapMarkerAlt, FaGlobe, FaBriefcase, FaTag } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../../components/layout/Navbar";
 import Footer from "../../../components/layout/Footer";
 import { useAuth } from "../../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import "../../../styles/Global.css";
 import "../../../styles/job/Job.css";
 import noresults from "../../../assets/void.png";
-import Spinner from "../../../components/Spinner/Spinner";
-import { FaMapMarkerAlt, FaGlobe, FaBriefcase, FaTag } from "react-icons/fa";
 
 const BrowseEmployers = () => {
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+
+  // State variables
   const [employerData, setEmployerData] = useState([]);
   const [search, setSearch] = useState("");
   const [errors, setErrors] = useState([]);
@@ -20,43 +22,44 @@ const BrowseEmployers = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Fetch employers based on search term and current page
   const fetchEmployers = async () => {
     setLoading(true);
     try {
       const res = await axios.get("http://localhost:5050/api/employer", {
         params: { search, page: currentPage },
       });
-      setEmployerData(res.data.employers);
-      setTotalPages(res.data.totalPages);
+      setEmployerData(res.data.employers); // Update state with fetched employers
+      setTotalPages(res.data.totalPages); // Update total pages for pagination
     } catch (err) {
-      setErrors([{ msg: "An error occurred: " + err }]);
+      setErrors([{ msg: "An error occurred: " + err }]); // Handle any errors
     } finally {
-      setLoading(false);
+      setLoading(false); // Loading is complete
     }
   };
 
-  useEffect(() => {
-    fetchEmployers(); // Fetch employers on initial render
-  }, []); // Empty dependency array to only run on mount
-
+  // Handle user logout
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/"); // Redirect to home on logout
   };
 
+  // Update search input state
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
   };
 
+  // Handle search form submission
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setCurrentPage(1); // Reset to first page on new search
-    fetchEmployers(); // Fetch employers with the new search value
+    setCurrentPage(1); // Reset to first page for new search
+    fetchEmployers(); // Fetch employers with the new search term
   };
 
+  // Change the current page and fetch employers for that page
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    fetchEmployers(); // Fetch employers for the new page
+    fetchEmployers();
   };
 
   return (

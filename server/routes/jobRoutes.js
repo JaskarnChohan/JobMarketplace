@@ -1,30 +1,37 @@
+// Import necessary modules
 const express = require("express");
 const {
   getJobs,
   getJobDetails,
   createJob,
-  applyToJob,
   getJobsByEmployer,
-  getUniqueCompanies,
   updateJobListing,
-  getUniqueCategories,
   deleteJobListing,
-  createApplication,
   getLatestJobs,
 } = require("../controllers/jobController");
 
-const router = express.Router();
+const router = express.Router(); // Create a new router instance
 
-router.get("/companies", getUniqueCompanies);
-router.get("/categories", getUniqueCategories);
+// Route to update an existing job listing by its ID
 router.put("/update/:_id", updateJobListing);
+
+// Route to delete a job listing by its ID
 router.delete("/delete/:_id", deleteJobListing);
-router.post("/createapplication", createApplication);
+
+// Route to fetch jobs posted by a specific employer
 router.get("/getbyemployer/:employerId", getJobsByEmployer);
+
+// Route to fetch all jobs
 router.get("/", getJobs);
+
+// Route to create a new job listing
 router.post("/create", createJob);
+
+// Route to fetch the latest job listings
 router.get("/latest", getLatestJobs);
-router.post("/:jobId/apply", applyToJob);
+
+// Route to fetch details of a specific job by job ID
 router.get("/:jobId", getJobDetails);
 
+// Export the router for use in other modules
 module.exports = router;

@@ -16,6 +16,7 @@ const validMonths = [
   "Dec",
 ];
 
+// Define the experience schema
 const experienceSchema = new mongoose.Schema(
   {
     profile: {
@@ -34,7 +35,7 @@ const experienceSchema = new mongoose.Schema(
     startMonth: {
       type: String,
       required: true,
-      enum: validMonths, // Restrict the value to valid 3-character month abbreviations
+      enum: validMonths,
       validate: {
         validator: function (value) {
           return validMonths.includes(value); // Ensure the month is valid
@@ -54,7 +55,7 @@ const experienceSchema = new mongoose.Schema(
     },
     endMonth: {
       type: String,
-      enum: validMonths, // Restrict the value to valid 3-character month abbreviations
+      enum: validMonths,
       validate: {
         validator: function (value) {
           return value === null || validMonths.includes(value); // Allow null or valid month

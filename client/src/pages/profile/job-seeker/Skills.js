@@ -5,9 +5,11 @@ import { FaPencilAlt, FaPlus, FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
 import "../../../styles/profile/Profile.css";
 
+// Set root element for modal accessibility
 Modal.setAppElement("#root");
 
 const Skills = ({ skills, setSkills, formData }) => {
+  // Destructuring react-hook-form methods for managing form input and validation
   const {
     register,
     handleSubmit,
@@ -15,14 +17,17 @@ const Skills = ({ skills, setSkills, formData }) => {
     formState: { errors },
   } = useForm();
 
-  const [skillModalIsOpen, setSkillModalIsOpen] = useState(false);
-  const [editingSkill, setEditingSkill] = useState(null);
-  const [skillToDelete, setSkillToDelete] = useState(null);
-  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
+  // Modal state management
+  const [skillModalIsOpen, setSkillModalIsOpen] = useState(false); // Tracks if skill modal is open
+  const [editingSkill, setEditingSkill] = useState(null); // Tracks skill being edited, if any
+  const [skillToDelete, setSkillToDelete] = useState(null); // Tracks which skill is being deleted
+  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // Manages confirmation modal visibility
 
+  // Opens the modal for adding or editing a skill
   const openSkillModal = (skill = null) => {
-    setEditingSkill(skill);
+    setEditingSkill(skill); // Set the skill to edit, or null for a new skill
 
+    // If editing an existing skill, pre-fill the form with skill data, otherwise reset the form
     if (skill) {
       reset(skill);
     } else {
@@ -33,16 +38,19 @@ const Skills = ({ skills, setSkills, formData }) => {
       });
     }
 
-    setSkillModalIsOpen(true);
+    setSkillModalIsOpen(true); // Open the modal
   };
 
+  // Closes the skill modal and resets the form
   const closeSkillModal = () => {
     setSkillModalIsOpen(false);
     reset({});
   };
 
+  // Handles form submission for creating or updating a skill
   const handleSkillSubmit = async (data) => {
     try {
+      // If editing, send a PUT request to update the skill
       if (editingSkill) {
         const response = await axios.put(
           `http://localhost:5050/api/profile/${formData._id}/skill/${editingSkill._id}/update`,
@@ -52,12 +60,14 @@ const Skills = ({ skills, setSkills, formData }) => {
             withCredentials: true,
           }
         );
+        // Update the skills list in state
         setSkills((prevSkills) =>
           prevSkills.map((skill) =>
             skill._id === editingSkill._id ? response.data : skill
           )
         );
       } else {
+        // Otherwise, send a POST request to create a new skill
         const response = await axios.post(
           `http://localhost:5050/api/profile/${formData._id}/skill/create`,
           data,
@@ -66,17 +76,20 @@ const Skills = ({ skills, setSkills, formData }) => {
             withCredentials: true,
           }
         );
+        // Add the new skill to the skills list
         setSkills((prevSkills) => [...prevSkills, response.data]);
       }
 
-      closeSkillModal();
+      closeSkillModal(); // Close the modal after submitting
     } catch (error) {
       console.error("Failed to save skill:", error);
     }
   };
 
+  // Handles deleting a skill
   const handleDeleteSkill = async () => {
     try {
+      // Send a DELETE request to remove the skill
       await axios.delete(
         `http://localhost:5050/api/profile/${formData._id}/skill/${skillToDelete}/delete`,
         {
@@ -84,26 +97,31 @@ const Skills = ({ skills, setSkills, formData }) => {
         }
       );
 
+      // Remove the deleted skill from the state
       setSkills((prevSkills) =>
         prevSkills.filter((skill) => skill._id !== skillToDelete)
       );
-      closeConfirmationModal();
+      closeConfirmationModal(); // Close confirmation modal after deletion
     } catch (error) {
       console.error("Failed to delete skill:", error);
     }
   };
 
+  // Opens the confirmation modal for deleting a skill
   const openConfirmationModal = (skillId) => {
-    setSkillToDelete(skillId);
-    setConfirmationModalIsOpen(true);
+    setSkillToDelete(skillId); // Set the skill ID to be deleted
+    setConfirmationModalIsOpen(true); // Open confirmation modal
   };
 
+  // Closes the confirmation modal
   const closeConfirmationModal = () => setConfirmationModalIsOpen(false);
 
   return (
     <div className="section">
       <h2 className="section-title">Skills</h2>
       <p className="section-text">List your skills and expertise.</p>
+
+      {/* Skill List */}
       <ul className="list">
         {skills.map((skill) => (
           <li key={skill._id} className="card">
@@ -114,12 +132,14 @@ const Skills = ({ skills, setSkills, formData }) => {
                 <p className="description">{skill.description}</p>
               </div>
               <div className="card-actions">
+                {/* Edit Skill */}
                 <button
                   onClick={() => openSkillModal(skill)}
                   className="smallBtn btn-icon"
                 >
                   <FaPencilAlt />
                 </button>
+                {/* Delete Skill */}
                 <button
                   onClick={() => openConfirmationModal(skill._id)}
                   className="smallBtn btn-icon"
@@ -131,11 +151,13 @@ const Skills = ({ skills, setSkills, formData }) => {
           </li>
         ))}
       </ul>
+
+      {/* Add Skill Button */}
       <button onClick={() => openSkillModal()} className="btn btn-primary">
         <FaPlus /> Add Skill
       </button>
 
-      {/* Skill Modal */}
+      {/* Skill Modal for Add/Edit */}
       <Modal
         isOpen={skillModalIsOpen}
         onRequestClose={closeSkillModal}
@@ -145,6 +167,7 @@ const Skills = ({ skills, setSkills, formData }) => {
           <h1 className="lrg-heading">
             {editingSkill ? "Edit Skill" : "Add Skill"}
           </h1>
+          {/* Skill Form */}
           <form onSubmit={handleSubmit(handleSkillSubmit)} className="form">
             <label htmlFor="name">Skill Name</label>
             <input
@@ -175,7 +198,9 @@ const Skills = ({ skills, setSkills, formData }) => {
                 {errors.level.message}
               </p>
             )}
-            <label htmlFor="description">Description (Optional)</label>
+            <label htmlFor="description">
+              Description <p className="sub-text">(Optional)</p>
+            </label>
             <textarea
               id="description"
               {...register("description", {
@@ -207,7 +232,7 @@ const Skills = ({ skills, setSkills, formData }) => {
         </div>
       </Modal>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal for Deleting Skill */}
       <Modal
         isOpen={confirmationModalIsOpen}
         onRequestClose={closeConfirmationModal}

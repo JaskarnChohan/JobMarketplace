@@ -16,6 +16,7 @@ const validMonths = [
   "Dec",
 ];
 
+// Define the experience schema
 const educationSchema = new mongoose.Schema(
   {
     profile: {
@@ -86,4 +87,5 @@ const educationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Export the model
 module.exports = mongoose.model("Education", educationSchema);

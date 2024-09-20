@@ -1,20 +1,20 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/Global.css";
 import "../../styles/job/Job.css";
 import { locations } from "../../assets/locations.js";
 import { categories } from "../../assets/categories.js";
 import Spinner from "../../components/Spinner/Spinner";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { FaTrash } from "react-icons/fa";
 
 const EditJob = () => {
-  const { _id } = useParams();
+  const { _id } = useParams(); // Get job ID from URL params
   const [job, setJob] = useState({
     employer: "",
     title: "",
@@ -28,13 +28,14 @@ const EditJob = () => {
     applicationDeadline: new Date(),
     status: "",
   });
-  const [loading, setLoading] = useState(true);
-  const [errors, setError] = useState([]);
-  const textareaRef = useRef(null);
-  const { logout, user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true); // Loading state for fetching job data
+  const [errors, setError] = useState([]); // State to hold error messages
+  const textareaRef = useRef(null); // Reference for the textarea
+  const { logout, user, isAuthenticated } = useAuth(); // Auth context
+  const navigate = useNavigate(); // Hook to navigate between pages
 
   useEffect(() => {
+    // Fetch job data on component mount
     const fetchJob = async () => {
       try {
         const response = await axios.get(
@@ -52,13 +53,16 @@ const EditJob = () => {
     fetchJob();
   }, [_id]);
 
+  // Local state for input items
   const [requirementinputitem, setInputValue] = useState("");
   const [benefitsinputitem, setBenefitInputValue] = useState("");
 
+  // Redirect to login if user is not authenticated
   if (!isAuthenticated) {
     navigate("/login");
   }
 
+  // Loading spinner while fetching job data
   if (loading) return <Spinner />;
   if (!job)
     return (
@@ -66,10 +70,9 @@ const EditJob = () => {
         <p className="lrg-heading">Job not found</p>
       </div>
     );
-  if (!user) {
-    return <Spinner />;
-  }
+  if (!user) return <Spinner />;
 
+  // Destructure job properties for easier access
   const {
     title,
     description,
@@ -88,10 +91,12 @@ const EditJob = () => {
     navigate("/");
   };
 
+  // Update job state on input change
   const onChange = (e) => {
     setJob({ ...job, [e.target.name]: e.target.value });
   };
 
+  // Handle job update submission
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -117,15 +122,11 @@ const EditJob = () => {
     }
   };
 
-  // Handle input change
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-  };
-  const handleBenefitInputChange = (e) => {
-    setBenefitInputValue(e.target.value);
-  };
+  // Handle input changes for requirements and benefits
+  const handleInputChange = (e) => setInputValue(e.target.value);
+  const handleBenefitInputChange = (e) => setBenefitInputValue(e.target.value);
 
-  // Handle adding item to the list
+  // Add requirement to the list
   const handleAddItem = () => {
     if (requirementinputitem.trim()) {
       const updatedRequirements = [...requirements, requirementinputitem];
@@ -133,6 +134,8 @@ const EditJob = () => {
       setInputValue("");
     }
   };
+
+  // Add benefit to the list
   const handleBenefitAddItem = () => {
     if (benefitsinputitem.trim()) {
       const updatedBenefits = [...benefits, benefitsinputitem];
@@ -141,17 +144,21 @@ const EditJob = () => {
     }
   };
 
+  // Remove requirement by index
   const removeItem = (index) => {
     const updatedRequirements = requirements.filter((_, i) => i !== index);
     setJob({ ...job, requirements: updatedRequirements });
   };
+
+  // Remove benefit by index
   const removeBenefitItem = (index) => {
     const updatedBenefits = benefits.filter((_, i) => i !== index);
     setJob({ ...job, benefits: updatedBenefits });
   };
 
+  // Handle date change for application deadline
   const handleDateChange = (date) => {
-    setJob({ ...job, ["applicationDeadline"]: date });
+    setJob({ ...job, applicationDeadline: date });
   };
 
   return (

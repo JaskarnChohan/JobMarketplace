@@ -20,11 +20,11 @@ import {
 import noresults from "../../assets/void.png";
 
 const JobManagement = () => {
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth(); // Authentication context
   const navigate = useNavigate();
   const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false);
   const [jobToDelete, setJobToDelete] = useState(null);
-  const [jobListingData, setJobListingData] = useState([]);
+  const [jobListingData, setJobListingData] = useState([]); // State for job listings
   const [jobFilters, setJobFilters] = useState({
     search: "",
     title: "",
@@ -39,7 +39,7 @@ const JobManagement = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [sortBy, setSortBy] = useState("newest");
+  const [sortBy, setSortBy] = useState("newest"); // Default sorting
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -94,6 +94,7 @@ const JobManagement = () => {
       setTotalPages(res.data.totalPages);
       setCurrentPage(page);
     } catch (err) {
+      // Handle errors, displaying any received
       if (err.response && err.response.data.errors) {
         setErrors(err.response.data.errors);
       } else {
@@ -106,12 +107,12 @@ const JobManagement = () => {
   };
 
   const handleCreateJobButton = () => {
-    navigate("/createjob");
+    navigate("/createjob"); // Navigate to create job page
   };
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/"); // Redirect to home after logout
   };
 
   // Handle Filter Input Changes
@@ -163,7 +164,7 @@ const JobManagement = () => {
     let jobId = jobToDelete._id;
     try {
       await axios.delete(`http://localhost:5050/api/jobs/delete/${jobId}`);
-      getJobListings();
+      getJobListings(); // Refresh the job listings after deletion
       closeConfirmationModal();
     } catch (err) {
       console.error(err.response.data); // Handle errors, e.g., show error message to user
@@ -171,7 +172,7 @@ const JobManagement = () => {
   };
 
   const openConfirmationModal = (job) => {
-    setJobToDelete(job);
+    setJobToDelete(job); // Set the job to be deleted
     setConfirmationModalIsOpen(true);
   };
 

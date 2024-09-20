@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Modal from "react-modal";
 import {
   FaPencilAlt,
@@ -14,15 +16,14 @@ import {
   FaCalendarAlt,
   FaGlobe,
 } from "react-icons/fa";
-import axios from "axios";
 import { useAuth } from "../../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import { locations } from "../../../assets/locations.js";
 import profileImage from "../../../assets/profile.png";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/ProfileInfo.css";
 import "../../../styles/Global.css";
 
+// Set the app element for the modal accessibility
 Modal.setAppElement("#root");
 
 const EmployerProfileInformation = ({
@@ -31,13 +32,18 @@ const EmployerProfileInformation = ({
   profileExists,
   onProfileUpdate,
 }) => {
+  // Set up form handling using react-hook-form
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm();
+
+  // Authentication context to get the current user
   const { user } = useAuth();
+
+  // State variables for managing modal visibility and job listings
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const navigate = useNavigate();
   const [pictureModalIsOpen, setPictureModalIsOpen] = useState(false);
@@ -45,6 +51,7 @@ const EmployerProfileInformation = ({
   const [fileName, setFileName] = useState("No file chosen");
   const [jobListings, setJobListings] = useState([]);
 
+  // Fetch profile data and job listings when the component mounts or updates
   useEffect(() => {
     if (profileExists) {
       reset(formData);
@@ -52,6 +59,7 @@ const EmployerProfileInformation = ({
     }
   }, [formData, profileExists, reset]);
 
+  // Function to fetch job listings from the API
   const fetchJobListings = async () => {
     try {
       const response = await axios.get(
@@ -60,6 +68,7 @@ const EmployerProfileInformation = ({
           withCredentials: true,
         }
       );
+      // Filter for open job listings
       const openJobListings = response.data.jobs.filter(
         (job) => job.status === "Open"
       );
@@ -69,6 +78,7 @@ const EmployerProfileInformation = ({
     }
   };
 
+  // Functions to open and close the profile edit modal
   const openModal = () => {
     reset(formData);
     setModalIsOpen(true);
@@ -76,18 +86,22 @@ const EmployerProfileInformation = ({
 
   const closeModal = () => setModalIsOpen(false);
 
+  // Functions to manage the logo upload modal
   const openPictureModal = () => {
     setImageFile(null);
     setFileName("No file chosen");
     setPictureModalIsOpen(true);
   };
+
   const closePictureModal = () => setPictureModalIsOpen(false);
 
+  // Function to handle profile form submission
   const handleProfileSubmit = async (data) => {
     try {
       const url = profileExists
         ? "http://localhost:5050/api/employer/update"
         : "http://localhost:5050/api/employer/create";
+
       const response = await axios({
         method: profileExists ? "PUT" : "POST",
         url,
@@ -95,6 +109,8 @@ const EmployerProfileInformation = ({
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
+
+      // Update form data and close the modal
       setFormData(response.data);
       setModalIsOpen(false);
       if (onProfileUpdate) onProfileUpdate();
@@ -103,12 +119,14 @@ const EmployerProfileInformation = ({
     }
   };
 
+  // Handle file selection for logo upload
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setImageFile(file || null);
     setFileName(file ? file.name : "No file chosen");
   };
 
+  // Function to upload the selected logo image
   const handleImageUpload = async (event) => {
     event.preventDefault();
     if (!imageFile) {
@@ -120,6 +138,7 @@ const EmployerProfileInformation = ({
     formData.append("logo", imageFile);
 
     try {
+      // Upload the logo
       await axios.post(
         "http://localhost:5050/api/employer/update-logo",
         formData,
@@ -129,6 +148,7 @@ const EmployerProfileInformation = ({
         }
       );
 
+      // Fetch the updated profile data
       const response = await axios.get(
         "http://localhost:5050/api/employer/profile/fetch",
         {

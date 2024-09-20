@@ -6,13 +6,15 @@ import "../../styles/Global.css";
 import { useAuth } from "../../context/AuthContext";
 
 const Navbar = ({ isAuthenticated, handleLogout }) => {
-  const { user } = useAuth();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { user } = useAuth(); // Get user information from Auth context
+  const [dropdownOpen, setDropdownOpen] = useState(false); // State for dropdown menu
 
+  // Toggle the dropdown menu visibility
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
+  // Render navigation links based on authentication status
   const renderLinks = () => {
     if (!isAuthenticated) {
       return (
@@ -36,21 +38,20 @@ const Navbar = ({ isAuthenticated, handleLogout }) => {
           <>
             <Link to="/jobmanagement">Job Management</Link>
             <Link to="/createjob">Create Job</Link>
-            <Link to="/applications">Applications</Link>
           </>
         )}
 
         {user.role === "jobSeeker" && (
           <>
-            <Link to="/dashboard">Dashboard</Link>
             <Link to="/joblistings">Job Listings</Link>
             <Link to="/browse-employers">Browse Employers</Link>
           </>
         )}
 
-        {/* Profile Dropdown */}
+        {/* Profile Dropdown for user actions */}
         <div className="dropdown">
-          <FaUser className="icon" onClick={toggleDropdown} />
+          <FaUser className="icon" onClick={toggleDropdown} />{" "}
+          {/* User icon for dropdown */}
           {dropdownOpen && (
             <div className="dropdown-menu">
               <Link to="/profile" className="dropdown-item">

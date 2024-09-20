@@ -7,22 +7,24 @@ exports.createSkill = async (req, res) => {
     const { name, level, description } = req.body;
     const { profileId } = req.params;
 
+    // Validate profile ID
     if (!mongoose.isValidObjectId(profileId)) {
       return res.status(400).json({ errors: [{ msg: "Invalid Profile ID" }] });
     }
 
-    // Check if required fields are provided
+    // Check for required fields
     if (!name || !level) {
       return res
         .status(400)
         .json({ errors: [{ msg: "Please provide all required fields" }] });
     }
 
+    // Create new skill instance
     const skill = new Skill({
       profile: new mongoose.Types.ObjectId(profileId),
       name,
       level,
-      description, // Optional field
+      description, // Optional
     });
 
     await skill.save();
@@ -32,6 +34,7 @@ exports.createSkill = async (req, res) => {
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
+
 // Update Skill
 exports.updateSkill = async (req, res) => {
   try {
@@ -43,11 +46,12 @@ exports.updateSkill = async (req, res) => {
       return res.status(404).json({ errors: [{ msg: "Skill not found" }] });
     }
 
+    // Authorization check
     if (skill.profile.user.toString() !== req.user.id) {
       return res.status(403).json({ errors: [{ msg: "Not authorized" }] });
     }
 
-    // Update fields
+    // Update skill fields
     skill.name = name || skill.name;
     skill.level = level || skill.level;
     skill.description = description || skill.description;
@@ -70,6 +74,7 @@ exports.deleteSkill = async (req, res) => {
       return res.status(404).json({ errors: [{ msg: "Skill not found" }] });
     }
 
+    // Authorization check
     if (skill.profile.user.toString() !== req.user.id) {
       return res.status(403).json({ errors: [{ msg: "Not authorized" }] });
     }
@@ -87,6 +92,7 @@ exports.getSkills = async (req, res) => {
   try {
     const { profileId } = req.params;
 
+    // Validate profile ID
     if (!mongoose.isValidObjectId(profileId)) {
       return res.status(400).json({ errors: [{ msg: "Invalid Profile ID" }] });
     }

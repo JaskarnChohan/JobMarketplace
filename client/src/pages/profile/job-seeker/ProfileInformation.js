@@ -16,7 +16,7 @@ import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/ProfileInfo.css";
 import "../../../styles/Global.css";
 
-Modal.setAppElement("#root");
+Modal.setAppElement("#root"); // Set the app element for accessibility
 
 const ProfileInformation = ({
   formData,
@@ -24,37 +24,47 @@ const ProfileInformation = ({
   profileExists,
   onProfileUpdate,
 }) => {
+  // Hook for form handling
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm();
+
+  // State to manage modals
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [pictureModalIsOpen, setPictureModalIsOpen] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [fileName, setFileName] = useState("No file chosen");
 
+  // Reset form data if profile exists
   useEffect(() => {
     if (profileExists) {
       reset(formData);
     }
   }, [formData, profileExists, reset]);
 
+  // Open and reset the profile edit modal
   const openModal = () => {
     reset(formData);
     setModalIsOpen(true);
   };
 
+  // Close the profile edit modal
   const closeModal = () => setModalIsOpen(false);
 
+  // Open the picture upload modal
   const openPictureModal = () => {
     setImageFile(null);
     setFileName("No file chosen");
     setPictureModalIsOpen(true);
   };
+
+  // Close the picture upload modal
   const closePictureModal = () => setPictureModalIsOpen(false);
 
+  // Handle form submission for profile data
   const handleProfileSubmit = async (data) => {
     try {
       const url = profileExists
@@ -67,20 +77,22 @@ const ProfileInformation = ({
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      setFormData(response.data);
-      setModalIsOpen(false);
-      if (onProfileUpdate) onProfileUpdate();
+      setFormData(response.data); // Update form data with response
+      setModalIsOpen(false); // Close modal after submission
+      if (onProfileUpdate) onProfileUpdate(); // Notify parent component of update
     } catch (error) {
       console.error("Failed to update profile:", error);
     }
   };
 
+  // Handle file input changes for profile picture upload
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setImageFile(file || null);
     setFileName(file ? file.name : "No file chosen");
   };
 
+  // Handle image upload
   const handleImageUpload = async (event) => {
     event.preventDefault();
     if (!imageFile) {
@@ -89,7 +101,7 @@ const ProfileInformation = ({
     }
 
     const formData = new FormData();
-    formData.append("profilePicture", imageFile);
+    formData.append("profilePicture", imageFile); // Append file to FormData
 
     try {
       await axios.post(
@@ -101,6 +113,7 @@ const ProfileInformation = ({
         }
       );
 
+      // Fetch updated profile data after picture upload
       const response = await axios.get(
         "http://localhost:5050/api/profile/fetch",
         {
@@ -108,8 +121,8 @@ const ProfileInformation = ({
         }
       );
 
-      setFormData(response.data);
-      setPictureModalIsOpen(false);
+      setFormData(response.data); // Update form data with new profile
+      setPictureModalIsOpen(false); // Close picture modal after upload
     } catch (error) {
       console.error("Failed to upload profile picture:", error);
     }
@@ -127,7 +140,8 @@ const ProfileInformation = ({
                 className="profile-picture"
               />
               <div className="overlay">
-                <i className="fas fa-pencil-alt pencil-icon"></i>
+                <i className="fas fa-pencil-alt pencil-icon"></i>{" "}
+                {/* Edit icon */}
               </div>
             </div>
           </div>
@@ -172,7 +186,7 @@ const ProfileInformation = ({
         </div>
       )}
 
-      {/* Profile Modal */}
+      {/* Profile Modal for editing or creating profile */}
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
@@ -193,7 +207,6 @@ const ProfileInformation = ({
             />
             {errors.firstName && (
               <p className="error-message">
-                {" "}
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.firstName.message}
               </p>
@@ -209,7 +222,6 @@ const ProfileInformation = ({
             />
             {errors.lastName && (
               <p className="error-message">
-                {" "}
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.lastName.message}
               </p>
@@ -243,8 +255,8 @@ const ProfileInformation = ({
               {...register("phoneNumber", {
                 required: "Phone number is required",
                 pattern: {
-                  value: /^\+?[0-9]{6,15}$/,
-                  message: "Phone number must be between 6 and 15 digits.",
+                  value: /^\+?[0-9]{10,14}$/,
+                  message: "Phone number must be between 10 and 14 digits.",
                 },
               })}
             />
@@ -252,27 +264,6 @@ const ProfileInformation = ({
               <p className="error-message">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.phoneNumber.message}
-              </p>
-            )}
-
-            <label>Preferred Classification</label>
-            <select
-              className={errors.preferredClassification ? "error" : ""}
-              {...register("preferredClassification", {
-                required: "Preferred classification is required",
-              })}
-            >
-              <option value="">Select Classification</option>
-              {categories.map((categories) => (
-                <option key={categories} value={categories}>
-                  {categories}
-                </option>
-              ))}
-            </select>
-            {errors.preferredClassification && (
-              <p className="error-message">
-                <i className="fas fa-exclamation-circle error-icon"></i>
-                {errors.preferredClassification.message}
               </p>
             )}
 
@@ -298,11 +289,32 @@ const ProfileInformation = ({
               </p>
             )}
 
-            <div className="btn-container">
-              <button type="submit" className="btn-save">
+            <label>Preferred Classification</label>
+            <select
+              className={errors.preferredClassification ? "error" : ""}
+              {...register("preferredClassification", {
+                required: "Preferred classification is required",
+              })}
+            >
+              <option value="">Select Classification</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+            {errors.preferredClassification && (
+              <p className="error-message">
+                <i className="fas fa-exclamation-circle error-icon"></i>
+                {errors.preferredClassification.message}
+              </p>
+            )}
+
+            <div className="modal-buttons">
+              <button className="btn" type="submit">
                 Save
               </button>
-              <button type="button" className="btn-cancel" onClick={closeModal}>
+              <button className="btn cancel" onClick={closeModal}>
                 Cancel
               </button>
             </div>
@@ -310,36 +322,22 @@ const ProfileInformation = ({
         </div>
       </Modal>
 
-      {/* Picture Modal */}
+      {/* Profile Picture Modal */}
       <Modal
         isOpen={pictureModalIsOpen}
         onRequestClose={closePictureModal}
         className="modal-wrapper"
       >
         <div className="modal">
-          <h1 className="lrg-heading">Upload Profile Picture</h1>
+          <h1 className="lrg-heading">Change Profile Picture</h1>
           <form onSubmit={handleImageUpload}>
-            <label className="modal-label">Profile Picture</label>
-            <div className="file-upload">
-              <div className="file-select">
-                <div className="file-select-button">Choose File</div>
-                <div className="file-select-name">{fileName}</div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </div>
-            </div>
-            <div className="btn-container">
-              <button type="submit" className="btn-save">
+            <input type="file" accept="image/*" onChange={handleFileChange} />
+            <p className="file-name">{fileName}</p>
+            <div className="modal-buttons">
+              <button className="btn" type="submit">
                 Upload
               </button>
-              <button
-                type="button"
-                className="btn-cancel"
-                onClick={closePictureModal}
-              >
+              <button className="btn cancel" onClick={closePictureModal}>
                 Cancel
               </button>
             </div>

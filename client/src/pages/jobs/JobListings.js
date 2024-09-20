@@ -19,8 +19,11 @@ import {
 import noresults from "../../assets/void.png";
 
 const JobListings = () => {
-  const { isAuthenticated, logout, user } = useAuth();
+  // Authentication context and navigation hook
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+
+  // State for job listings and filters
   const [jobListingData, setJobListingData] = useState([]);
   const [jobFilters, setJobFilters] = useState({
     search: "",
@@ -38,6 +41,7 @@ const JobListings = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [searched, setSearched] = useState(false);
 
+  // Define salary ranges and employment types
   const salaryRanges = [
     "$0-$10,000",
     "$10,000-$20,000",
@@ -61,30 +65,33 @@ const JobListings = () => {
     "Internship",
   ];
 
-  // Sorting Options
+  // Sorting options for job listings
   const sortingOptions = [
     { value: "newest", label: "Newest" },
     { value: "oldest", label: "Oldest" },
   ];
 
+  // Reset the searched state when the component mounts
   useEffect(() => {
-    // Reset searched state when the component mounts
     setSearched(false);
   }, []);
 
+  // Fetch job listings from the API
   const getJobListings = async (page = 1) => {
-    setSearched(true);
+    setSearched(true); // Set searched to true when a search is made
     try {
-      // Prepare Sort Parameter
-      const sortParam = sortBy === "newest" ? -1 : 1; // -1 for descending, 1 for ascending
+      // Determine sorting order based on user selection
+      const sortParam = sortBy === "newest" ? -1 : 1;
 
       const res = await axios.get("http://localhost:5050/api/jobs/", {
         params: { ...jobFilters, page, sortBy: sortParam },
       });
+      // Update state with fetched job listings and pagination info
       setJobListingData(res.data.jobs);
       setTotalPages(res.data.totalPages);
       setCurrentPage(page);
     } catch (err) {
+      // Handle errors from the API
       if (err.response && err.response.data.errors) {
         setErrors(err.response.data.errors);
       } else {
@@ -94,14 +101,15 @@ const JobListings = () => {
     }
   };
 
-  const [categories] = useState(categoryList);
+  const [categories] = useState(categoryList); // List of job categories
 
+  // Handle user logout
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
-  // Handle Filter Input Changes
+  // Update filter values as user types or selects options
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setJobFilters((prevFilters) => ({
@@ -110,7 +118,7 @@ const JobListings = () => {
     }));
   };
 
-  // Handle Sorting Change
+  // Update sorting option when user selects a different sort method
   const handleSortChange = (e) => {
     const { value } = e.target;
     setSortBy(value);

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Define the company profile schema
 const companyProfileSchema = new mongoose.Schema(
   {
     user: {
@@ -36,4 +37,5 @@ const companyProfileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Export the model
 module.exports = mongoose.model("companyProfile", companyProfileSchema);

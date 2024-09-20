@@ -2,9 +2,9 @@ const CompanyProfile = require("../models/companyProfile");
 const User = require("../models/user");
 const Job = require("../models/jobListing");
 const fs = require("fs");
-const path = require("path");
 const mongoose = require("mongoose");
 
+// Default logo path
 const DEFAULT_LOGO = "uploads/profile-pictures/default.png";
 
 // Fetch company profile data by user
@@ -12,6 +12,7 @@ exports.getCompanyProfile = async (req, res) => {
   try {
     const companyProfile = await CompanyProfile.findOne({ user: req.user.id });
 
+    // If profile is not found, return a default profile with a flag indicating no profile exists
     if (!companyProfile) {
       return res.json({
         companyProfile: null,
@@ -22,6 +23,8 @@ exports.getCompanyProfile = async (req, res) => {
     }
 
     const user = await User.findById(req.user.id).select("email");
+
+    // If user is not found, return an error
     if (!user) {
       return res.status(404).json({ errors: [{ msg: "User not found" }] });
     }
@@ -37,6 +40,7 @@ exports.getCompanyProfile = async (req, res) => {
 
     res.json(profileWithEmail);
   } catch (err) {
+    // Handle server error
     console.error("Error fetching company profile:", err.message);
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
@@ -63,6 +67,8 @@ exports.createCompanyProfile = async (req, res) => {
 
     // Fetch user's email
     const user = await User.findById(req.user.id).select("email");
+
+    // If user is not found, return an error
     if (!user) {
       return res.status(404).json({ errors: [{ msg: "User not found" }] });
     }
@@ -78,6 +84,7 @@ exports.createCompanyProfile = async (req, res) => {
       data: profileWithEmail,
     });
   } catch (err) {
+    // Handle server error
     console.error(err.message);
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
@@ -120,6 +127,7 @@ exports.updateCompanyProfile = async (req, res) => {
       { new: true, runValidators: true }
     );
 
+    // If profile is not found, return an error
     if (!updatedProfile) {
       return res.status(404).json({ message: "Company profile not found" });
     }
@@ -148,11 +156,13 @@ exports.updateCompanyProfile = async (req, res) => {
       data: profileWithEmail,
     });
   } catch (err) {
+    // Handle server error
     console.error("Failed to update company profile:", err.message);
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
 
+// Update company logo
 exports.updateCompanyLogo = async (req, res) => {
   try {
     // Check if a file was uploaded
@@ -188,13 +198,13 @@ exports.updateCompanyLogo = async (req, res) => {
       logo: companyProfile.logo,
     });
   } catch (err) {
-    console.error(err); // Log the error for debugging
+    // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
 
 exports.getCompanyProfileById = async (req, res) => {
-  const { id } = req.params; // This should be the userID
+  const { id } = req.params;
 
   try {
     // Validate ObjectId
@@ -203,16 +213,14 @@ exports.getCompanyProfileById = async (req, res) => {
       return res.status(400).json({ errors: [{ msg: "Invalid user ID" }] });
     }
 
-    console.log("Fetching company profile for user ID:", id);
-
     // Find the company profile by user ID
     const companyProfile = await CompanyProfile.findOne({ user: id }).populate(
       "user",
       "email logo"
     );
 
+    // If profile is not found, return a default profile with a flag indicating no profile exists
     if (!companyProfile) {
-      console.error("Company profile not found for user ID:", id);
       return res.status(404).json({
         companyProfile: null,
         email: null,
@@ -220,9 +228,6 @@ exports.getCompanyProfileById = async (req, res) => {
         profileExists: false,
       });
     }
-
-    // Log the retrieved company profile for debugging
-    console.log("Retrieved company profile:", companyProfile);
 
     // Extract user information from populated field
     const { user, logo } = companyProfile;
@@ -236,11 +241,12 @@ exports.getCompanyProfileById = async (req, res) => {
 
     res.json(profileWithEmail);
   } catch (err) {
-    console.error("Error fetching company profile by user ID:", err.message);
+    // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
 
+// Fetch all employers
 exports.getEmployers = async (req, res) => {
   const { search, page = 1, limit = 10 } = req.query;
 
@@ -277,7 +283,7 @@ exports.getEmployers = async (req, res) => {
       employers: employerWithJobCounts,
     });
   } catch (err) {
-    console.error(err);
+    // Handle server error
     res.status(500).json({ msg: "Server error" });
   }
 };

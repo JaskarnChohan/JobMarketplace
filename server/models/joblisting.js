@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Define the job listing schema
 const jobListingSchema = new mongoose.Schema(
   {
     employer: {
@@ -75,4 +76,5 @@ const jobListingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Export the model
 module.exports = mongoose.model("JobListing", jobListingSchema);

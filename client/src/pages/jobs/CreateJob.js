@@ -14,9 +14,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import { FaTrash } from "react-icons/fa";
 
 const CreateJob = () => {
+  // Reference for the job description textarea
   const textareaRef = useRef(null);
   const { logout, user, isAuthenticated, isEmployer } = useAuth();
   const navigate = useNavigate();
+
+  // State to hold job listing form data
   const [formData, setFormData] = useState({
     employer: user._id,
     title: "",
@@ -32,26 +35,27 @@ const CreateJob = () => {
     status: "Draft",
   });
 
+  // State for error messages and profile existence check
   const [errors, setErrors] = useState([]);
   const [profileExists, setProfileExists] = useState(false);
 
+  // Effect to check authentication and fetch employer profile
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/dashboard");
     } else if (isEmployer()) {
-      // Fetch employer profile data
       const fetchProfile = async () => {
         try {
           const response = await axios.get(
             "http://localhost:5050/api/employer/profile/fetch",
-            {
-              withCredentials: true,
-            }
+            { withCredentials: true }
           );
 
           if (response.data) {
+            // Check if employer profile exists
             if (response.data._id) {
               setProfileExists(true);
+              // Set company name from the profile
               setFormData((prevData) => ({
                 ...prevData,
                 company: response.data.name,
@@ -69,11 +73,13 @@ const CreateJob = () => {
     }
   }, [isAuthenticated, isEmployer, navigate]);
 
+  // Function to handle user logout
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
+  // Destructure form data for easier access
   const {
     title,
     description,
@@ -87,14 +93,16 @@ const CreateJob = () => {
     status,
   } = formData;
 
+  // Function to update form data on input change
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Function to handle form submission
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    // Check if the profile exists
+    // Ensure profile exists before submitting the job
     if (!profileExists) {
       setErrors([
         { msg: "You must create your profile before creating a job." },
@@ -109,8 +117,10 @@ const CreateJob = () => {
       );
       console.log(res.data);
       console.log(formData);
+      // Navigate to job management page on success
       navigate("/jobmanagement");
     } catch (err) {
+      // Handle errors from the server
       if (err.response && err.response.data.errors) {
         setErrors(err.response.data.errors);
       } else {
@@ -120,10 +130,11 @@ const CreateJob = () => {
     }
   };
 
+  // State for input fields to add requirements and benefits
   const [requirementinputitem, setInputValue] = useState("");
   const [benefitsinputitem, setBenefitInputValue] = useState("");
 
-  // Handle input change
+  // Handle input changes for requirement and benefit fields
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
   };
@@ -132,36 +143,42 @@ const CreateJob = () => {
     setBenefitInputValue(e.target.value);
   };
 
+  // Function to add requirement to the list
   const handleAddItem = () => {
     if (requirementinputitem.trim()) {
       const updatedRequirements = [...requirements, requirementinputitem];
-      setInputValue("");
+      setInputValue(""); // Clear input field
       setFormData({ ...formData, requirements: updatedRequirements });
     }
   };
 
+  // Function to add benefit to the list
   const handleBenefitAddItem = () => {
     if (benefitsinputitem.trim()) {
       const updatedBenefits = [...benefits, benefitsinputitem];
       setFormData({ ...formData, benefits: updatedBenefits });
-      setBenefitInputValue("");
+      setBenefitInputValue(""); // Clear input field
     }
   };
 
+  // Function to remove a requirement from the list
   const removeItem = (index) => {
     const updatedRequirements = requirements.filter((_, i) => i !== index);
     setFormData({ ...formData, requirements: updatedRequirements });
   };
 
+  // Function to remove a benefit from the list
   const removeBenefitItem = (index) => {
     const updatedBenefits = benefits.filter((_, i) => i !== index);
     setFormData({ ...formData, benefits: updatedBenefits });
   };
 
+  // Function to handle date selection for the application deadline
   const handleDateChange = (date) => {
     setFormData({ ...formData, applicationDeadline: date });
   };
 
+  // Show a loading spinner if user data is not yet available
   if (!user) {
     return <Spinner />;
   }
