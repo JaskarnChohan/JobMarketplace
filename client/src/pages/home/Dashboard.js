@@ -1,8 +1,8 @@
 import React from "react";
-import Navbar from "../../components/header/Navbar";
+import Navbar from "../../components/layout/Navbar";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import "../../global.css";
+import "../../styles/Global.css";
 
 const Dashboard = () => {
   const { logout, user } = useAuth();

@@ -1,0 +1,312 @@
+/* General content styling */
+.content {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.content .lrg-heading {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.create-jobs-btn {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0px;
+}
+
+/* Filter form styling */
+.filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 30px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    background-color: var(--primary-color);
+}
+
+.filter-group,
+.filter-group-wide {
+    flex: 1;
+    min-width: 200px;
+}
+
+.inner-filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+}
+
+.filter-group label,
+.filter-group-wide label {
+    display: block;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.filter-group-wide input[type="text"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+select {
+    background: #fff url('../../assets/arrow.png') no-repeat right 10px center;
+    background-size: 16px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.filter-form .btn {
+    align-self: center;
+    width: 300px;
+    font-size: 1.5rem;
+    margin-top: 20px;
+}
+
+/* No results message */
+.no-results {
+    grid-column: 2;
+    font-size: 1.5rem;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.no-results img {
+    width: 300px;
+}
+
+/* Pagination styles */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.pagination button {
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 0 5px;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.pagination button.active {
+    background-color: var(--primary-color);
+    font-weight: bold;
+}
+
+.pagination button:hover,
+.pagination button:focus {
+    background-color: #f9dc70;
+    outline: none;
+    transform: translateY(-2px);
+}
+
+.pagination button[disabled] {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 600px) {
+    .pagination button {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+
+/* Job listing grid layout */
+.wrapper .job-listing-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 25px;
+}
+
+.section .job-listing-container {
+    width: 100%;
+    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Responsive columns */
+    gap: 20px; /* Space between items */
+    padding: 25px; /* Padding around the grid */
+    box-sizing: border-box; /* Ensure padding doesn't affect total width */
+}
+
+
+@media (max-width: 800px) {
+    .wrapper .job-listing-container {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 500px) {
+    .wrapper .job-listing-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Job card styles */
+.job-listing-container .job-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.job-listing-container .job-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Job management styles */
+.job-management-card:hover {
+    cursor: default;
+}
+
+.job-management-card h3:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.job-management-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+/* Responsive button size */
+@media (max-width: 600px) {
+    .button-blue {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+
+/* Red button styling */
+.button-red {
+    background-color: #ff0000 !important;
+    border: none;
+}
+
+.button-red:hover {
+    background-color: #f95555 !important;
+    border: none;
+}
+
+/* Update job container */
+.update-job-container {
+    width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Form container */
+.content .form-container {
+    padding: 2rem;
+}
+
+.form-wrapper {
+    display: flex;
+    justify-content: space-between;
+    gap: 3rem;
+}
+
+.form-section {
+    flex: 1;
+}
+
+.form-section label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.form-section input,
+.form-section select,
+.form-section textarea {
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.form-section textarea {
+    height: 330px;
+    resize: none;
+}
+
+/* Create job button */
+.create-job-container .btn {
+    margin-top: 20px;
+}
+
+.small-btn {
+    margin-top: 0.5rem;
+}
+
+/* List container */
+.list-container {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.list-container h3 {
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+}
+
+/* Item list styles */
+.item-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.item-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 8px 0;
+    padding: 8px 15px;
+    background-color: #ffffff;
+    border-radius: 4px;
+    font-size: 15px;
+    color: #333;
+}
+
+/* Button styling */
+.item-list li .red-btn {
+    color: red;
+}
+
+.item-list li .red-btn:hover {
+    cursor: pointer;
+}
+
+/* Datepicker styling */
+.datepicker {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+}

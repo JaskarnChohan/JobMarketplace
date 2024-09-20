@@ -1,0 +1,116 @@
+/* General Styles */
+.job-details-container {
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    padding: 40px;
+    margin: 40px 0;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    background: white;
+    text-align: left !important;
+  }
+  
+  /* Job Header */
+  .job-header {
+    border-bottom: 1px solid var(--primary-color);
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+    text-align: left !important;
+    word-wrap: break-word;
+  }
+  
+  .job-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+  }
+  
+  .company-info {
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+  }
+  
+  .company-info:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  
+  /* Job Icons */
+  .job-icons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-bottom: 1px solid var(--primary-color);
+    padding-bottom: 30px;
+  }
+  
+  .job-icons p {
+    font-size: 1em;
+    color: #555555;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 350;
+  }
+  
+  /* Job Details Sections */
+  .job-description,
+  .job-requirements,
+  .job-benefits {
+    margin-top: 25px;
+    background-color: var(--light-gray);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    word-wrap: break-word;
+  }
+  
+  .job-description h3,
+  .job-requirements h3,
+  .job-benefits h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+
+  }
+  
+  .job-description pre,
+  .job-requirements ul,
+  .job-benefits ul {
+    font-size: 1rem;
+    color: var(--dark-gray);
+    line-height: 1.7;
+  }
+  
+  .job-requirements ul,
+  .job-benefits ul {
+    list-style-type: none;
+    margin-left: 0;
+    padding-left: 0;
+  }
+  
+  ul li {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease;
+  }
+  
+  ul li:hover {
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  ul p {
+    color: var(--dark-gray);
+  }
+  
+  .job-details-container .btn {
+    font-size: 1rem;
+  }
+

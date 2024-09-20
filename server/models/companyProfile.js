@@ -5,17 +5,16 @@ const companyProfileSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,  
+      required: true,
     },
-    companyName: {
+    name: {
       type: String,
-      required: true,  
-      unique: true,    
+      required: true,
     },
-    companyLogo: String,
+    logo: String,
     description: {
       type: String,
-      maxlength: 1000,
+      maxlength: 10000,
     },
     location: {
       type: String,
@@ -37,4 +36,4 @@ const companyProfileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("CompanyProfile", companyProfileSchema);
+module.exports = mongoose.model("companyProfile", companyProfileSchema);
