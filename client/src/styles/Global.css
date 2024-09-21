@@ -135,10 +135,25 @@ margin-top: 20px;
   font-weight: 400;
   margin-bottom: 10px;
 }
+
 .dashboard .small-btn {
   margin-top: 10px;
   width: 100%;
 }
+
+.dashboard {
+  max-width: 80% !important;
+  margin: 0px auto;
+}
+
+.dashboard-banner {
+  background: var(--primary-color);
+  width: 100%;
+  border: 2px solid #333;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
 .sub-headings {
   font-size: 1rem;
   font-weight: 400;
@@ -154,9 +169,35 @@ margin-top: 20px;
 
 .applicants-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* This should work fine */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
   gap: 20px;
   margin-bottom: 30px;
+}
+
+.help-guide {
+  text-align: center;
+  white-space: normal !important;
+  word-break: normal !important; 
+  overflow-wrap: normal !important;
+  margin: 50px;
+}
+
+.help-guide h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.help-links {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.help-button {
+  width: 250px;
 }
 
 /* Button */

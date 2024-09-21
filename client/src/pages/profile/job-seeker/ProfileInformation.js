@@ -311,10 +311,10 @@ const ProfileInformation = ({
             )}
 
             <div className="btn-container">
-              <button className="btn btn-save" type="submit">
+              <button className="btn-save" type="submit">
                 Save
               </button>
-              <button className="btn btn-cancel" onClick={closeModal}>
+              <button className="btn-cancel" onClick={closeModal}>
                 Cancel
               </button>
             </div>
@@ -322,22 +322,36 @@ const ProfileInformation = ({
         </div>
       </Modal>
 
-      {/* Profile Picture Modal */}
+      {/* Picture Modal */}
       <Modal
         isOpen={pictureModalIsOpen}
         onRequestClose={closePictureModal}
         className="modal-wrapper"
       >
         <div className="modal">
-          <h1 className="lrg-heading">Change Profile Picture</h1>
+          <h1 className="lrg-heading">Upload Profile Picture</h1>
           <form onSubmit={handleImageUpload}>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
-            <p className="file-name">{fileName}</p>
+            <label className="modal-label">Profile Picture</label>
+            <div className="file-upload">
+              <div className="file-select">
+                <div className="file-select-button">Choose File</div>
+                <div className="file-select-name">{fileName}</div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </div>
+            </div>
             <div className="btn-container">
-              <button className="btn btn-save" type="submit">
+              <button type="submit" className="btn-save">
                 Upload
               </button>
-              <button className="btn btn-cancel" onClick={closePictureModal}>
+              <button
+                type="button"
+                className="btn-cancel"
+                onClick={closePictureModal}
+              >
                 Cancel
               </button>
             </div>

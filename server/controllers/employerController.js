@@ -235,7 +235,7 @@ exports.getCompanyProfileById = async (req, res) => {
     const profileWithEmail = {
       ...companyProfile.toObject(),
       email: user ? user.email : null,
-      logo: logo || null,
+      logo: logo || DEFAULT_LOGO,
       profileExists: true,
     };
 

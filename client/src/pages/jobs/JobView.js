@@ -124,7 +124,12 @@ const JobView = () => {
         <div className="job-details-container">
           <div className="job-header">
             <h2>{job.title}</h2>
-            <p className="company-info">{job.company}</p>
+            <p
+              className="company-info hover"
+              onClick={() => navigate(`/viewcompany/${job.employer}`)}
+            >
+              {job.company}
+            </p>
           </div>
 
           <div className="job-icons">

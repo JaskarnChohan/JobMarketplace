@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import Modal from "react-modal"; // Import the modal
 
 const AuthContext = createContext(); // Create the authentication context
 
@@ -7,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Authentication status
   const [user, setUser] = useState(null); // User information
   const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // Modal open state
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -57,7 +59,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
+  const handleLogout = async () => {
     try {
       await axios.post(
         "http://localhost:5050/api/auth/logout", // Log out user
@@ -70,7 +72,11 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       console.error("Logout failed", err);
     }
+    closeConfirmationModal(); // Close the modal after logout
   };
+
+  const openConfirmationModal = () => setConfirmationModalIsOpen(true); // Open modal
+  const closeConfirmationModal = () => setConfirmationModalIsOpen(false); // Close modal
 
   // Role checking methods for user types
   const isEmployer = () => user?.role === "employer"; // Check if user is an employer
@@ -81,7 +87,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         isAuthenticated,
         login,
-        logout,
+        logout: openConfirmationModal, // Call the modal on logout attempt
         user,
         isLoading,
         isEmployer,
@@ -89,6 +95,25 @@ export const AuthProvider = ({ children }) => {
       }}
     >
       {children} {/* Render child components */}
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={confirmationModalIsOpen}
+        onRequestClose={closeConfirmationModal}
+        className="modal-wrapper"
+      >
+        <div className="modal">
+          <h1 className="lrg-heading">Confirm Logout</h1>
+          <p className="med-text">Are you sure you want to log out?</p>
+          <div className="btn-container">
+            <button onClick={handleLogout} className="btn-delete">
+              Logout
+            </button>
+            <button onClick={closeConfirmationModal} className="btn-cancel">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
     </AuthContext.Provider>
   );
 };

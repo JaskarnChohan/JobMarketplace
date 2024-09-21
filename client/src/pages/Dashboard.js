@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/layout/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Modal from "react-modal";
 import "../styles/Global.css";
 import "../styles/job/Job.css";
@@ -179,111 +179,167 @@ const Dashboard = () => {
   return (
     <div className="min-height">
       <Navbar isAuthenticated={true} handleLogout={handleLogout} />
-      <div className="section dashboard">
-        <h2 className="lrg-heading">Application Dashboard</h2>
-        <p className="med-heading">Manage all your applications here!</p>
+      <div className="dashboard">
         <br />
 
         {user.role === "employer" ? (
           <>
-            <h3 className="dashboard-title">Open Job Listings</h3>
-            {userJobs.length > 0 ? (
-              <div className="user-jobs-list">
-                {userJobs.map((job) => (
-                  <div key={job._id} className="job-card">
-                    <h3
-                      className="job-title hover"
-                      onClick={() => navigate(`/jobview/${job._id}`)}
-                    >
-                      {job.title}
-                    </h3>
-                    <h4>Applicants:</h4>
-                    <div className="applicants-grid">
-                      {jobApplicationsMap[job._id] &&
-                      jobApplicationsMap[job._id].length > 0 ? (
-                        jobApplicationsMap[job._id].map((app) => (
-                          <div className="applicant" key={app._id}>
-                            <p>
-                              <p
-                                className="user-name hover"
-                                onClick={() =>
-                                  navigate(`/viewprofile/${app.userId._id}`)
-                                }
-                              >
-                                {app.userProfile
-                                  ? `${app.userProfile.firstName} ${app.userProfile.lastName}`
-                                  : "Unknown User"}{" "}
-                              </p>
-                              <select
-                                value={app.status}
-                                onChange={(e) =>
-                                  handleStatusChange(app._id, e.target.value)
-                                }
-                              >
-                                <option value="Pending">Pending</option>
-                                <option value="Reviewed">Reviewed</option>
-                                <option value="Accepted">Accepted</option>
-                                <option value="Rejected">Rejected</option>
-                              </select>
-                              <button
-                                className="small-btn"
-                                onClick={() => openConfirmationModal(app)}
-                              >
-                                Delete Application
-                              </button>
-                            </p>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="sub-headings">No applicants yet.</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+            <div className="dashboard-banner">
+              <h2 className="lrg-heading">Application Dashboard</h2>
+              <p className="med-heading">Manage all your applications here!</p>
+              <div className="help-guide">
+                <h2>Employer Help Guide</h2>
+                <div className="help-links">
+                  <Link to="/createjob">
+                    <button className="btn help-button">Post a New Job</button>
+                  </Link>
+                  <Link to="/jobmanagement">
+                    <button className="btn help-button">Manage Jobs</button>
+                  </Link>
+                  <Link to="/browse-employers">
+                    <button className="btn help-button">
+                      Browse Job Seekers
+                    </button>
+                  </Link>
+                </div>
               </div>
-            ) : (
-              <p className="sub-headings">You have no job listings yet.</p>
-            )}
+            </div>
+            <div>
+              <h3 className="dashboard-title">Open Job Listings</h3>
+              {userJobs.length > 0 ? (
+                <div className="user-jobs-list">
+                  {userJobs.map((job) => (
+                    <div key={job._id} className="job-card">
+                      <h3
+                        className="job-title hover"
+                        onClick={() => navigate(`/jobview/${job._id}`)}
+                      >
+                        {job.title}
+                      </h3>
+                      <h4>Applicants:</h4>
+                      <div className="applicants-grid">
+                        {jobApplicationsMap[job._id] &&
+                        jobApplicationsMap[job._id].length > 0 ? (
+                          jobApplicationsMap[job._id].map((app) => (
+                            <div className="applicant" key={app._id}>
+                              <p>
+                                <p
+                                  className="user-name hover"
+                                  onClick={() =>
+                                    navigate(`/viewprofile/${app.userId._id}`)
+                                  }
+                                >
+                                  {app.userProfile
+                                    ? `${app.userProfile.firstName} ${app.userProfile.lastName}`
+                                    : "Unknown User"}{" "}
+                                </p>
+                                <select
+                                  value={app.status}
+                                  onChange={(e) =>
+                                    handleStatusChange(app._id, e.target.value)
+                                  }
+                                >
+                                  <option value="Pending">Pending</option>
+                                  <option value="Reviewed">Reviewed</option>
+                                  <option value="Accepted">Accepted</option>
+                                  <option value="Rejected">Rejected</option>
+                                </select>
+                                <button
+                                  className="small-btn"
+                                  onClick={() => openConfirmationModal(app)}
+                                >
+                                  Delete Application
+                                </button>
+                              </p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="sub-headings">No applicants yet.</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="sub-headings">You have no job listings yet.</p>
+              )}
+            </div>
           </>
         ) : user.role === "jobSeeker" ? (
           <>
-            <h3 className="page-title">Your Applications</h3>
-            {Object.keys(groupedApplications).map((status) => (
-              <div key={status}>
-                <h4 className="sub-headings">{status}</h4>
-                {groupedApplications[status].length > 0 ? (
-                  <div className="applicants-grid">
-                    {groupedApplications[status].map((application) => (
-                      <div key={application._id} className="applicant">
-                        <h4
-                          className="job-title hover"
-                          onClick={() =>
-                            navigate(`/jobview/${application.jobId._id}`)
-                          }
-                        >
-                          {application.jobId.title}
-                        </h4>
-                        <p className="job-info">
-                          <FaTag /> {application.status}
-                        </p>
-                        <p className="job-info">
-                          Applied At:{" "}
-                          {new Date(application.appliedAt).toLocaleDateString()}
-                        </p>
-                        <button
-                          className="small-btn"
-                          onClick={() => openConfirmationModal(application)}
-                        >
-                          Delete Application
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="sub-headings">No applications for {status}.</p>
-                )}
+            <div className="dashboard-banner">
+              <h2 className="lrg-heading">Dashboard</h2>
+              <p className="med-heading">Manage your Applications!</p>
+              <div className="help-guide">
+                <h2>Help Guide</h2>
+                <div className="help-links">
+                  <Link to="/joblistings">
+                    <button className="btn help-button">
+                      View Job Listings
+                    </button>
+                  </Link>
+                  <Link to="/profile">
+                    <button className="btn help-button">
+                      Manage Your Profile
+                    </button>
+                  </Link>
+                  <Link to="/browse-employers">
+                    <button className="btn help-button">
+                      Browse Employers
+                    </button>
+                  </Link>
+                </div>
               </div>
-            ))}
+            </div>
+            <div>
+              <h3 className="page-title">Your Applications</h3>
+
+              {/* Check if there are any grouped applications */}
+              {Object.keys(groupedApplications).length > 0 ? (
+                Object.keys(groupedApplications).map((status) => (
+                  <div key={status}>
+                    <h4 className="sub-headings">{status}</h4>
+                    {groupedApplications[status].length > 0 ? (
+                      <div className="applicants-grid">
+                        {groupedApplications[status].map((application) => (
+                          <div key={application._id} className="applicant">
+                            <h4
+                              className="job-title hover"
+                              onClick={() =>
+                                navigate(`/jobview/${application.jobId._id}`)
+                              }
+                            >
+                              {application.jobId.title}
+                            </h4>
+                            <p className="job-info">
+                              <FaTag /> {application.status}
+                            </p>
+                            <p className="job-info">
+                              Applied At:{" "}
+                              {new Date(
+                                application.appliedAt
+                              ).toLocaleDateString()}
+                            </p>
+                            <button
+                              className="small-btn"
+                              onClick={() => openConfirmationModal(application)}
+                            >
+                              Delete Application
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="sub-headings">
+                        No applications for {status}.
+                      </p>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="sub-headings">You have no applications yet.</p>
+              )}
+            </div>
           </>
         ) : (
           <p className="sub-headings">
@@ -311,16 +367,10 @@ const Dashboard = () => {
               Are you sure you want to delete this application?
             </p>
             <div className="btn-container">
-              <button
-                className="btn btn-delete"
-                onClick={handleDeleteApplication}
-              >
+              <button className="btn-delete" onClick={handleDeleteApplication}>
                 Confirm
               </button>
-              <button
-                className="btn btn-cancel"
-                onClick={closeConfirmationModal}
-              >
+              <button className="btn-cancel" onClick={closeConfirmationModal}>
                 Cancel
               </button>
             </div>
