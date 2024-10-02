@@ -20,50 +20,48 @@ import { useAuth } from "../../../context/AuthContext";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/ProfileInfo.css";
 import "../../../styles/Global.css";
-import "../../../styles/Reviews.css";
+import "../../../styles/profile/Reviews.css"; // Correct import path
 
+const ViewCompanyProfile = () => {
+  // Hooks must be inside the component
+  const { id } = useParams(); // Get the company ID from the URL parameters
+  const [companyData, setCompanyData] = useState(null);
+  const [jobListings, setJobListings] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [reviewText, setReviewText] = useState("");
+  const [reviewerName, setReviewerName] = useState("");
+  const [rating, setRating] = useState(5);
 
-const [reviews, setReviews] = useState([]); 
-const [reviewText, setReviewText] = useState(""); 
-const [reviewerName, setReviewerName] = useState(""); 
-const [rating, setRating] = useState(5); 
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
-
-const handleSubmitReview = async (e) => {
-  e.preventDefault();
-  try {
-    const newReview = {
-      employerId: id,
-      reviewerName,
-      reviewText,
-      rating,
-    };
-    await axios.post("http://localhost:5050/api/reviews", newReview, {
-      withCredentials: true,
-    });
-    setReviews([...reviews, newReview]); // Update reviews list with the new review
-    setReviewerName("");
-    setReviewText("");
-    setRating(5);
-  } catch (error) {
-    console.error("Failed to submit review:", error);
-  }
-};
-
-
-const ViewCompany = () => {
-  
-  const { id } = useParams();
-  const [companyData, setCompanyData] = useState(null); 
-  const [jobListings, setJobListings] = useState([]); 
-
-  const { isAuthenticated, logout } = useAuth(); 
-  const navigate = useNavigate(); 
-  
+  // Handle logout and redirect to the home page
   const handleLogout = () => {
     logout();
     navigate("/");
   };
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    try {
+      const newReview = {
+        employerId: id,
+        reviewerName,
+        reviewText,
+        rating,
+      };
+      await axios.post("http://localhost:5050/api/reviews", newReview, {
+        withCredentials: true,
+      });
+      setReviews([...reviews, newReview]); // Update reviews list with the new review
+      setReviewerName("");
+      setReviewText("");
+      setRating(5);
+    } catch (error) {
+      console.error("Failed to submit review:", error);
+    }
+  };
+  
+  // Fetch company data, job listings, and reviews when the component mounts
   useEffect(() => {
     const fetchCompanyData = async () => {
       try {
@@ -75,12 +73,12 @@ const ViewCompany = () => {
         );
         setCompanyData(response.data);
         fetchJobListings();
-        fetchCompanyReviews(); 
+        fetchCompanyReviews();
       } catch (error) {
         console.error("Failed to fetch company data:", error);
       }
     };
-  
+
     const fetchJobListings = async () => {
       try {
         const response = await axios.get(
@@ -97,7 +95,7 @@ const ViewCompany = () => {
         console.error("Failed to fetch job listings:", error);
       }
     };
-  
+
     const fetchCompanyReviews = async () => {
       try {
         const response = await axios.get(
@@ -106,18 +104,16 @@ const ViewCompany = () => {
             withCredentials: true,
           }
         );
-        setReviews(response.data); 
+        setReviews(response.data);
       } catch (error) {
         console.error("Failed to fetch reviews:", error);
       }
     };
-  
+
     fetchCompanyData();
   }, [id]);
-  
 
-
-  
+  // If company data is not yet available, show a loading spinner
   if (!companyData) return <Spinner />;
 
   return (
@@ -151,7 +147,6 @@ const ViewCompany = () => {
             </p>
           </div>
         </div>
-        
       </div>
       <div>
         <div className="section">
@@ -192,55 +187,57 @@ const ViewCompany = () => {
             )}
           </div>
         </div>
-      </div>
-      <div className="section">
-  <h2 className="section-title">Company Reviews</h2>
-  <div className="reviews-list">
-    {reviews.length > 0 ? (
-      reviews.map((review, index) => (
-        <div className="review-card" key={index}>
-          <strong>{review.reviewerName}</strong> ({review.rating} stars):
-          <p>{review.reviewText}</p>
+        {/* Add the Reviews Section Here */}
+        <div className="section">
+          <h2 className="section-title">Company Reviews</h2>
+          <div className="reviews-list">
+            {reviews.length > 0 ? (
+              reviews.map((review, index) => (
+                <div className="review-card" key={index}>
+                  <strong>{review.reviewerName}</strong> ({review.rating} stars):
+                  <p>{review.reviewText}</p>
+                </div>
+              ))
+            ) : (
+              <p className="section-text">No reviews available.</p>
+            )}
+          </div>
+          <div className="review-form">
+            <h3>Leave a Review</h3>
+            <form onSubmit={handleSubmitReview}>
+              <label>Your Name:</label>
+              <input
+                type="text"
+                value={reviewerName}
+                onChange={(e) => setReviewerName(e.target.value)}
+                required
+              />
+              <label>Your Review:</label>
+              <textarea
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                rows="4"
+                required
+              ></textarea>
+              <label>Rating:</label>
+              <select
+                value={rating}
+                onChange={(e) => setRating(Number(e.target.value))}
+              >
+                <option value="5">5 - Excellent</option>
+                <option value="4">4 - Good</option>
+                <option value="3">3 - Average</option>
+                <option value="2">2 - Poor</option>
+                <option value="1">1 - Terrible</option>
+              </select>
+              <button type="submit">Submit Review</button>
+            </form>
+          </div>
         </div>
-      ))
-    ) : (
-      <p className="section-text">No reviews available.</p>
-    )}
-  </div>
-  <div className="review-form">
-    <h3>Leave a Review</h3>
-    <form onSubmit={handleSubmitReview}>
-      <label>Your Name:</label>
-      <input
-        type="text"
-        value={reviewerName}
-        onChange={(e) => setReviewerName(e.target.value)}
-        required
-      />
-      <label>Your Review:</label>
-      <textarea
-        value={reviewText}
-        onChange={(e) => setReviewText(e.target.value)}
-        rows="4"
-        required
-      ></textarea>
-      <label>Rating:</label>
-      <select value={rating} onChange={(e) => setRating(e.target.value)}>
-        <option value="5">5 - Excellent</option>
-        <option value="4">4 - Good</option>
-        <option value="3">3 - Average</option>
-        <option value="2">2 - Poor</option>
-        <option value="1">1 - Terrible</option>
-      </select>
-      <button type="submit">Submit Review</button>
-    </form>
-  </div>
-</div>
-
-
+      </div>
       <Footer />
     </div>
   );
 };
 
-export default ViewCompany;
+export default ViewCompanyProfile;
