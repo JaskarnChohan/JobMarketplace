@@ -20,40 +20,67 @@ import { useAuth } from "../../../context/AuthContext";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/ProfileInfo.css";
 import "../../../styles/Global.css";
+import "../../../styles/Reviews.css";
+
+
+const [reviews, setReviews] = useState([]); 
+const [reviewText, setReviewText] = useState(""); 
+const [reviewerName, setReviewerName] = useState(""); 
+const [rating, setRating] = useState(5); 
+
+
+const handleSubmitReview = async (e) => {
+  e.preventDefault();
+  try {
+    const newReview = {
+      employerId: id,
+      reviewerName,
+      reviewText,
+      rating,
+    };
+    await axios.post("http://localhost:5050/api/reviews", newReview, {
+      withCredentials: true,
+    });
+    setReviews([...reviews, newReview]); // Update reviews list with the new review
+    setReviewerName("");
+    setReviewText("");
+    setRating(5);
+  } catch (error) {
+    console.error("Failed to submit review:", error);
+  }
+};
+
 
 const ViewCompany = () => {
-  // Retrieve the company ID from the URL parameters
+  
   const { id } = useParams();
-  const [companyData, setCompanyData] = useState(null); // State to hold company data
-  const [jobListings, setJobListings] = useState([]); // State to hold job listings
+  const [companyData, setCompanyData] = useState(null); 
+  const [jobListings, setJobListings] = useState([]); 
 
-  const { isAuthenticated, logout } = useAuth(); // Authentication context
-  const navigate = useNavigate(); // Hook for navigation
-
-  // Handle user logout and navigate to home
+  const { isAuthenticated, logout } = useAuth(); 
+  const navigate = useNavigate(); 
+  
   const handleLogout = () => {
     logout();
     navigate("/");
   };
-
   useEffect(() => {
-    // Function to fetch company data
     const fetchCompanyData = async () => {
       try {
         const response = await axios.get(
           `http://localhost:5050/api/employer/profile/fetch/${id}`,
           {
-            withCredentials: true, // Include cookies for authentication
+            withCredentials: true,
           }
         );
-        setCompanyData(response.data); // Set the company data from the response
-        fetchJobListings(); // Fetch job listings for the company
+        setCompanyData(response.data);
+        fetchJobListings();
+        fetchCompanyReviews(); 
       } catch (error) {
         console.error("Failed to fetch company data:", error);
       }
     };
-
-    // Function to fetch job listings for the company
+  
     const fetchJobListings = async () => {
       try {
         const response = await axios.get(
@@ -63,18 +90,34 @@ const ViewCompany = () => {
           }
         );
         const openJobListings = response.data.jobs.filter(
-          (job) => job.status === "Open" // Filter to get only open job listings
+          (job) => job.status === "Open"
         );
-        setJobListings(openJobListings); // Set the filtered job listings
+        setJobListings(openJobListings);
       } catch (error) {
         console.error("Failed to fetch job listings:", error);
       }
     };
-
-    fetchCompanyData(); // Initiate fetch when component mounts
+  
+    const fetchCompanyReviews = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5050/api/reviews/${id}`,
+          {
+            withCredentials: true,
+          }
+        );
+        setReviews(response.data); 
+      } catch (error) {
+        console.error("Failed to fetch reviews:", error);
+      }
+    };
+  
+    fetchCompanyData();
   }, [id]);
+  
 
-  // If company data is not yet available, show a loading spinner
+
+  
   if (!companyData) return <Spinner />;
 
   return (
@@ -108,6 +151,7 @@ const ViewCompany = () => {
             </p>
           </div>
         </div>
+        
       </div>
       <div>
         <div className="section">
@@ -149,6 +193,50 @@ const ViewCompany = () => {
           </div>
         </div>
       </div>
+      <div className="section">
+  <h2 className="section-title">Company Reviews</h2>
+  <div className="reviews-list">
+    {reviews.length > 0 ? (
+      reviews.map((review, index) => (
+        <div className="review-card" key={index}>
+          <strong>{review.reviewerName}</strong> ({review.rating} stars):
+          <p>{review.reviewText}</p>
+        </div>
+      ))
+    ) : (
+      <p className="section-text">No reviews available.</p>
+    )}
+  </div>
+  <div className="review-form">
+    <h3>Leave a Review</h3>
+    <form onSubmit={handleSubmitReview}>
+      <label>Your Name:</label>
+      <input
+        type="text"
+        value={reviewerName}
+        onChange={(e) => setReviewerName(e.target.value)}
+        required
+      />
+      <label>Your Review:</label>
+      <textarea
+        value={reviewText}
+        onChange={(e) => setReviewText(e.target.value)}
+        rows="4"
+        required
+      ></textarea>
+      <label>Rating:</label>
+      <select value={rating} onChange={(e) => setRating(e.target.value)}>
+        <option value="5">5 - Excellent</option>
+        <option value="4">4 - Good</option>
+        <option value="3">3 - Average</option>
+        <option value="2">2 - Poor</option>
+        <option value="1">1 - Terrible</option>
+      </select>
+      <button type="submit">Submit Review</button>
+    </form>
+  </div>
+</div>
+
 
       <Footer />
     </div>
