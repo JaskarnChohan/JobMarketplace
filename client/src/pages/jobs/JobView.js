@@ -19,6 +19,7 @@ import "react-datepicker/dist/react-datepicker.css";
 const JobView = () => {
   const { _id } = useParams(); // Extract the job ID from the URL
   const { isAuthenticated, logout, user, isJobSeeker } = useAuth(); // Grab authentication details from context
+  const [hasProfile, setHasProfile] = useState(false); // State to track if user has a profile
   const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // State to manage modal visibility
   const navigate = useNavigate(); // Hook to navigate programmatically
   const [loading, setLoading] = useState(true); // State to manage loading status
@@ -48,11 +49,11 @@ const JobView = () => {
       try {
         const response = await axios.get(
           `http://localhost:5050/api/jobs/${_id}`
-        ); // Get job data
-        setJob(response.data); // Set job data in state
+        );
+        setJob(response.data);
 
-        // Check if the user has already applied for this job
         if (isAuthenticated && user) {
+          // Check if the user has already applied for this job
           const applicationResponse = await axios.get(
             `http://localhost:5050/api/application/check`,
             {
@@ -62,18 +63,27 @@ const JobView = () => {
               },
             }
           );
-          setHasApplied(applicationResponse.data.hasApplied); // Update the application status
+          setHasApplied(applicationResponse.data.hasApplied);
+
+          // Check if the user has a profile
+          const profileResponse = await axios.get(
+            `http://localhost:5050/api/profile/fetch/`,
+            { withCredentials: true } // Ensure credentials (cookies) are included in request
+          );
+
+          // Update profile existence state based on response
+          setHasProfile(profileResponse.data.profileExists);
         }
 
-        setLoading(false); // Set loading to false after data fetch
+        setLoading(false);
       } catch (err) {
-        setLoading(false); // Handle errors and stop loading
-        console.error(err); // Log any errors to the console
+        setLoading(false);
+        console.error(err);
       }
     };
 
-    fetchJob(); // Call the function to fetch job data
-  }, [_id, isAuthenticated, user]); // Re-run if job ID or authentication status changes
+    fetchJob();
+  }, [_id, isAuthenticated, user]);
 
   if (loading) return <Spinner />; // Show loading spinner while data is being fetched
   if (!job)
@@ -154,22 +164,28 @@ const JobView = () => {
             </p>
 
             {isAuthenticated ? (
-              isJobSeeker() && job.status === "Open" && !hasApplied ? (
-                <div className="apply-button-container">
-                  <button
-                    className="btn"
-                    onClick={() => openConfirmationModal(true)}
-                  >
-                    Quick Apply
-                  </button>
-                </div>
-              ) : hasApplied ? (
-                <p className="applied-notification">
-                  You have already applied for this job.
-                </p>
+              hasProfile ? (
+                isJobSeeker() && job.status === "Open" && !hasApplied ? (
+                  <div className="apply-button-container">
+                    <button
+                      className="btn"
+                      onClick={() => openConfirmationModal(true)}
+                    >
+                      Quick Apply
+                    </button>
+                  </div>
+                ) : hasApplied ? (
+                  <p className="applied-notification">
+                    You have already applied for this job.
+                  </p>
+                ) : (
+                  <p className="status-notification">
+                    This job is currently not accepting applications.
+                  </p>
+                )
               ) : (
-                <p className="status-notification">
-                  This job is currently not accepting applications.
+                <p className="profile-notification">
+                  You need to complete your profile before applying.
                 </p>
               )
             ) : (
