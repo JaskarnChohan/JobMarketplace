@@ -74,6 +74,7 @@ const JobListings = () => {
   // Reset the searched state when the component mounts
   useEffect(() => {
     setSearched(false);
+    getJobListings();
   }, []);
 
   // Fetch job listings from the API
