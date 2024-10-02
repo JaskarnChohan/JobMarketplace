@@ -348,6 +348,9 @@ label .sub-text {
     background-color: #e74c3c;
 }
 
+.btn-confirm {
+    background-color: green; 
+}
 .btn-delete:hover {
     background-color: #f08a7f;
 }

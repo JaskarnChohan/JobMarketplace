@@ -236,7 +236,7 @@ const JobView = () => {
             By applying to this job, the employer can see your profile.
           </p>
           <div className="btn-container">
-            <button onClick={handleApply} className="btn-delete">
+            <button onClick={handleApply} className="btn-confirm">
               Confirm
             </button>
             <button onClick={closeConfirmationModal} className="btn-cancel">
