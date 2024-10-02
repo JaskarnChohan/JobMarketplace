@@ -1,3 +1,4 @@
+
 .review-form {
     margin-top: 20px;
     padding: 20px;
@@ -6,34 +7,46 @@
     background-color: #f9f9f9;
   }
   
+  
   .review-form label {
     display: block;
     margin-top: 10px;
+    font-weight: bold;
   }
+  
   
   .review-form input,
   .review-form textarea,
   .review-form select {
     width: 100%;
-    padding: 8px;
+    padding: 10px;
     margin-top: 5px;
+    margin-bottom: 10px;
     border: 1px solid #ddd;
     border-radius: 3px;
   }
   
+  
   .review-form button {
     margin-top: 15px;
-    padding: 10px 15px;
+    padding: 10px 20px;
     background-color: #007bff;
     color: #fff;
     border: none;
     border-radius: 3px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
   }
+  
+  .review-form button:hover {
+    background-color: #0056b3;
+  }
+  
   
   .reviews-list {
     margin-top: 20px;
   }
+  
   
   .review-card {
     margin-bottom: 15px;
@@ -42,4 +55,31 @@
     border-radius: 5px;
     background-color: #f9f9f9;
   }
+  
+
+  .review-card strong {
+    font-size: 1.1em;
+    color: #333;
+  }
+  
+ 
+  .review-card p {
+    margin: 8px 0;
+  }
+  
+  
+  .section-title {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  
+ 
+  .section {
+    margin-top: 30px;
+    padding: 20px;
+    border-top: 1px solid #ccc;
+    background-color: #ffffff;
+  }
+  
   
