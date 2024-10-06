@@ -24,7 +24,7 @@ connectDatabase();
 const server = http.createServer(app);
 
 // Configure Socket.IO
-socketConfig(server);
+const io = socketConfig(server); // Store the Socket.IO instance
 
 // Initialise Middleware
 app.use(express.json());
@@ -44,7 +44,12 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/employer", employerRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/application", applicationRoutes);
-app.use("/api/messages", messageRoutes);
+
+// Middleware to initialize message routes with Socket.IO instance
+const { router: messageRouter, initSocketRoutes } = messageRoutes;
+initSocketRoutes(io); // Pass Socket.IO instance to message routes
+
+app.use("/api/messages", messageRouter);
 
 // Serve static files in the uploads folder
 app.use("/uploads", express.static("uploads"));

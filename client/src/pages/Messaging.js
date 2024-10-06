@@ -7,6 +7,7 @@ import Navbar from "../components/layout/Navbar";
 import Spinner from "../components/Spinner/Spinner";
 import Footer from "../components/layout/Footer";
 import axios from "axios";
+import { io } from "socket.io-client";
 
 const Messaging = () => {
   const { user, logout } = useAuth();
@@ -31,6 +32,8 @@ const Messaging = () => {
     logout();
     navigate("/");
   };
+  // Create socket instance
+  const socket = useRef();
 
   // Scroll to the bottom whenever messages are updated
   useEffect(() => {
@@ -44,6 +47,40 @@ const Messaging = () => {
   useEffect(() => {
     fetchConversations();
   }, [user._id]);
+
+  // Establish socket connection on mount
+  // Listen for incoming messages
+  useEffect(() => {
+    socket.current = io(
+      process.env.REACT_APP_SOCKET_URL || "http://localhost:3000"
+    );
+
+    // Listen for incoming messages
+    socket.current.on("receiveMessage", (newMessage) => {
+      console.log("Received message:", newMessage); // Debugging line
+      const { senderId, receiverId } = newMessage;
+
+      // Update the selected conversation if it's open
+      if (
+        selectedConversation &&
+        (receiverId === selectedConversation.recipientId ||
+          senderId === selectedConversation.recipientId)
+      ) {
+        setSelectedConversation((prev) => ({
+          ...prev,
+          messages: [...(prev.messages || []), newMessage],
+        }));
+      }
+
+      // Refresh conversations to ensure the latest message is displayed
+      fetchConversations();
+      handleConversationSelect(selectedConversation);
+    });
+
+    return () => {
+      socket.current.disconnect(); // Clean up the socket connection on unmount
+    };
+  }, [selectedConversation]);
 
   const fetchConversations = async () => {
     setLoading(true);
@@ -81,6 +118,9 @@ const Messaging = () => {
         // Send the message using the API
         const response = await axios.post("/api/messages/send", newMessage);
         const savedMessage = response.data;
+
+        // Emit the message through socket
+        socket.current.emit("message", savedMessage);
 
         // Update the local state to include the new message
         setSelectedConversation((prev) => ({

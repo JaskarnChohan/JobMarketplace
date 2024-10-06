@@ -3,31 +3,36 @@ const router = express.Router();
 const authenticate = require("../middleware/authMiddleware");
 const messageController = require("../controllers/messageController");
 
-// Send a message
-router.post("/send", authenticate, messageController.sendMessage);
+// Middleware to accept io instance
+const initSocketRoutes = (io) => {
+  // Send a message
+  router.post("/send", authenticate, (req, res) => {
+    messageController.sendMessage(req, res, io); // Pass io instance to controller
+  });
 
-// Get all conversations for the user
-router.get(
-  "/conversations/:userId",
-  authenticate,
-  messageController.getConversations
-);
+  // Get all conversations for the user
+  router.get(
+    "/conversations/:userId",
+    authenticate,
+    messageController.getConversations
+  );
 
-// Start a new conversation
-router.post(
-  "/start_conversation",
-  authenticate,
-  messageController.startConversation
-);
+  // Start a new conversation
+  router.post(
+    "/start_conversation",
+    authenticate,
+    messageController.startConversation
+  );
 
-// Get messages between two users
-router.get(
-  "/:userId/:recipientId",
-  authenticate,
-  messageController.getMessages
-);
+  // Get messages between two users
+  router.get(
+    "/:userId/:recipientId",
+    authenticate,
+    messageController.getMessages
+  );
 
-// Mark a message as read (Optional)
-router.put("/read/:messageId", authenticate, messageController.markAsRead);
+  // Mark a message as read (Optional)
+  router.put("/read/:messageId", authenticate, messageController.markAsRead);
+};
 
-module.exports = router;
+module.exports = { router, initSocketRoutes };
