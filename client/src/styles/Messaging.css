@@ -1,0 +1,157 @@
+.messages .lrg-heading {
+    text-align: center;
+    margin: 20px;
+}
+.messaging-container {
+    display: flex;
+    max-width: 1200px;
+    height: 750px; /* Fixed height for the messaging container */
+    margin: 0px auto 3% auto;
+    background-color: #ffffff;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.sidebar {
+    width: 30%;
+    background-color: #f7f9fc;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.sidebar h3, .message-section h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.sidebar .latest-message-time {
+    font-size: 10px;
+    color: #888;
+}
+
+.sidebar .sender-email {
+    font-size: 14px;
+    padding-bottom: 5px;
+    color: #888;
+}
+
+.message-profile-picture {
+    width: 40px; 
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.conversation-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.conversation-item.selected {
+    background-color: #f6ecc9;
+}
+
+.create-message-btn {
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.message-section {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.message-history {
+    height: 600px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+.message-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.message-item.sent {
+    justify-content: flex-end;
+}
+
+.message-item.received {
+    justify-content: flex-start;
+}
+
+.message-profile-picture {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.message-content {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 70%;
+}
+
+.message-item.sent .message-content {
+    background-color: #d1e7dd;
+}
+
+.message-input {
+    padding: 10px;
+    background-color: #fff;
+    border-top: 1px solid #ddd;
+    width: 100%;
+    margin-top: auto;
+    
+}
+
+.message-input input {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    margin-right: 10px;
+    width: 90%;
+}
+
+.message-time-separator {
+    text-align: center;
+    font-size: 12px;
+    color: #888;
+    margin: 15px 0;
+}
+
+.no-message-selected {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Center in the available space */
+}
+
+.no-message-selected h4 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.messages .error-message {
+    margin: 30px auto 15px auto;
+    padding: 10px;
+    background-color: #ef3547;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    max-width: 1200px;
+  }
+  

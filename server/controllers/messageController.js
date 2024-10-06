@@ -3,13 +3,22 @@ const User = require("../models/user");
 const mongoose = require("mongoose");
 
 // Send a message
-exports.sendMessage = async (req, res) => {
+exports.sendMessage = async (req, res, io) => {
   const { receiverId, content } = req.body;
 
+  // Log request body for debugging
+  console.log("Received request body:", req.body);
+
+  // Check for required fields
   if (!receiverId || !content) {
     return res
       .status(400)
       .json({ message: "Receiver ID and content are required." });
+  }
+
+  // Check if user is authenticated
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: "User not authenticated." });
   }
 
   try {
@@ -20,15 +29,20 @@ exports.sendMessage = async (req, res) => {
       content,
     });
 
+    // Save the message
     await message.save();
+
+    // Emit the new message to all connected clients
+    io.emit("receiveMessage", message); // Emit the message to all clients
 
     res.status(201).json(message);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error sending message" });
+    console.error("Error sending message:", error);
+    res
+      .status(500)
+      .json({ message: "Error sending message", error: error.message });
   }
 };
-
 // Get conversations for a user
 exports.getConversations = async (req, res) => {
   const userId = req.user.id; // Use req.user.id directly to avoid undefined issues
