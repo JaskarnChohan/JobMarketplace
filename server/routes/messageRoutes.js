@@ -31,8 +31,12 @@ const initSocketRoutes = (io) => {
     messageController.getMessages
   );
 
-  // Mark a message as read (Optional)
-  router.put("/read/:messageId", authenticate, messageController.markAsRead);
+  // Mark all unread messages in a conversation as read
+  router.patch(
+    "/read/:userId/:recipientId",
+    authenticate,
+    messageController.markAsRead
+  );
 };
 
 module.exports = { router, initSocketRoutes };

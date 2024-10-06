@@ -52,6 +52,18 @@
     cursor: pointer;
 }
 
+.conversation-item .unread-dot {
+    height: 8px;
+    width: 8px;
+    background-color: blue; /* Color for the dot */
+    border-radius: 50%; /* Makes it a circle */
+    display: inline-block; /* Aligns with text */
+    margin: 0 5px 0 auto; /* Space from the text */
+    align-self: center; /* Center vertically */
+    
+}
+
+
 .conversation-item.selected {
     background-color: #f6ecc9;
 }
@@ -140,7 +152,7 @@
 }
 
 .no-message-selected h4 {
-    font-size: 20px;
+    font-size: 40px;
     margin-bottom: 20px;
 }
 
@@ -155,3 +167,12 @@
     max-width: 1200px;
   }
   
+  button:disabled {
+    opacity: 0.5; 
+    cursor: not-allowed; /* Change cursor when disabled */
+  }
+  .no-profile-warning {
+    margin-top: 5px;
+    font-weight: bold;
+    color: red;
+  }

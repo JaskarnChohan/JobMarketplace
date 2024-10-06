@@ -1,25 +1,28 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext"; // Importing authentication context for user state
 import "../styles/Messaging.css";
 import "../styles/Global.css";
-import { useNavigate } from "react-router-dom";
-import Navbar from "../components/layout/Navbar";
-import Spinner from "../components/Spinner/Spinner";
-import Footer from "../components/layout/Footer";
-import axios from "axios";
-import { io } from "socket.io-client";
+import { useNavigate } from "react-router-dom"; // For navigation after logout
+import Navbar from "../components/layout/Navbar"; // Navbar component
+import Spinner from "../components/Spinner/Spinner"; // Loading spinner component
+import Footer from "../components/layout/Footer"; // Footer component
+import axios from "axios"; // Axios for API calls
+import { io } from "socket.io-client"; // Importing Socket.io for real-time messaging
 
 const Messaging = () => {
-  const { user, logout } = useAuth();
-  const [conversations, setConversations] = useState([]);
-  const [selectedConversation, setSelectedConversation] = useState(null);
-  const [message, setMessage] = useState("");
-  const [newConversationEmail, setNewConversationEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
-  const messageEndRef = useRef(null);
+  const { user, logout } = useAuth(); // Getting user and logout function from auth context
+  const navigate = useNavigate(); // Navigate function for routing
+  const [hasProfile, setHasProfile] = useState(false); // State to track if user has a profile
+  const [loading, setLoading] = useState(false); // Loading state for API calls
+  const [conversations, setConversations] = useState([]); // State for storing conversations
+  const [selectedConversation, setSelectedConversation] = useState(null); // Currently selected conversation
+  const [message, setMessage] = useState(""); // Message input state
+  const [newConversationEmail, setNewConversationEmail] = useState(""); // Email for new conversation
+  const [error, setError] = useState(""); // State for error messages
+  const messageEndRef = useRef(null); // Ref for scrolling to the end of messages
+
   const options = {
+    // Formatting options for date and time
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -28,36 +31,55 @@ const Messaging = () => {
     hour12: false,
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
   // Create socket instance
   const socket = useRef();
 
-  // Scroll to the bottom whenever messages are updated
-  useEffect(() => {
-    if (messageEndRef.current) {
-      // Scroll to the bottom of the message history container
-      messageEndRef.current.scrollTop = messageEndRef.current.scrollHeight;
-    }
-  }, [selectedConversation?.messages]);
+  // Logout handler
+  const handleLogout = () => {
+    logout(); // Call logout function
+    navigate("/"); // Navigate to home page after logout
+  };
 
-  // Fetch all conversations when component mounts or user ID changes
+  // Combined effect for checking profile existence and fetching conversations
   useEffect(() => {
-    fetchConversations();
+    const checkUserProfileAndFetchConversations = async () => {
+      try {
+        // Check if user profile exists
+        const profileResponse = await axios.get(
+          `http://localhost:5050/api/profile/fetch/`,
+          { withCredentials: true }
+        );
+        setHasProfile(profileResponse.data.profileExists);
+
+        if (!profileResponse.data.profileExists) {
+          const companyProfileResponse = await axios.get(
+            `http://localhost:5050/api/employer/profile/fetch`,
+            { withCredentials: true }
+          );
+          setHasProfile(companyProfileResponse.data.profileExists);
+        }
+
+        // Fetch conversations
+        await fetchConversations();
+      } catch (error) {
+        console.error("Error fetching profile or conversations:", error);
+      }
+    };
+
+    if (user._id) {
+      checkUserProfileAndFetchConversations();
+    }
   }, [user._id]);
 
-  // Establish socket connection on mount
   // Listen for incoming messages
   useEffect(() => {
     socket.current = io(
       process.env.REACT_APP_SOCKET_URL || "http://localhost:3000"
     );
 
+    // Establish socket connection on mount
     // Listen for incoming messages
     socket.current.on("receiveMessage", (newMessage) => {
-      console.log("Received message:", newMessage); // Debugging line
       const { senderId, receiverId } = newMessage;
 
       // Update the selected conversation if it's open
@@ -74,7 +96,9 @@ const Messaging = () => {
 
       // Refresh conversations to ensure the latest message is displayed
       fetchConversations();
-      handleConversationSelect(selectedConversation);
+      if (selectedConversation) {
+        handleConversationSelect(selectedConversation);
+      }
     });
 
     return () => {
@@ -82,8 +106,16 @@ const Messaging = () => {
     };
   }, [selectedConversation]);
 
+  // Scroll to the bottom whenever messages are updated
+  useEffect(() => {
+    if (messageEndRef.current) {
+      // Scroll to the bottom of the message history container
+      messageEndRef.current.scrollTop = messageEndRef.current.scrollHeight;
+    }
+  }, [selectedConversation?.messages]);
+
   const fetchConversations = async () => {
-    setLoading(true);
+    setLoading(true); // Set loading to true while fetching
     try {
       const response = await axios.get(
         `/api/messages/conversations/${user._id}`
@@ -94,12 +126,14 @@ const Messaging = () => {
           new Date(b.latestMessage.createdAt) -
           new Date(a.latestMessage.createdAt)
       );
+      // Update the conversation list
       setConversations(sortedConversations);
     } catch (error) {
+      // Handle errors
       console.error("Error fetching conversations", error);
       setError("Failed to load conversations.");
     } finally {
-      setLoading(false);
+      setLoading(false); // Set loading to false after fetching
     }
   };
 
@@ -129,13 +163,14 @@ const Messaging = () => {
         }));
 
         setMessage(""); // Clear the input after sending
-        // Refresh conversations
-        fetchConversations();
+        fetchConversations(); // Refresh the conversation list
       } catch (error) {
+        // Handle errors
         console.error("Error sending message", error);
         setError("Failed to send message.");
       }
     } else {
+      // Show error if message is empty
       setError("Message can't be empty.");
     }
   };
@@ -151,10 +186,12 @@ const Messaging = () => {
     }
   };
 
+  // Start a new conversation with a user
   const startNewConversation = async () => {
     if (newConversationEmail.trim()) {
       const lowercaseEmail = newConversationEmail.toLowerCase(); // Convert to lowercase
       if (lowercaseEmail === user.email) {
+        // Check if the user is trying to message themselves
         setError("You can't start a conversation with yourself.");
         return;
       }
@@ -164,7 +201,6 @@ const Messaging = () => {
         const userIdResponse = await axios.get(
           `/api/auth/getIdByEmail/${lowercaseEmail}`
         );
-
         const userId = userIdResponse.data.userId; // Extract the user ID from the response
 
         // Check if the user has a profile using the user ID
@@ -185,7 +221,7 @@ const Messaging = () => {
             !companyProfileResponse.data ||
             !companyProfileResponse.data.profileExists
           ) {
-            setError("The user does not exist or has no profile.");
+            setError("This user has not created a profile yet.");
             return;
           }
         }
@@ -209,7 +245,7 @@ const Messaging = () => {
 
         const newConversation = {
           ...response.data,
-          messages: [], // Initialize with an empty array
+          messages: [], // Initialise with an empty array
         };
 
         // Update conversation list and select the new conversation
@@ -235,6 +271,7 @@ const Messaging = () => {
         }
       }
     } else {
+      // Show error if email is empty
       setError("Please enter a valid email address.");
     }
   };
@@ -246,7 +283,7 @@ const Messaging = () => {
 
     // Set the selected conversation first
     setSelectedConversation(conversation);
-    setLoading(true);
+    setLoading(true); // Set loading to true while fetching
     setError(""); // Clear any previous errors
     try {
       // Fetch messages for the selected conversation
@@ -258,13 +295,21 @@ const Messaging = () => {
         ...prev,
         messages: response.data.length ? response.data : [], // Ensure messages are an array
       }));
+
+      // Mark all unread messages as read
+      await axios.patch(
+        `/api/messages/read/${user._id}/${conversation.recipientId}`
+      ); // Call the API to mark all messages as read
+      fetchConversations(); // Refresh the conversation list
     } catch (error) {
+      // Handle errors
       console.error("Error fetching conversation messages", error);
       setError("Failed to load messages.");
     } finally {
-      setLoading(false);
+      setLoading(false); // Set loading to false after fetching
     }
   };
+
   return (
     <div>
       <Navbar isAuthenticated={true} handleLogout={handleLogout} />
@@ -300,7 +345,7 @@ const Messaging = () => {
                         ? "selected"
                         : ""
                     }`}
-                    onClick={() => handleConversationSelect(conv)}
+                    onClick={() => handleConversationSelect(conv)} // Call the function to select the conversation
                   >
                     <img
                       src={
@@ -314,7 +359,7 @@ const Messaging = () => {
                       <div className="sender-name">
                         {conv.firstName && conv.lastName
                           ? `${conv.firstName} ${conv.lastName}`
-                          : conv.companyName || "Unknown"}
+                          : conv.companyName || "Unknown"}{" "}
                       </div>
                       <div className="sender-email">{conv.email}</div>
                       <div className="latest-message-time">
@@ -322,9 +367,14 @@ const Messaging = () => {
                           ? new Date(
                               conv.latestMessage.createdAt
                             ).toLocaleTimeString([], options)
-                          : "No messages yet"}
+                          : "No messages yet"}{" "}
                       </div>
                     </div>
+                    {conv.latestMessage &&
+                      !conv.latestMessage.isRead &&
+                      conv.latestMessage.sender != user._id && (
+                        <span className="unread-dot"></span>
+                      )}
                   </li>
                 ))}
               </ul>
@@ -411,7 +461,7 @@ const Messaging = () => {
               </div>
             ) : (
               <div className="no-message-selected">
-                <h4>Select a Conversation or Create a New One</h4>
+                <h4>Start a Conversation</h4>
                 <input
                   type="email"
                   placeholder="Email address"
@@ -421,9 +471,18 @@ const Messaging = () => {
                     if (e.key === "Enter") startNewConversation();
                   }}
                 />
-                <button className="btn" onClick={startNewConversation}>
+                <button
+                  className="btn"
+                  onClick={startNewConversation}
+                  disabled={!hasProfile}
+                >
                   Start Conversation
                 </button>
+                {!hasProfile && (
+                  <div className="no-profile-warning">
+                    You need to create a profile to send messages.
+                  </div>
+                )}
               </div>
             )}
           </div>
