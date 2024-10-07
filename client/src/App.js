@@ -52,7 +52,7 @@ const App = () => {
           />
           {/* Allow only authenticated users to access the messaging page */}
           <Route
-            path="/messaging"
+            path="/messages"
             element={isAuthenticated ? <Messaging /> : <Navigate to="/login" />}
           />
           {/* Reset password routes */}

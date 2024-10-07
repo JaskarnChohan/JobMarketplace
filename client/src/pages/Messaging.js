@@ -43,6 +43,7 @@ const Messaging = () => {
   // Combined effect for checking profile existence and fetching conversations
   useEffect(() => {
     const checkUserProfileAndFetchConversations = async () => {
+      setLoading(true); // Start loading
       try {
         // Check if user profile exists
         const profileResponse = await axios.get(
@@ -63,6 +64,8 @@ const Messaging = () => {
         await fetchConversations();
       } catch (error) {
         console.error("Error fetching profile or conversations:", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
       }
     };
 
@@ -115,7 +118,6 @@ const Messaging = () => {
   }, [selectedConversation?.messages]);
 
   const fetchConversations = async () => {
-    setLoading(true); // Set loading to true while fetching
     try {
       const response = await axios.get(
         `/api/messages/conversations/${user._id}`
@@ -132,8 +134,6 @@ const Messaging = () => {
       // Handle errors
       console.error("Error fetching conversations", error);
       setError("Failed to load conversations.");
-    } finally {
-      setLoading(false); // Set loading to false after fetching
     }
   };
 
@@ -283,7 +283,7 @@ const Messaging = () => {
 
     // Set the selected conversation first
     setSelectedConversation(conversation);
-    setLoading(true); // Set loading to true while fetching
+
     setError(""); // Clear any previous errors
     try {
       // Fetch messages for the selected conversation
@@ -305,8 +305,6 @@ const Messaging = () => {
       // Handle errors
       console.error("Error fetching conversation messages", error);
       setError("Failed to load messages.");
-    } finally {
-      setLoading(false); // Set loading to false after fetching
     }
   };
 
@@ -314,7 +312,7 @@ const Messaging = () => {
     <div>
       <Navbar isAuthenticated={true} handleLogout={handleLogout} />
       <div className="messages">
-        <h2 className="lrg-heading">Messaging</h2>
+        <h2 className="lrg-heading">Messages</h2>
         {error && (
           <div className="error-message">
             <p>{error}</p>
@@ -357,17 +355,25 @@ const Messaging = () => {
                     />
                     <div>
                       <div className="sender-name">
-                        {conv.firstName && conv.lastName
-                          ? `${conv.firstName} ${conv.lastName}`
-                          : conv.companyName || "Unknown"}{" "}
+                        {conv.firstName && conv.lastName ? (
+                          `${conv.firstName} ${conv.lastName}`
+                        ) : (
+                          <span
+                            className="sender-name hover"
+                            onClick={() =>
+                              navigate(`/viewcompany/${conv.recipientId}`)
+                            }
+                          >
+                            {conv.companyName || "Unknown"}
+                          </span>
+                        )}{" "}
                       </div>
                       <div className="sender-email">{conv.email}</div>
                       <div className="latest-message-time">
-                        {conv.latestMessage?.createdAt
-                          ? new Date(
-                              conv.latestMessage.createdAt
-                            ).toLocaleTimeString([], options)
-                          : "No messages yet"}{" "}
+                        {conv.latestMessage?.createdAt &&
+                          new Date(
+                            conv.latestMessage.createdAt
+                          ).toLocaleTimeString([], options)}
                       </div>
                     </div>
                     {conv.latestMessage &&
@@ -439,7 +445,7 @@ const Messaging = () => {
                       );
                     })
                   ) : (
-                    <div>No messages yet.</div>
+                    <div></div>
                   )}
                   {/* Scroll target */}
                   <div ref={messageEndRef}></div>
@@ -464,7 +470,7 @@ const Messaging = () => {
                 <h4>Start a Conversation</h4>
                 <input
                   type="email"
-                  placeholder="Email address"
+                  placeholder="User's email address"
                   value={newConversationEmail}
                   onChange={(e) => setNewConversationEmail(e.target.value)}
                   onKeyPress={(e) => {

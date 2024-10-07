@@ -120,7 +120,12 @@ const ViewCompany = () => {
             {Array.isArray(jobListings) && jobListings.length > 0 ? (
               jobListings.map((job) => (
                 <div className="job-card" key={job._id}>
-                  <h3 className="job-title">{job.title}</h3>
+                  <h3
+                    className="job-title hover"
+                    onClick={() => navigate(`/jobview/${job._id}`)}
+                  >
+                    {job.title}
+                  </h3>
                   <p className="job-info">
                     <FaBuilding /> {job.jobCategory}
                   </p>

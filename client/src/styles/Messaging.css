@@ -63,7 +63,6 @@
     
 }
 
-
 .conversation-item.selected {
     background-color: #f6ecc9;
 }
@@ -92,6 +91,10 @@
     display: flex;
     align-items: center;
     margin-bottom: 15px;
+    word-wrap: break-word; 
+    overflow: hidden;
+    white-space: nowrap; 
+    text-overflow: ellipsis; 
 }
 
 .message-item.sent {
@@ -148,7 +151,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100%; /* Center in the available space */
+    height: 100%; 
 }
 
 .no-message-selected h4 {

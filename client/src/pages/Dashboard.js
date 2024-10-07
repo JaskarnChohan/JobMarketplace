@@ -196,6 +196,9 @@ const Dashboard = () => {
                   <Link to="/jobmanagement">
                     <button className="btn help-button">Manage Jobs</button>
                   </Link>
+                  <Link to="/messages">
+                    <button className="btn help-button">Messages</button>
+                  </Link>
                   <Link to="/browse-employers">
                     <button className="btn help-button">
                       Browse Job Seekers
@@ -282,6 +285,9 @@ const Dashboard = () => {
                     <button className="btn help-button">
                       Manage Your Profile
                     </button>
+                  </Link>
+                  <Link to="/messages">
+                    <button className="btn help-button">Messages</button>
                   </Link>
                   <Link to="/browse-employers">
                     <button className="btn help-button">
