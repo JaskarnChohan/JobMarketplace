@@ -379,7 +379,7 @@ const CreateJob = () => {
             </div>
           </div>
           <button className="btn" type="submit">
-            Create Job Listing
+            Save and add questions
           </button>
           {errors.length > 0 && (
             <div className="error-messages">
