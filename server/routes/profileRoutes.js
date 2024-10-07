@@ -26,6 +26,12 @@ router.post(
 );
 router.get("/resume/fetch", authenticate, profileController.getResume); // Fetch resume
 router.delete("/resume/delete", authenticate, profileController.deleteResume); // Delete resume
+// Route for Updating Resume Privacy
+router.put(
+  "/resume/privacy",
+  authenticate,
+  profileController.updateResumePrivacy // Update resume privacy
+);
 
 // Fetch profile by user ID
 router.get("/user/:userId", profileController.getProfileByUserId); // Fetch profile by user ID
