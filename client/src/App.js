@@ -6,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import Home from "./pages/Home";
+import Messaging from "./pages/Messaging";
 import Signup from "./pages/auth/Signup";
 import Login from "./pages/auth/Login";
 import Dashboard from "./pages/Dashboard";
@@ -48,6 +49,11 @@ const App = () => {
           <Route
             path="/dashboard"
             element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
+          />
+          {/* Allow only authenticated users to access the messaging page */}
+          <Route
+            path="/messaging"
+            element={isAuthenticated ? <Messaging /> : <Navigate to="/login" />}
           />
           {/* Reset password routes */}
           <Route

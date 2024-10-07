@@ -221,7 +221,7 @@ exports.getCompanyProfileById = async (req, res) => {
 
     // If profile is not found, return a default profile with a flag indicating no profile exists
     if (!companyProfile) {
-      return res.status(404).json({
+      return res.json({
         companyProfile: null,
         email: null,
         logo: DEFAULT_LOGO,
