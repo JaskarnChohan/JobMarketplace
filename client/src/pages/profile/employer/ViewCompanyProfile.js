@@ -20,26 +20,29 @@ import { useAuth } from "../../../context/AuthContext";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/ProfileInfo.css";
 import "../../../styles/Global.css";
-import "../../../styles/profile/Reviews.css"; // Correct import path
+import "../../../styles/profile/ReviewModal.css";  // Correct CSS import
+import ReviewModal from '../Review/ReviewModal';  // Correct component import
+
+
 
 const ViewCompanyProfile = () => {
-  // Hooks must be inside the component
-  const { id } = useParams(); // Get the company ID from the URL parameters
+  const { id } = useParams(); 
   const [companyData, setCompanyData] = useState(null);
   const [jobListings, setJobListings] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [reviewText, setReviewText] = useState("");
   const [reviewerName, setReviewerName] = useState("");
   const [rating, setRating] = useState(5);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
 
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Handle logout and redirect to the home page
   const handleLogout = () => {
     logout();
     navigate("/");
   };
+
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     try {
@@ -52,16 +55,16 @@ const ViewCompanyProfile = () => {
       await axios.post("http://localhost:5050/api/reviews", newReview, {
         withCredentials: true,
       });
-      setReviews([...reviews, newReview]); // Update reviews list with the new review
+      setReviews([...reviews, newReview]); 
       setReviewerName("");
       setReviewText("");
       setRating(5);
+      setIsModalOpen(false); // Close modal after submission
     } catch (error) {
       console.error("Failed to submit review:", error);
     }
   };
   
-  // Fetch company data, job listings, and reviews when the component mounts
   useEffect(() => {
     const fetchCompanyData = async () => {
       try {
@@ -113,7 +116,6 @@ const ViewCompanyProfile = () => {
     fetchCompanyData();
   }, [id]);
 
-  // If company data is not yet available, show a loading spinner
   if (!companyData) return <Spinner />;
 
   return (
@@ -187,7 +189,6 @@ const ViewCompanyProfile = () => {
             )}
           </div>
         </div>
-        {/* Add the Reviews Section Here */}
         <div className="section">
           <h2 className="section-title">Company Reviews</h2>
           <div className="reviews-list">
@@ -202,40 +203,25 @@ const ViewCompanyProfile = () => {
               <p className="section-text">No reviews available.</p>
             )}
           </div>
-          <div className="review-form">
-            <h3>Leave a Review</h3>
-            <form onSubmit={handleSubmitReview}>
-              <label>Your Name:</label>
-              <input
-                type="text"
-                value={reviewerName}
-                onChange={(e) => setReviewerName(e.target.value)}
-                required
-              />
-              <label>Your Review:</label>
-              <textarea
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                rows="4"
-                required
-              ></textarea>
-              <label>Rating:</label>
-              <select
-                value={rating}
-                onChange={(e) => setRating(Number(e.target.value))}
-              >
-                <option value="5">5 - Excellent</option>
-                <option value="4">4 - Good</option>
-                <option value="3">3 - Average</option>
-                <option value="2">2 - Poor</option>
-                <option value="1">1 - Terrible</option>
-              </select>
-              <button type="submit">Submit Review</button>
-            </form>
-          </div>
+          <button onClick={() => setIsModalOpen(true)} className="write-review-btn">
+            Write a Review
+          </button>
         </div>
       </div>
       <Footer />
+
+      {/* Render the ReviewModal */}
+      <ReviewModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        handleSubmitReview={handleSubmitReview}
+        reviewerName={reviewerName}
+        setReviewerName={setReviewerName}
+        reviewText={reviewText}
+        setReviewText={setReviewText}
+        rating={rating}
+        setRating={setRating}
+      />
     </div>
   );
 };
