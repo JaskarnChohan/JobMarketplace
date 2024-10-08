@@ -19,7 +19,7 @@ const createJobValidationRules = [
 
 exports.getLatestJobs = async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 12;
+    const limit = parseInt(req.query.limit) || 9;
     const page = parseInt(req.query.page) || 1;
     const sortBy = parseInt(req.query.sortBy) || -1;
 

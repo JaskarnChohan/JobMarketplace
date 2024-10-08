@@ -6,6 +6,8 @@ import {
   FaTrashAlt,
   FaDownload,
   FaFileAlt,
+  FaLock,
+  FaUnlock,
 } from "react-icons/fa";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/Resume.css";
@@ -29,17 +31,26 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
   // State to hold any existing resume fetched from the backend
   const [existingResume, setExistingResume] = useState(null);
 
+  // State to manage privacy toggle modal visibility
+  const [privacyToggleModalIsOpen, setPrivacyToggleModalIsOpen] =
+    useState(false);
+
+  // State to manage the privacy setting of the resume
+  const [isResumePublic, setIsResumePublic] = useState(false);
+
   // Fetch the existing resume from the server when the component is mounted
   useEffect(() => {
     const fetchResume = async () => {
       try {
         const response = await axios.get(
           `http://localhost:5050/api/profile/resume/fetch`,
-          { withCredentials: true } // Enables sending cookies for authentication
+          { withCredentials: true }
         );
-        setExistingResume(response.data.resume); // Set the existing resume in the state
+
+        setExistingResume(response.data.resume); // Set existing resume
+        setIsResumePublic(response.data.privacySetting === "public"); // Set privacy state based on fetched data
       } catch (error) {
-        console.error("Failed to fetch resume:", error); // Handle error
+        console.error("Failed to fetch resume:", error);
       }
     };
 
@@ -82,24 +93,25 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
     e.preventDefault();
     try {
       if (resumeFile) {
-        const formData = new FormData(); // Create FormData to send the file
+        const formData = new FormData();
         formData.append("resume", resumeFile);
+        formData.append("resumePrivacy", "private");
 
-        // Make a POST request to upload the resume
         const response = await axios.post(
           `http://localhost:5050/api/profile/resume/upload`,
           formData,
           {
-            headers: { "Content-Type": "multipart/form-data" }, // Set headers for file upload
-            withCredentials: true, // Send cookies for authentication
+            headers: { "Content-Type": "multipart/form-data" },
+            withCredentials: true,
           }
         );
 
-        setExistingResume(response.data.resume); // Update the existing resume with the new file
-        closeResumeModal(); // Close the upload modal after successful upload
+        setExistingResume(response.data.resume);
+        closeResumeModal();
+        setIsResumePublic(false); // Set privacy state to private
       }
     } catch (error) {
-      console.error("Failed to upload resume:", error); // Handle error
+      console.error("Failed to upload resume:", error);
     }
   };
 
@@ -116,6 +128,36 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
     }
   };
 
+  // Opens the privacy toggle modal
+  const openPrivacyToggleModal = () => {
+    setPrivacyToggleModalIsOpen(true);
+  };
+
+  // Closes the privacy toggle modal
+  const closePrivacyToggleModal = () => {
+    setPrivacyToggleModalIsOpen(false);
+  };
+
+  // Handles the privacy toggle process
+  const handlePrivacyToggle = async () => {
+    try {
+      const newPrivacySetting = isResumePublic ? "private" : "public";
+      await axios.put(
+        `http://localhost:5050/api/profile/resume/privacy`,
+        {
+          privacySetting: newPrivacySetting,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      setIsResumePublic(!isResumePublic); // Update local state
+      closePrivacyToggleModal();
+    } catch (error) {
+      console.error("Failed to update privacy setting:", error);
+    }
+  };
+
   return (
     <div className="section">
       <h2 className="section-title">Resume Upload</h2>
@@ -123,7 +165,6 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
         Upload your resume to enhance your profile!
       </p>
 
-      {/* Check if a resume exists; if so, display download and delete options */}
       {existingResume ? (
         <div className="resume-card last">
           <div className="resume-card-content">
@@ -132,10 +173,11 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
             </div>
             <div className="resume-card-info">
               <h3 className="resume-card-title">{`${firstName} ${lastName}'s Resume`}</h3>
+              <p>Privacy Setting: {isResumePublic ? "Public" : "Private"}</p>
             </div>
             <div className="resume-card-actions">
               <a
-                href={`http://localhost:5050/${existingResume}`} // Link to download the existing resume
+                href={`http://localhost:5050/${existingResume}`}
                 download
                 className="btn resume-btn"
               >
@@ -143,17 +185,23 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
                 <span>Download</span>
               </a>
               <button
-                onClick={openConfirmationModal} // Open delete confirmation modal
+                onClick={openConfirmationModal}
                 className="btn resume-btn"
               >
                 <FaTrashAlt />
                 <span>Delete</span>
               </button>
+              <button
+                onClick={openPrivacyToggleModal}
+                className="btn resume-btn"
+              >
+                {isResumePublic ? <FaLock /> : <FaUnlock />}
+                <span>{isResumePublic ? "Make Private" : "Make Public"}</span>
+              </button>
             </div>
           </div>
         </div>
       ) : (
-        // If no resume exists, show the option to upload a new resume
         <button onClick={openResumeModal} className="btn btn-primary">
           <FaFileUpload /> Upload Resume
         </button>
@@ -175,8 +223,8 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
                 <div className="file-select-name">{resumeFileName}</div>
                 <input
                   type="file"
-                  accept=".pdf,.doc,.docx" // Accept only document file types
-                  onChange={handleFileChange} // Trigger file selection handling
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileChange}
                 />
               </div>
             </div>
@@ -212,6 +260,29 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
               Delete
             </button>
             <button onClick={closeConfirmationModal} className="btn-cancel">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Privacy Toggle Modal */}
+      <Modal
+        isOpen={privacyToggleModalIsOpen}
+        onRequestClose={closePrivacyToggleModal}
+        className="modal-wrapper"
+      >
+        <div className="modal">
+          <h1 className="lrg-heading">Resume Privacy</h1>
+          <p className="med-text">
+            Are you sure you want to make your resume{" "}
+            {isResumePublic ? "private" : "public"}?
+          </p>
+          <div className="btn-container">
+            <button onClick={handlePrivacyToggle} className="btn-confirm">
+              Confirm
+            </button>
+            <button onClick={closePrivacyToggleModal} className="btn-cancel">
               Cancel
             </button>
           </div>

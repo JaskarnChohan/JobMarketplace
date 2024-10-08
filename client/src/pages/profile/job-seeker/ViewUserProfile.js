@@ -202,7 +202,7 @@ const ViewUserProfile = () => {
         {/* Resume Section */}
         <div className="section">
           <h2 className="section-title">Resume Upload</h2>
-          {profileData.resume ? (
+          {profileData.resume && profileData.resumePrivacy === "public" ? (
             <div className="resume-card last">
               <div className="resume-card-content">
                 <div className="resume-card-icon">
@@ -227,7 +227,7 @@ const ViewUserProfile = () => {
             </div>
           ) : (
             <p className="section-text">
-              {fullName} has not uploaded a resume.
+              {fullName}'s resume is private or has not been uploaded.
             </p>
           )}
         </div>

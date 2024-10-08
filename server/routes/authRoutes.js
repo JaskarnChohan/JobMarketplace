@@ -8,6 +8,7 @@ const {
   resetPassword,
   validateResetToken,
   getUserInformation,
+  getUserIdByEmail,
 } = require("../controllers/authController");
 const authenticate = require("../middleware/authMiddleware");
 
@@ -35,6 +36,9 @@ router.post("/validate-reset-token", validateResetToken);
 
 // Route to fetch user information for the authenticated user
 router.get("/user-info", authenticate, getUserInformation);
+
+// Route to fetch user ID by email
+router.get("/getIdByEmail/:email", getUserIdByEmail);
 
 // Export the router for use in other modules
 module.exports = router;
