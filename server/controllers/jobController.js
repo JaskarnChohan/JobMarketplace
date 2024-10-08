@@ -345,21 +345,3 @@ exports.getJobDetails = async (req, res) => {
   }
 };
 
-exports.addJobQuestions = async (req, res) => {
-  const { jobId } = req.params;  
-  const { questions } = req.body;
-
-  try {
-    const job = await jobListing.findById(jobId);
-
-    if (!job) {
-      return res.status(404).json({ msg: "Job not found" });
-    }
-    job.questions = questions;
-    await job.save();
-
-    res.json({ success: true, job });
-  } catch (err) {
-    res.status(500).json({ errors: [{ msg: "Server error" }] });
-  }
-};
