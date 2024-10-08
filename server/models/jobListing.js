@@ -74,9 +74,7 @@ const jobListingSchema = new mongoose.Schema(
     },
     questions: {
       type: [String],
-      required: true,
-      default: [], 
-      required: true,   
+      default: [],   
     },
   },
   { timestamps: true }

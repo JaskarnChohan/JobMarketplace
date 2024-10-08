@@ -114,13 +114,13 @@ const CreateJob = () => {
       const res = await axios.post(
         "http://localhost:5050/api/jobs/create",
         formData
-      );
-      console.log(res.data);
-      console.log(formData);
       // Navigate to job management page on success
-      navigate("/jobmanagement");
+      );   
+      const jobId = res.data._id; 
+      console.log("Job created successfully:", res.data);
+      // Navigate to JobQuestion page with jobId
+      navigate(`/jobquestions/${jobId}`);
     } catch (err) {
-      // Handle errors from the server
       if (err.response && err.response.data.errors) {
         setErrors(err.response.data.errors);
       } else {
@@ -129,7 +129,6 @@ const CreateJob = () => {
       }
     }
   };
-
   // State for input fields to add requirements and benefits
   const [requirementinputitem, setInputValue] = useState("");
   const [benefitsinputitem, setBenefitInputValue] = useState("");
