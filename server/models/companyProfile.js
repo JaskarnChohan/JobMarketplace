@@ -33,6 +33,12 @@ const companyProfileSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "CompanyReview", // Reference to the company reviews
+      },
+    ],
   },
   { timestamps: true }
 );
