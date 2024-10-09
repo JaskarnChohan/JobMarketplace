@@ -21,12 +21,13 @@ import JobManagement from "./pages/jobs/JobManagement";
 import ViewCompanyProfile from "./pages/profile/employer/ViewCompanyProfile";
 import ViewUserProfile from "./pages/profile/job-seeker/ViewUserProfile";
 import BrowseEmployers from "./pages/profile/employer/BrowseEmployers";
+import AIAnswerImprover from "./pages/AIAnswerImprover";
 import EditJob from "./pages/jobs/EditJob";
 import JobView from "./pages/jobs/JobView";
 
 const App = () => {
   // Extract authentication information from the context
-  const { isAuthenticated, isEmployer } = useAuth();
+  const { isAuthenticated, isEmployer, isJobSeeker } = useAuth();
 
   return (
     <Router>
@@ -49,6 +50,17 @@ const App = () => {
           <Route
             path="/dashboard"
             element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
+          />
+          {/* Allow only authenticated users to access the AI to improve interview questions */}
+          <Route
+            path="/enchanceanswers"
+            element={
+              isAuthenticated && isJobSeeker() ? (
+                <AIAnswerImprover />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
           />
           {/* Allow only authenticated users to access the messaging page */}
           <Route

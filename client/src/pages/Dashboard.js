@@ -9,6 +9,7 @@ import "../styles/job/Job.css";
 import "../styles/job/JobCards.css";
 import { FaTag } from "react-icons/fa";
 import Spinner from "../components/Spinner/Spinner";
+import AIAnswerImprover from "./AIAnswerImprover";
 
 const Dashboard = () => {
   const { logout, user } = useAuth(); // Get logout function and user info from context
@@ -131,7 +132,8 @@ const Dashboard = () => {
   // George Haeberlin: Get saved jobs functionality
   // get saved job IDs
   const getSavedJobIds = async () => {
-    try { // Send request to fetch saved jobs
+    try {
+      // Send request to fetch saved jobs
       const response = await axios.get(`/api/profile/getSavedJobs`);
       setSavedJobIds(response.data.savedJobs); // Update saved jobs state
     } catch (err) {
@@ -358,6 +360,16 @@ const Dashboard = () => {
             <div className="dashboard-banner">
               <h2 className="lrg-heading">Dashboard</h2>
               <p className="med-heading">Manage your Applications!</p>
+              <div className="help-guide">
+                <h2>Improve Yourself</h2>
+                <div className="help-links">
+                  <Link to="/enchanceanswers">
+                    <button className="btn help-button">
+                      Enhance Interview Answers
+                    </button>
+                  </Link>
+                </div>
+              </div>
               <div className="help-guide">
                 <h2>Help Guide</h2>
                 <div className="help-links">
