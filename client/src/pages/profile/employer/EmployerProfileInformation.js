@@ -15,6 +15,7 @@ import {
   FaTag,
   FaCalendarAlt,
   FaGlobe,
+  FaStar,
 } from "react-icons/fa";
 import { useAuth } from "../../../context/AuthContext";
 import { locations } from "../../../assets/locations.js";
@@ -50,12 +51,15 @@ const EmployerProfileInformation = ({
   const [imageFile, setImageFile] = useState(null);
   const [fileName, setFileName] = useState("No file chosen");
   const [jobListings, setJobListings] = useState([]);
+  const [reviews, setReviews] = useState([]); // State for reviews
+  const [averageRating, setAverageRating] = useState(0); // State for average rating
 
   // Fetch profile data and job listings when the component mounts or updates
   useEffect(() => {
     if (profileExists) {
       reset(formData);
       fetchJobListings();
+      fetchReviews();
     }
   }, [formData, profileExists, reset]);
 
@@ -78,12 +82,37 @@ const EmployerProfileInformation = ({
     }
   };
 
+  // Fetch reviews for the employer
+  const fetchReviews = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/employer/reviews/${user._id}`,
+        { withCredentials: true }
+      );
+      setReviews(response.data); // Set the reviews in state
+      // Calculate the average rating
+      const totalRating = response.data.reduce(
+        (acc, review) => acc + review.rating,
+        0
+      );
+      const averageRating =
+        response.data.length > 0
+          ? (totalRating / response.data.length).toFixed(1)
+          : 0;
+      setAverageRating(averageRating); // Set the average rating in state
+    } catch (error) {
+      // Handle error
+      console.error("Failed to fetch reviews:", error);
+    }
+  };
+
   // Functions to open and close the profile edit modal
   const openModal = () => {
     reset(formData);
     setModalIsOpen(true);
   };
 
+  // Function to close the profile edit modal
   const closeModal = () => setModalIsOpen(false);
 
   // Functions to manage the logo upload modal
@@ -93,6 +122,7 @@ const EmployerProfileInformation = ({
     setPictureModalIsOpen(true);
   };
 
+  // Function to close the logo upload modal
   const closePictureModal = () => setPictureModalIsOpen(false);
 
   // Function to handle profile form submission
@@ -115,6 +145,7 @@ const EmployerProfileInformation = ({
       setModalIsOpen(false);
       if (onProfileUpdate) onProfileUpdate();
     } catch (error) {
+      // Handle error
       console.error("Failed to update profile:", error);
     }
   };
@@ -266,6 +297,36 @@ const EmployerProfileInformation = ({
                 <p className="section-text">
                   No active job listings available.
                 </p>
+              )}
+            </div>
+          </div>
+          <div className="section">
+            <h2 className="section-title">Reviews</h2>
+            <p className="average-rating">
+              Average Rating: {averageRating} / 5
+            </p>
+            <div className="reviews-container">
+              {Array.isArray(reviews) && reviews.length > 0 ? (
+                reviews.map((review) => (
+                  <div className="review-card" key={review._id}>
+                    <div className="review-rating">
+                      {Array.from({ length: review.rating }, (_, index) => (
+                        <FaStar key={index} className="star" />
+                      ))}
+                    </div>
+                    <p className="review-content">{review.content}</p>
+                    <p className="review-author">
+                      - {review.userProfile.firstName}{" "}
+                      {review.userProfile.lastName}
+                    </p>
+                    <p className="review-date">
+                      {new Date(review.createdAt).toLocaleDateString()}{" "}
+                      {/* Format the date */}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="section-text">No reviews available.</p>
               )}
             </div>
           </div>
