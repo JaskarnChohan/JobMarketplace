@@ -12,7 +12,9 @@ import {
   FaTag,
   FaCalendarAlt,
   FaGlobe,
+  FaStar,
 } from "react-icons/fa";
+import Modal from "react-modal";
 import Navbar from "../../../components/layout/Navbar";
 import Footer from "../../../components/layout/Footer";
 import Spinner from "../../../components/Spinner/Spinner";
@@ -20,68 +22,56 @@ import { useAuth } from "../../../context/AuthContext";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/ProfileInfo.css";
 import "../../../styles/Global.css";
-import "../../../styles/profile/ReviewModal.css";  // Correct CSS import
-import ReviewModal from '../Review/ReviewModal';  // Correct component import
 
+const ViewCompany = () => {
+  // Retrieve the company ID from the URL parameters
+  const { id } = useParams();
+  const [companyData, setCompanyData] = useState(null); // State to hold company data
+  const [jobListings, setJobListings] = useState([]); // State to hold job listings
+  const [reviews, setReviews] = useState([]); // State for reviews
+  const [reviewModalIsOpen, setReviewModalIsOpen] = useState(false); // State for modal visibility
+  const [reviewContent, setReviewContent] = useState(""); // State for review content
+  const [reviewRating, setReviewRating] = useState(0); // State for review rating
+  const [userHasReviewed, setUserHasReviewed] = useState(false); // State to track if the user has submitted a review
+  const [userReviewId, setUserReviewId] = useState(null); // State to store user review ID
+  const [averageRating, setAverageRating] = useState(0); // State for average rating
+  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // State for confirmation modal visibility
 
+  const [hasProfile, setHasProfile] = useState(false); // State to check if the user has a profile
+  const { user, isAuthenticated, logout, isJobSeeker } = useAuth(); // Authentication context
+  const navigate = useNavigate(); // Hook for navigation
 
-const ViewCompanyProfile = () => {
-  const { id } = useParams(); 
-  const [companyData, setCompanyData] = useState(null);
-  const [jobListings, setJobListings] = useState([]);
-  const [reviews, setReviews] = useState([]);
-  const [reviewText, setReviewText] = useState("");
-  const [reviewerName, setReviewerName] = useState("");
-  const [rating, setRating] = useState(5);
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
-
-  const { isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
-
+  // Handle user logout and navigate to home
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
-  const handleSubmitReview = async (e) => {
-    e.preventDefault();
-    try {
-      const newReview = {
-        employerId: id,
-        reviewerName,
-        reviewText,
-        rating,
-      };
-      await axios.post("http://localhost:5050/api/reviews", newReview, {
-        withCredentials: true,
-      });
-      setReviews([...reviews, newReview]); 
-      setReviewerName("");
-      setReviewText("");
-      setRating(5);
-      setIsModalOpen(false); // Close modal after submission
-    } catch (error) {
-      console.error("Failed to submit review:", error);
-    }
-  };
-  
   useEffect(() => {
+    // Function to fetch company data
     const fetchCompanyData = async () => {
       try {
         const response = await axios.get(
           `http://localhost:5050/api/employer/profile/fetch/${id}`,
           {
-            withCredentials: true,
+            withCredentials: true, // Include cookies for authentication
           }
         );
-        setCompanyData(response.data);
-        fetchJobListings();
-        fetchCompanyReviews();
+        setCompanyData(response.data); // Set the company data from the response
+        fetchJobListings(); // Fetch job listings for the company
+        fetchCompanyReviews(); // Fetch reviews for the company
+        // Check if the user has a profile
+        const profileResponse = await axios.get(
+          `http://localhost:5050/api/profile/fetch/`,
+          { withCredentials: true }
+        );
+        setHasProfile(profileResponse.data.profileExists); // Set the profile existence flag
       } catch (error) {
         console.error("Failed to fetch company data:", error);
       }
     };
 
+    // Function to fetch job listings for the company
     const fetchJobListings = async () => {
       try {
         const response = await axios.get(
@@ -91,31 +81,133 @@ const ViewCompanyProfile = () => {
           }
         );
         const openJobListings = response.data.jobs.filter(
-          (job) => job.status === "Open"
+          (job) => job.status === "Open" // Filter to get only open job listings
         );
-        setJobListings(openJobListings);
+        setJobListings(openJobListings); // Set the filtered job listings
       } catch (error) {
         console.error("Failed to fetch job listings:", error);
       }
     };
 
-    const fetchCompanyReviews = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:5050/api/reviews/${id}`,
-          {
-            withCredentials: true,
-          }
-        );
-        setReviews(response.data);
-      } catch (error) {
-        console.error("Failed to fetch reviews:", error);
-      }
-    };
-
-    fetchCompanyData();
+    fetchCompanyData(); // Initiate fetch when component mounts
   }, [id]);
 
+  // Function to open the review modal
+  const openReviewModal = (content, rating) => {
+    // Check if content is a string and rating is a number
+    if (typeof content === "string") {
+      setReviewContent(content); // Set review content
+    } else {
+      setReviewContent(""); // Default to empty if not valid
+    }
+
+    if (typeof rating === "number") {
+      setReviewRating(rating); // Set review rating
+    } else {
+      setReviewRating(0); // Default to 0 if not valid
+    }
+
+    setReviewModalIsOpen(true); // Open the modal
+  };
+
+  // Function to close the review modal
+  const closeReviewModal = () => {
+    setReviewModalIsOpen(false);
+    setReviewContent(""); // Clear content
+    setReviewRating(0); // Reset rating
+  };
+
+  // Function to fetch company reviews
+  const fetchCompanyReviews = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/employer/reviews/${id}`,
+        {
+          withCredentials: true,
+        }
+      );
+      setReviews(response.data);
+
+      const userReview = response.data.find(
+        (review) => review.user._id === user._id // Check if the logged-in user has a review
+      );
+      setUserHasReviewed(!!userReview); // Set user review state
+      if (userReview) {
+        setUserReviewId(userReview._id); // Store user review ID for deletion
+      }
+
+      // Calculate average rating
+      const totalRating = response.data.reduce(
+        (acc, review) => acc + review.rating,
+        0
+      );
+      const averageRating =
+        response.data.length > 0
+          ? (totalRating / response.data.length).toFixed(1)
+          : 0;
+      setAverageRating(averageRating); // Store average rating
+    } catch (error) {
+      console.error("Failed to fetch company reviews:", error);
+    }
+  };
+  // Function to handle review submission
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (userHasReviewed) {
+        // Edit the existing review
+        await axios.put(
+          `http://localhost:5050/api/employer/reviews/edit/${userReviewId}`,
+          {
+            content: reviewContent,
+            rating: reviewRating,
+          },
+          { withCredentials: true }
+        );
+      } else {
+        // Add a new review
+        await axios.post(
+          `http://localhost:5050/api/employer/reviews/add/${id}`,
+          {
+            content: reviewContent,
+            rating: reviewRating,
+          },
+          { withCredentials: true }
+        );
+      }
+      closeReviewModal(); // Close the modal
+      fetchCompanyReviews(); // Refresh reviews
+    } catch (error) {
+      console.error("Failed to submit review:", error);
+    }
+  };
+
+  // Function to handle review deletion
+  const handleDeleteReview = async () => {
+    try {
+      await axios.delete(
+        `http://localhost:5050/api/employer/reviews/delete/${userReviewId}`,
+        { withCredentials: true }
+      );
+      setUserHasReviewed(false); // Reset the user review state
+      fetchCompanyReviews(); // Refresh reviews after deletion
+      closeConfirmationModal(); // Close the modal after deletion
+    } catch (error) {
+      console.error("Failed to delete review:", error);
+    }
+  };
+
+  // Function to open the confirmation modal
+  const openConfirmationModal = () => {
+    setConfirmationModalIsOpen(true);
+  };
+
+  // Function to close the confirmation modal
+  const closeConfirmationModal = () => {
+    setConfirmationModalIsOpen(false);
+  };
+
+  // If company data is not yet available, show a loading spinner
   if (!companyData) return <Spinner />;
 
   return (
@@ -161,12 +253,7 @@ const ViewCompanyProfile = () => {
             {Array.isArray(jobListings) && jobListings.length > 0 ? (
               jobListings.map((job) => (
                 <div className="job-card" key={job._id}>
-                  <h3
-                    className="job-title hover"
-                    onClick={() => navigate(`/jobview/${job._id}`)}
-                  >
-                    {job.title}
-                  </h3>
+                  <h3 className="job-title">{job.title}</h3>
                   <p className="job-info">
                     <FaBuilding /> {job.jobCategory}
                   </p>
@@ -194,41 +281,149 @@ const ViewCompanyProfile = () => {
             )}
           </div>
         </div>
+        {/* New Reviews Section */}
         <div className="section">
           <h2 className="section-title">Company Reviews</h2>
-          <div className="reviews-list">
-            {reviews.length > 0 ? (
-              reviews.map((review, index) => (
-                <div className="review-card" key={index}>
-                  <strong>{review.reviewerName}</strong> ({review.rating} stars):
-                  <p>{review.reviewText}</p>
+          <p className="average-rating">
+            Average Rating: {averageRating} <FaStar />
+          </p>
+          {isAuthenticated && isJobSeeker() && hasProfile ? (
+            userHasReviewed ? (
+              <div className="manage-review-buttons">
+                <p className="section-text">Manage your review.</p>
+                <button
+                  className="btn review-btn"
+                  onClick={() => {
+                    const reviewToEdit = reviews.find(
+                      (review) => review._id === userReviewId
+                    );
+                    if (reviewToEdit) {
+                      openReviewModal(
+                        reviewToEdit.content,
+                        reviewToEdit.rating
+                      );
+                    }
+                  }}
+                >
+                  Edit Review
+                </button>
+                <button
+                  className="btn delete-review-btn"
+                  onClick={openConfirmationModal}
+                >
+                  Delete Review
+                </button>
+              </div>
+            ) : (
+              <button className="btn review-btn" onClick={openReviewModal}>
+                Add Review
+              </button>
+            )
+          ) : (
+            <p className="section-text">
+              You must create a profile to write a review.
+            </p>
+          )}
+          <div className="reviews-container">
+            {Array.isArray(reviews) && reviews.length > 0 ? (
+              reviews.map((review) => (
+                <div className="review-card" key={review._id}>
+                  <div className="review-rating">
+                    {Array.from({ length: review.rating }, (_, index) => (
+                      <FaStar key={index} className="star" />
+                    ))}
+                  </div>
+                  <p className="review-content">{review.content}</p>
+                  <p className="review-author">
+                    - {review.userProfile.firstName}{" "}
+                    {review.userProfile.lastName}
+                  </p>
+                  <p className="review-date">
+                    {new Date(review.createdAt).toLocaleDateString()}{" "}
+                    {/* Format the date */}
+                  </p>
                 </div>
               ))
             ) : (
               <p className="section-text">No reviews available.</p>
             )}
           </div>
-          <button onClick={() => setIsModalOpen(true)} className="write-review-btn">
-            Write a Review
-          </button>
         </div>
       </div>
-      <Footer />
 
-      {/* Render the ReviewModal */}
-      <ReviewModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        handleSubmitReview={handleSubmitReview}
-        reviewerName={reviewerName}
-        setReviewerName={setReviewerName}
-        reviewText={reviewText}
-        setReviewText={setReviewText}
-        rating={rating}
-        setRating={setRating}
-      />
+      {/* Review Modal */}
+      <Modal
+        isOpen={reviewModalIsOpen}
+        onRequestClose={closeReviewModal}
+        className="modal-wrapper"
+      >
+        <div className="modal">
+          <h1 className="lrg-heading">
+            {userHasReviewed ? "Edit Your Review" : "Add a Review"}
+          </h1>
+          <form onSubmit={handleReviewSubmit}>
+            <label htmlFor="rating">Rating</label>
+            <select
+              id="rating"
+              value={reviewRating}
+              onChange={(e) => setReviewRating(e.target.value)}
+              required
+            >
+              <option value="">Select Rating</option>
+              {[1, 2, 3, 4, 5].map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+            <label htmlFor="content">Review</label>
+            <textarea
+              id="content"
+              value={reviewContent}
+              onChange={(e) => setReviewContent(e.target.value)}
+              required
+            ></textarea>
+            <div className="btn-container">
+              <button type="submit" className="btn-save">
+                Save
+              </button>
+              <button
+                type="button"
+                className="btn-cancel"
+                onClick={closeReviewModal}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </Modal>
+
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={confirmationModalIsOpen}
+        onRequestClose={closeConfirmationModal}
+        className="modal-wrapper"
+      >
+        <div className="modal">
+          <h1 className="lrg-heading">Delete Review</h1>
+          <p className="med-text">
+            Are you sure you want to delete this review?
+          </p>
+          <div className="btn-container">
+            <button onClick={handleDeleteReview} className="btn-delete">
+              Delete
+            </button>
+            <button onClick={closeConfirmationModal} className="btn-cancel">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Footer />
     </div>
   );
 };
 
-export default ViewCompanyProfile;
+export default ViewCompany;

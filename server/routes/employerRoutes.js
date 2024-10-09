@@ -26,6 +26,26 @@ router.post(
   employerController.updateCompanyLogo
 );
 
+// Route for adding a review
+router.post("/reviews/add/:id", authenticate, employerController.createReview);
+
+// Route for editing a review
+router.put(
+  "/reviews/edit/:reviewId",
+  authenticate,
+  employerController.editReview
+);
+
+// Route for deleting a review
+router.delete(
+  "/reviews/delete/:reviewId",
+  authenticate,
+  employerController.deleteReview
+);
+
+// Route for fetching company reviews
+router.get("/reviews/:companyId/", employerController.getCompanyReviews);
+
 // Route for fetching a specific company profile by its ID
 router.get("/profile/fetch/:id", employerController.getCompanyProfileById);
 
