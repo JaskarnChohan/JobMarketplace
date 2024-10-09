@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Spinner from "../../../components/Spinner/Spinner";
 import { FaMapMarkerAlt, FaGlobe, FaBriefcase, FaTag } from "react-icons/fa";
@@ -39,6 +39,11 @@ const BrowseEmployers = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchEmployers();
+  }, []);
+
 
   // Handle user logout
   const handleLogout = () => {

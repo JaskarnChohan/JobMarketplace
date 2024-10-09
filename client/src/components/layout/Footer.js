@@ -84,14 +84,6 @@ const Footer = () => {
 
       <div className="footer-bottom">
         <p className="footer-text">© 2024 JobHive. All rights reserved.</p>
-        <div className="footer-buttons">
-          <a href="/privacy" className="btn">
-            Privacy Policy
-          </a>
-          <a href="/terms" className="btn">
-            Terms of Service
-          </a>
-        </div>
       </div>
     </footer>
   );

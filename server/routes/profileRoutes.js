@@ -12,6 +12,8 @@ const upload = require("../middleware/multer");
 router.post("/create", authenticate, profileController.createProfile); // Create a new profile
 router.put("/update", authenticate, profileController.updateProfile); // Update existing profile
 router.get("/fetch", authenticate, profileController.getProfile); // Fetch the profile
+router.put("/updateSavedJobs", authenticate, profileController.updateSavedJobs); // Save a job
+router.get("/getSavedJobs", authenticate, profileController.getSavedJobs); // Fetch saved jobs
 router.post(
   "/update-picture",
   authenticate,
@@ -26,6 +28,12 @@ router.post(
 );
 router.get("/resume/fetch", authenticate, profileController.getResume); // Fetch resume
 router.delete("/resume/delete", authenticate, profileController.deleteResume); // Delete resume
+// Route for Updating Resume Privacy
+router.put(
+  "/resume/privacy",
+  authenticate,
+  profileController.updateResumePrivacy // Update resume privacy
+);
 
 // Fetch profile by user ID
 router.get("/user/:userId", profileController.getProfileByUserId); // Fetch profile by user ID

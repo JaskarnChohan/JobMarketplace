@@ -38,6 +38,15 @@ const profileSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    resumePrivacy: {
+      type: String,
+      enum: ["public", "private"], // Define allowed values
+      default: "private", // Set default privacy level
+    },
+    savedJobs: {  // Define the savedJobs field
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );

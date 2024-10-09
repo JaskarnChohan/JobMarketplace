@@ -106,6 +106,10 @@ const JobManagement = () => {
     }
   };
 
+  useEffect(() => {
+    getJobListings();
+  }, []);
+
   const handleCreateJobButton = () => {
     navigate("/createjob"); // Navigate to create job page
   };

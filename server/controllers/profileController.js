@@ -96,6 +96,55 @@ exports.createProfile = async (req, res) => {
   }
 };
 
+// Get saved jobs
+exports.getSavedJobs = async (req, res) => {
+  try {
+    // Fetch the user's profile
+    const profile = await Profile.findOne({ user: req.user.id });
+
+    // If profile is not found, return an error
+    if (!profile) {
+      return res.status(404).json({ errors: [{ msg: "Profile not found" }] });
+    }
+
+    res.json({ savedJobs: profile.savedJobs });
+    console.log("getSavedJobs called: " + profile.savedJobs);
+  } catch (err) {
+    // Handle server error
+    console.error(err.message);
+    res.status(500).json({ errors: [{ msg: "Server error" }] });
+  }
+};
+
+// Update saved jobs
+exports.updateSavedJobs = async (req, res) => {
+  try {
+    const { savedJobs } = req.body;
+    console.log("updateSavedJobs called with: " + savedJobs);
+
+    // Fetch the user's profile
+    let profile = await Profile.findOne({ user: req.user.id });
+
+    // if profile not found, return an error
+    if (!profile) {
+      console.log("profile not found");
+      return res.status(404).json({ errors: [{ msg: "Profile not found" }] });
+    }
+
+    // Update the saved jobs using $set operator
+    profile.savedJobs = savedJobs;
+    await profile.save();
+
+    console.log("Saved jobs updated: " + profile.savedJobs);
+
+    res.json({ savedJobs: profile.savedJobs });
+  } catch (err) {
+    // Handle server error
+    console.error(err.message);
+    res.status(500).json({ errors: [{ msg: "Server error" }] });
+  }
+};
+
 // Update profile
 exports.updateProfile = async (req, res) => {
   try {
@@ -106,6 +155,7 @@ exports.updateProfile = async (req, res) => {
       phoneNumber,
       bio,
       preferredClassification,
+      savedJobs,
     } = req.body;
 
     // Find the user's profile
@@ -197,6 +247,7 @@ exports.updateProfilePicture = async (req, res) => {
 // Update Resume
 exports.updateResume = async (req, res) => {
   try {
+    const { privacySetting = "private" } = req.body; // Default to "private" if not provided
     const profile = await Profile.findOne({ user: req.user.id });
 
     // Check if the profile exists
@@ -219,13 +270,16 @@ exports.updateResume = async (req, res) => {
       }
     }
 
-    // Save the new resume
+    // Save the new resume and privacy setting
     profile.resume = req.file.path;
+    profile.resumePrivacy = privacySetting; // Set privacy based on request
     await profile.save();
 
-    res
-      .status(200)
-      .json({ message: "Resume updated successfully", resume: profile.resume });
+    res.status(200).json({
+      message: "Resume updated successfully",
+      resume: profile.resume,
+      resumePrivacy: profile.resumePrivacy, // Return the updated privacy setting
+    });
   } catch (err) {
     // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
@@ -238,18 +292,26 @@ exports.getResume = async (req, res) => {
     const profile = await Profile.findOne({ user: req.user.id });
 
     // Check if the profile exists
-    if (!profile || !profile.resume) {
+    if (!profile) {
+      return res.status(404).json({ errors: [{ msg: "Profile not found" }] });
+    }
+
+    // Check privacy setting
+    if (!profile.resume) {
       return res
         .status(200)
-        .json({ resume: null, message: "No resume uploaded yet" });
+        .json({ resume: null, message: "Resume is not uploaded" });
     }
 
     // Get the resume filename
     const resumeFilename = profile.resume;
 
     // Check if the file exists
-    if (fs.existsSync(profile.resume)) {
-      return res.status(200).json({ resume: resumeFilename });
+    if (fs.existsSync(resumeFilename)) {
+      return res.status(200).json({
+        resume: resumeFilename,
+        privacySetting: profile.resumePrivacy,
+      });
     } else {
       return res
         .status(404)
@@ -338,5 +400,32 @@ exports.getProfileByUserId = async (req, res) => {
   } catch (err) {
     // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
+  }
+};
+
+// Update Resume Privacy
+exports.updateResumePrivacy = async (req, res) => {
+  try {
+    const { privacySetting } = req.body; // Get the new privacy setting
+    const userId = req.user.id; // Get the user ID from the authenticated request
+
+    // Find the user's profile and update the resume privacy setting
+    const updatedProfile = await Profile.findOneAndUpdate(
+      { user: userId }, // Search by user ID in the profile
+      { resumePrivacy: privacySetting }, // Update privacy setting, converting to boolean
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedProfile) {
+      return res.status(404).json({ message: "Profile not found" });
+    }
+
+    return res.status(200).json({
+      message: "Resume privacy setting updated successfully",
+      resumePrivacy: updatedProfile.resumePrivacy, // Return the updated privacy setting
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
   }
 };

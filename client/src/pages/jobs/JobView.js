@@ -23,6 +23,7 @@ const JobView = () => {
   const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // State to manage modal visibility
   const navigate = useNavigate(); // Hook to navigate programmatically
   const [loading, setLoading] = useState(true); // State to manage loading status
+  const [errors, setErrors] = useState([]); // State to hold error messages
 
   // State to hold job details
   const [job, setJob] = useState({
@@ -40,6 +41,8 @@ const JobView = () => {
     status: "",
     datePosted: "",
   });
+
+  const [savedJobs, setSavedJobs] = useState([]); // State to hold saved jobs
 
   const [hasApplied, setHasApplied] = useState(false); // Track if the user has applied
 
@@ -85,6 +88,20 @@ const JobView = () => {
     fetchJob();
   }, [_id, isAuthenticated, user]);
 
+  // Fetch saved jobs on component mount
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      try {
+        const response = await axios.get(`/api/profile/getSavedJobs`);
+        setSavedJobs(response.data.savedJobs); // Update saved jobs state
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchSavedJobs();
+  }, []);
+
   if (loading) return <Spinner />; // Show loading spinner while data is being fetched
   if (!job)
     // If job data isn't found
@@ -99,6 +116,16 @@ const JobView = () => {
   const daysAgo = Math.floor(
     (new Date() - new Date(job.datePosted)) / (1000 * 60 * 60 * 24)
   );
+
+  // get saved jobs
+  const getSavedJobs = async () => {
+    try { // Send request to fetch saved jobs
+      const response = await axios.get(`/api/profile/getSavedJobs`);
+      setSavedJobs(response.data.savedJobs); // Update saved jobs state
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Handle user logout
   const handleLogout = () => {
@@ -126,6 +153,29 @@ const JobView = () => {
     }
   };
 
+  const isJobSaved = () => {
+    return savedJobs.includes(job._id); // Check if job is saved
+  };
+
+  const handleSaveJob = async (job) => {
+    try {
+      let updatedSavedJobs = []; // Initialize updated saved jobs array
+      if (savedJobs.includes(job._id)) { // Remove job from saved jobs if already saved
+        updatedSavedJobs = savedJobs.filter((savedJob) => savedJob !== job._id);
+      } else { // Add job to saved jobs if not already saved
+        updatedSavedJobs = [...savedJobs, job._id];
+      }
+      setSavedJobs(updatedSavedJobs); // Update saved jobs state
+      await axios.put(
+        `http://localhost:5050/api/profile/updateSavedJobs`,
+        { savedJobs: updatedSavedJobs }, // Ensure the payload is correctly formatted
+        { withCredentials: true } // Ensure credentials (cookies) are included in request
+      );  
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div>
       <Navbar isAuthenticated={isAuthenticated} handleLogout={handleLogout} />
@@ -140,6 +190,13 @@ const JobView = () => {
             >
               {job.company}
             </p>
+            {isJobSaved(job._id) ? (
+              <button className="btn btn-delete" onClick={() => handleSaveJob(job)}>
+                Unsave Job
+              </button>
+            ) : (
+            <button className="btn" onClick={() => handleSaveJob(job)}>Save Job</button>
+            )}
           </div>
 
           <div className="job-icons">
@@ -224,6 +281,14 @@ const JobView = () => {
           </div>
         </div>
       </div>
+      {/* display errors */}
+      {errors.length > 0 && (
+        <div className="error-messages">
+          {errors.map((error, index) => (
+            <p key={index}>{error.msg}</p>
+          ))}
+        </div>
+      )}
       {/* Confirmation Modal */}
       <Modal
         isOpen={confirmationModalIsOpen}

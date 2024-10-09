@@ -261,3 +261,23 @@ exports.validateResetToken = async (req, res) => {
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
+
+// Get User ID by Email
+exports.getUserIdByEmail = async (req, res) => {
+  const { email } = req.params;
+
+  try {
+    // Find the user by email
+    const user = await User.findOne({ email: email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Return the user ID
+    res.json({ userId: user._id });
+  } catch (error) {
+    console.error("Error fetching user ID by email", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

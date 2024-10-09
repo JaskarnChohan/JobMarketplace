@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/layout/Navbar";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, redirect } from "react-router-dom";
 import Modal from "react-modal";
 import "../styles/Global.css";
 import "../styles/job/Job.css";
@@ -20,6 +20,9 @@ const Dashboard = () => {
   const [errors, setErrors] = useState([]); // State to hold error messages
   const [currentApplication, setCurrentApplication] = useState(null); // Current application for deletion
   const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // Modal visibility state
+  // George Haeberlin: Added savedJobIds and savedJobs states
+  const [savedJobIds, setSavedJobIds] = useState([]); // State to hold saved job ids
+  const [savedJobs, setSavedJobs] = useState([]); // State to hold saved jobs
 
   // Fetch user jobs or applications based on user role
   useEffect(() => {
@@ -125,6 +128,45 @@ const Dashboard = () => {
     setCurrentApplication(null); // Clear current application
   };
 
+  // George Haeberlin: Get saved jobs functionality
+  // get saved job IDs
+  const getSavedJobIds = async () => {
+    try { // Send request to fetch saved jobs
+      const response = await axios.get(`/api/profile/getSavedJobs`);
+      setSavedJobIds(response.data.savedJobs); // Update saved jobs state
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // George Haeberlin: Fetch saved jobs functionality
+  // fetch saved jobs
+  const fetchSavedJobs = async () => {
+    try {
+      const jobPromises = savedJobIds.map((jobId) =>
+        axios.get(`/api/jobs/${jobId}`)
+      );
+      const jobResponses = await Promise.all(jobPromises);
+      const jobs = jobResponses.map((res) => res.data);
+      setSavedJobs(jobs); // Update saved jobs state
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    const fetchSavedJobsData = async () => {
+      await getSavedJobIds(); // Fetch saved job IDs
+    };
+    fetchSavedJobsData();
+  }, []);
+
+  useEffect(() => {
+    if (savedJobIds.length > 0) {
+      fetchSavedJobs(); // Fetch saved jobs
+    }
+  }, [savedJobIds]);
+
   // Handle application deletion
   const handleDeleteApplication = async () => {
     try {
@@ -171,10 +213,53 @@ const Dashboard = () => {
     }
   };
 
+  // George Haeberlin: Handle quick apply for job
+  // Handle quick apply for job
+  const handleQuickApply = async (jobId) => {
+    try {
+      await axios.post(`http://localhost:5050/api/application`, {
+        userId: user._id,
+        jobId: jobId,
+      });
+      fetchUserApplications(); // Refresh applications after applying
+      navigate("/dashboard"); // Redirect to dashboard after applying
+    } catch (err) {
+      setErrors([
+        {
+          msg: "An error occurred while applying for the job: " + err.message,
+        },
+      ]);
+    }
+  };
+
+  // George Haeberlin: Handle unsave job
+  // Handle unsave job
+  const handleUnsaveJob = async (jobId) => {
+    try {
+      const updatedSavedJobIds = savedJobIds.filter((id) => id !== jobId);
+      setSavedJobIds(updatedSavedJobIds); // Update saved job IDs
+      await axios.put(
+        `http://localhost:5050/api/profile/updateSavedJobs`,
+        { savedJobs: updatedSavedJobIds },
+        { withCredentials: true }
+      );
+      redirect("/dashboard"); // Redirect to dashboard after unsaving
+    } catch (err) {
+      setErrors([
+        {
+          msg: "An error occurred while unsaving the job: " + err.message,
+        },
+      ]);
+    }
+  };
+
   // Show spinner while loading user data
   if (!user) {
     return <Spinner />;
   }
+
+  // Filter out saved jobs with status "Draft"
+  const filteredSavedJobs = savedJobs.filter((job) => job.status !== "Draft");
 
   return (
     <div className="min-height">
@@ -195,6 +280,9 @@ const Dashboard = () => {
                   </Link>
                   <Link to="/jobmanagement">
                     <button className="btn help-button">Manage Jobs</button>
+                  </Link>
+                  <Link to="/messages">
+                    <button className="btn help-button">Messages</button>
                   </Link>
                   <Link to="/browse-employers">
                     <button className="btn help-button">
@@ -283,6 +371,9 @@ const Dashboard = () => {
                       Manage Your Profile
                     </button>
                   </Link>
+                  <Link to="/messages">
+                    <button className="btn help-button">Messages</button>
+                  </Link>
                   <Link to="/browse-employers">
                     <button className="btn help-button">
                       Browse Employers
@@ -338,6 +429,47 @@ const Dashboard = () => {
                 ))
               ) : (
                 <p className="sub-headings">You have no applications yet.</p>
+              )}
+            </div>
+            {/* Saved Jobs Section */}
+            <div>
+              <h3 className="page-title">Saved Jobs</h3>
+
+              {/* Check if there are any saved jobs */}
+              {filteredSavedJobs.length > 0 ? (
+                <div className="applicants-grid">
+                  {filteredSavedJobs.map((job) => (
+                    <div key={job._id} className="applicant">
+                      <h4
+                        className="job-title hover"
+                        onClick={() => navigate(`/jobview/${job._id}`)}
+                      >
+                        {job.title}
+                      </h4>
+                      <p className="job-info">
+                        <FaTag /> {job.status}
+                      </p>
+                      <p className="job-info">
+                        Posted At:{" "}
+                        {new Date(job.createdAt).toLocaleDateString()}
+                      </p>
+                      <button
+                        className="small-btn"
+                        onClick={() => handleQuickApply(job._id)}
+                      >
+                        Quick Apply
+                      </button>
+                      <button
+                        className="small-btn btn-delete"
+                        onClick={() => handleUnsaveJob(job._id)}
+                      >
+                        Unsave Job
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="sub-headings">You have no saved jobs yet.</p>
               )}
             </div>
           </>
