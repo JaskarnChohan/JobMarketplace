@@ -9,6 +9,7 @@ import "../styles/job/Job.css";
 import "../styles/job/JobCards.css";
 import { FaTag } from "react-icons/fa";
 import Spinner from "../components/Spinner/Spinner";
+import AIQuestionImprover from "./AIQuestionImprover";
 
 const Dashboard = () => {
   const { logout, user } = useAuth(); // Get logout function and user info from context
@@ -131,7 +132,8 @@ const Dashboard = () => {
   // George Haeberlin: Get saved jobs functionality
   // get saved job IDs
   const getSavedJobIds = async () => {
-    try { // Send request to fetch saved jobs
+    try {
+      // Send request to fetch saved jobs
       const response = await axios.get(`/api/profile/getSavedJobs`);
       setSavedJobIds(response.data.savedJobs); // Update saved jobs state
     } catch (err) {
@@ -472,6 +474,8 @@ const Dashboard = () => {
                 <p className="sub-headings">You have no saved jobs yet.</p>
               )}
             </div>
+            {/* AI Question Improver Component */}
+            <AIQuestionImprover />
           </>
         ) : (
           <p className="sub-headings">
