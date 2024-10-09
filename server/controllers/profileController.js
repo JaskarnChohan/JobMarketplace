@@ -96,6 +96,55 @@ exports.createProfile = async (req, res) => {
   }
 };
 
+// Get saved jobs
+exports.getSavedJobs = async (req, res) => {
+  try {
+    // Fetch the user's profile
+    const profile = await Profile.findOne({ user: req.user.id });
+
+    // If profile is not found, return an error
+    if (!profile) {
+      return res.status(404).json({ errors: [{ msg: "Profile not found" }] });
+    }
+
+    res.json({ savedJobs: profile.savedJobs });
+    console.log("getSavedJobs called: " + profile.savedJobs);
+  } catch (err) {
+    // Handle server error
+    console.error(err.message);
+    res.status(500).json({ errors: [{ msg: "Server error" }] });
+  }
+};
+
+// Update saved jobs
+exports.updateSavedJobs = async (req, res) => {
+  try {
+    const { savedJobs } = req.body;
+    console.log("updateSavedJobs called with: " + savedJobs);
+
+    // Fetch the user's profile
+    let profile = await Profile.findOne({ user: req.user.id });
+
+    // if profile not found, return an error
+    if (!profile) {
+      console.log("profile not found");
+      return res.status(404).json({ errors: [{ msg: "Profile not found" }] });
+    }
+
+    // Update the saved jobs using $set operator
+    profile.savedJobs = savedJobs;
+    await profile.save();
+
+    console.log("Saved jobs updated: " + profile.savedJobs);
+
+    res.json({ savedJobs: profile.savedJobs });
+  } catch (err) {
+    // Handle server error
+    console.error(err.message);
+    res.status(500).json({ errors: [{ msg: "Server error" }] });
+  }
+};
+
 // Update profile
 exports.updateProfile = async (req, res) => {
   try {
@@ -106,6 +155,7 @@ exports.updateProfile = async (req, res) => {
       phoneNumber,
       bio,
       preferredClassification,
+      savedJobs,
     } = req.body;
 
     // Find the user's profile
