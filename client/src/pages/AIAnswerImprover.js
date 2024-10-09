@@ -1,17 +1,27 @@
 import React, { useState } from "react";
+import Navbar from "../components/layout/Navbar";
 import axios from "axios";
+import { useNavigate, Link, redirect } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Global.css";
+import "../styles/profile/ProfileInfo.css";
 import Modal from "react-modal";
 import Spinner from "../components/Spinner/Spinner";
 
-const AIQuestionImprover = () => {
-  const { user } = useAuth(); // Get user info from context
+const AIAnswerImprover = () => {
+  const { logout, user } = useAuth(); // Get logout function and user info from context
+  const navigate = useNavigate();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [aiResponse, setAiResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Handle user logout
+  const handleLogout = () => {
+    logout(); // Call logout from context
+    navigate("/"); // Redirect to home page
+  };
 
   // Validate the input for a question and answer
   const validateInput = () => {
@@ -53,39 +63,41 @@ const AIQuestionImprover = () => {
 
   return (
     <div className="min-height">
-      <div className="ai-improver-section">
-        <h2 className="lrg-heading">AI Question and Answer Improver</h2>
-        <p className="med-heading">
-          Enter a question and answer, and AI will help improve it!
-        </p>
-        <div className="ai-inputs">
-          <div className="input-field">
-            <label>Question:</label>
-            <input
-              type="text"
-              value={question}
-              onChange={(e) => setQuestion(e.target.value)}
-              placeholder="Enter your question"
-            />
+      <Navbar isAuthenticated={true} handleLogout={handleLogout} />
+      <div className="ai-improver-section dashboard">
+        <br />
+        <div className="dashboard-banner">
+          <h2 className="lrg-heading">AI Interview Answer Improver</h2>
+          <p className="med-heading">
+            Enter a question and answer, and AI will help improve your answer!
+          </p>
+          <div className="ai-inputs">
+            <div className="input-field">
+              <label>Question:</label>
+              <input
+                type="text"
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="Enter your question"
+              />
+            </div>
+            <div className="input-field">
+              <label>Answer:</label>
+              <textarea
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                placeholder="Enter your answer"
+              />
+            </div>
           </div>
-          <div className="input-field">
-            <label>Answer:</label>
-            <textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Enter your answer"
-            />
-          </div>
+          {error && <p className="error-messages">{error}</p>}
+          <button className="btn" onClick={handleImprove}>
+            Improve with AI
+          </button>
         </div>
-        {error && <p className="error-message">{error}</p>}
-        <button className="btn improve-btn" onClick={handleImprove}>
-          Improve with AI
-        </button>
-
         {loading && <Spinner />}
         {aiResponse && (
           <div className="ai-response">
-            <h3>Improved Text:</h3>
             <div
               className="improved-text"
               dangerouslySetInnerHTML={{ __html: aiResponse }}
@@ -97,4 +109,4 @@ const AIQuestionImprover = () => {
   );
 };
 
-export default AIQuestionImprover;
+export default AIAnswerImprover;

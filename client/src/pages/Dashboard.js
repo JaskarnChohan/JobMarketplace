@@ -9,7 +9,7 @@ import "../styles/job/Job.css";
 import "../styles/job/JobCards.css";
 import { FaTag } from "react-icons/fa";
 import Spinner from "../components/Spinner/Spinner";
-import AIQuestionImprover from "./AIQuestionImprover";
+import AIAnswerImprover from "./AIAnswerImprover";
 
 const Dashboard = () => {
   const { logout, user } = useAuth(); // Get logout function and user info from context
@@ -361,6 +361,16 @@ const Dashboard = () => {
               <h2 className="lrg-heading">Dashboard</h2>
               <p className="med-heading">Manage your Applications!</p>
               <div className="help-guide">
+                <h2>Improve Yourself</h2>
+                <div className="help-links">
+                  <Link to="/enchanceanswers">
+                    <button className="btn help-button">
+                      Enhance Interview Answers
+                    </button>
+                  </Link>
+                </div>
+              </div>
+              <div className="help-guide">
                 <h2>Help Guide</h2>
                 <div className="help-links">
                   <Link to="/joblistings">
@@ -474,8 +484,6 @@ const Dashboard = () => {
                 <p className="sub-headings">You have no saved jobs yet.</p>
               )}
             </div>
-            {/* AI Question Improver Component */}
-            <AIQuestionImprover />
           </>
         ) : (
           <p className="sub-headings">
