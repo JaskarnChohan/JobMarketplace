@@ -19,9 +19,14 @@ import "react-datepicker/dist/react-datepicker.css";
 const JobView = () => {
   const { _id } = useParams(); // Extract the job ID from the URL
   const { isAuthenticated, logout, user, isJobSeeker } = useAuth(); // Grab authentication details from context
+  const [hasProfile, setHasProfile] = useState(false); // State to track if user has a profile
   const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // State to manage modal visibility
   const navigate = useNavigate(); // Hook to navigate programmatically
   const [loading, setLoading] = useState(true); // State to manage loading status
+  const [errors, setErrors] = useState([]); // State to hold error messages
+
+  const [questions, setQuestions] = useState([]); // State to hold job questions
+  const [answers, setAnswers] = useState({}); // State to hold user answers
 
   // State to hold job details
   const [job, setJob] = useState({
@@ -40,6 +45,8 @@ const JobView = () => {
     datePosted: "",
   });
 
+  const [savedJobs, setSavedJobs] = useState([]); // State to hold saved jobs
+
   const [hasApplied, setHasApplied] = useState(false); // Track if the user has applied
 
   // Fetch job details on component mount
@@ -48,11 +55,12 @@ const JobView = () => {
       try {
         const response = await axios.get(
           `http://localhost:5050/api/jobs/${_id}`
-        ); // Get job data
-        setJob(response.data); // Set job data in state
+        );
+        setJob(response.data);
+        setQuestions(response.data.questions);
 
-        // Check if the user has already applied for this job
         if (isAuthenticated && user) {
+          // Check if the user has already applied for this job
           const applicationResponse = await axios.get(
             `http://localhost:5050/api/application/check`,
             {
@@ -62,18 +70,41 @@ const JobView = () => {
               },
             }
           );
-          setHasApplied(applicationResponse.data.hasApplied); // Update the application status
+          setHasApplied(applicationResponse.data.hasApplied);
+
+          // Check if the user has a profile
+          const profileResponse = await axios.get(
+            `http://localhost:5050/api/profile/fetch/`,
+            { withCredentials: true } // Ensure credentials (cookies) are included in request
+          );
+
+          // Update profile existence state based on response
+          setHasProfile(profileResponse.data.profileExists);
         }
 
-        setLoading(false); // Set loading to false after data fetch
+        setLoading(false);
       } catch (err) {
-        setLoading(false); // Handle errors and stop loading
-        console.error(err); // Log any errors to the console
+        setLoading(false);
+        console.error(err);
       }
     };
 
-    fetchJob(); // Call the function to fetch job data
-  }, [_id, isAuthenticated, user]); // Re-run if job ID or authentication status changes
+    fetchJob();
+  }, [_id, isAuthenticated, user]);
+
+  // Fetch saved jobs on component mount
+  useEffect(() => {
+    const fetchSavedJobs = async () => {
+      try {
+        const response = await axios.get(`/api/profile/getSavedJobs`);
+        setSavedJobs(response.data.savedJobs); // Update saved jobs state
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchSavedJobs();
+  }, []);
 
   if (loading) return <Spinner />; // Show loading spinner while data is being fetched
   if (!job)
@@ -90,6 +121,17 @@ const JobView = () => {
     (new Date() - new Date(job.datePosted)) / (1000 * 60 * 60 * 24)
   );
 
+  // get saved jobs
+  const getSavedJobs = async () => {
+    try {
+      // Send request to fetch saved jobs
+      const response = await axios.get(`/api/profile/getSavedJobs`);
+      setSavedJobs(response.data.savedJobs); // Update saved jobs state
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // Handle user logout
   const handleLogout = () => {
     logout(); // Call logout function
@@ -102,17 +144,73 @@ const JobView = () => {
 
   const closeConfirmationModal = () => setConfirmationModalIsOpen(false); // Close the modal
 
+  // Handle answer change
+  const handleAnswerChange = (question, answer) => {
+    setAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [question]: answer,
+    }));
+  };
+
+  // Modify the handleApply function to include answers
   const handleApply = async () => {
+    const unansweredQuestions = questions.filter(
+      (question) => !answers[question]
+    );
+
+    if (unansweredQuestions.length > 0) {
+      // Set error message for unanswered questions
+      setErrors([{ msg: "Please answer all questions before applying." }]);
+      return; // Exit the function to prevent further execution
+    }
     try {
-      // Send application request
+      setLoading(true); // Set loading state to true
+      // Prepare the questions and answers for submission
+      const questionsAndAnswers = questions.map((question) => ({
+        question,
+        userAnswer: answers[question] || "", // Default to empty if no answer provided
+      }));
+
+      // Send application request with answers
       await axios.post(`http://localhost:5050/api/application/`, {
         jobId: _id,
         userId: user._id,
+        questions: questionsAndAnswers, // Include questions and answers
       });
+
+      // Reset errors
+      setErrors([]);
+
       setHasApplied(true); // Update applied status
       navigate("/dashboard"); // Redirect to dashboard
+      setLoading(false); // Set loading state to false
     } catch (err) {
       closeConfirmationModal(); // Close modal on error
+    }
+  };
+
+  const isJobSaved = () => {
+    return savedJobs.includes(job._id); // Check if job is saved
+  };
+
+  const handleSaveJob = async (job) => {
+    try {
+      let updatedSavedJobs = []; // Initialize updated saved jobs array
+      if (savedJobs.includes(job._id)) {
+        // Remove job from saved jobs if already saved
+        updatedSavedJobs = savedJobs.filter((savedJob) => savedJob !== job._id);
+      } else {
+        // Add job to saved jobs if not already saved
+        updatedSavedJobs = [...savedJobs, job._id];
+      }
+      setSavedJobs(updatedSavedJobs); // Update saved jobs state
+      await axios.put(
+        `http://localhost:5050/api/profile/updateSavedJobs`,
+        { savedJobs: updatedSavedJobs }, // Ensure the payload is correctly formatted
+        { withCredentials: true } // Ensure credentials (cookies) are included in request
+      );
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -130,6 +228,18 @@ const JobView = () => {
             >
               {job.company}
             </p>
+            {isJobSaved(job._id) ? (
+              <button
+                className="btn btn-delete"
+                onClick={() => handleSaveJob(job)}
+              >
+                Unsave Job
+              </button>
+            ) : (
+              <button className="btn" onClick={() => handleSaveJob(job)}>
+                Save Job
+              </button>
+            )}
           </div>
 
           <div className="job-icons">
@@ -154,22 +264,28 @@ const JobView = () => {
             </p>
 
             {isAuthenticated ? (
-              isJobSeeker() && job.status === "Open" && !hasApplied ? (
-                <div className="apply-button-container">
-                  <button
-                    className="btn"
-                    onClick={() => openConfirmationModal(true)}
-                  >
-                    Quick Apply
-                  </button>
-                </div>
-              ) : hasApplied ? (
-                <p className="applied-notification">
-                  You have already applied for this job.
-                </p>
+              hasProfile ? (
+                isJobSeeker() && job.status === "Open" && !hasApplied ? (
+                  <div className="apply-button-container">
+                    <button
+                      className="btn"
+                      onClick={() => openConfirmationModal(true)}
+                    >
+                      Quick Apply
+                    </button>
+                  </div>
+                ) : hasApplied ? (
+                  <p className="applied-notification">
+                    You have already applied for this job.
+                  </p>
+                ) : (
+                  <p className="status-notification">
+                    This job is currently not accepting applications.
+                  </p>
+                )
               ) : (
-                <p className="status-notification">
-                  This job is currently not accepting applications.
+                <p className="profile-notification">
+                  You need to complete your profile before applying.
                 </p>
               )
             ) : (
@@ -208,6 +324,14 @@ const JobView = () => {
           </div>
         </div>
       </div>
+      {/* display errors */}
+      {errors.length > 0 && (
+        <div className="error-messages">
+          {errors.map((error, index) => (
+            <p key={index}>{error.msg}</p>
+          ))}
+        </div>
+      )}
       {/* Confirmation Modal */}
       <Modal
         isOpen={confirmationModalIsOpen}
@@ -219,8 +343,27 @@ const JobView = () => {
           <p className="med-text">
             By applying to this job, the employer can see your profile.
           </p>
+          {questions.map((question, index) => (
+            <div key={index}>
+              <label>{question}</label>
+              <input
+                required
+                type="text"
+                value={answers[question] || ""}
+                onChange={(e) => handleAnswerChange(question, e.target.value)}
+              />
+            </div>
+          ))}
+          {/* Display errors */}
+          {errors.length > 0 && (
+            <div className="error-messages">
+              {errors.map((error, index) => (
+                <p key={index}>{error.msg}</p>
+              ))}
+            </div>
+          )}
           <div className="btn-container">
-            <button onClick={handleApply} className="btn-delete">
+            <button onClick={handleApply} className="btn-confirm">
               Confirm
             </button>
             <button onClick={closeConfirmationModal} className="btn-cancel">

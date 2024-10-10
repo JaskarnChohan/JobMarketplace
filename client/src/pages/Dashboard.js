@@ -251,6 +251,32 @@ const Dashboard = () => {
                                   Delete Application
                                 </button>
                               </p>
+                              <div className="application-details">
+                                {/* Only show applicant answers if there are any questions */}
+                                {app.questions && app.questions.length > 0 && (
+                                  <>
+                                    <h4 className="application-heading">
+                                      Applicant Answers:
+                                    </h4>
+                                    {app.questions.map((question, index) => (
+                                      <div
+                                        key={index}
+                                        className="question-detail"
+                                      >
+                                        <p>
+                                          <strong>Question:</strong>{" "}
+                                          {question.question}
+                                        </p>
+                                        <p>
+                                          <strong>Answer:</strong>{" "}
+                                          {question.userAnswer}
+                                        </p>
+                                        <br />
+                                      </div>
+                                    ))}
+                                  </>
+                                )}
+                              </div>
                             </div>
                           ))
                         ) : (

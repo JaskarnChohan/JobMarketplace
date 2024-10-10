@@ -20,6 +20,12 @@ const applicationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  questions: [
+    {
+      question: { type: String, required: true }, // Store the question
+      userAnswer: { type: String, required: true }, // Store the user's answer
+    },
+  ],
 });
 
 // Export the model
