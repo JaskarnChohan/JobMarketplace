@@ -213,38 +213,28 @@ const Dashboard = () => {
       ]);
     }
   };
-
-  // George Haeberlin: Handle quick apply for job
-  // Handle quick apply for job
-  const handleQuickApply = async (jobId) => {
-    try {
-      await axios.post(`http://localhost:5050/api/application`, {
-        userId: user._id,
-        jobId: jobId,
-      });
-      fetchUserApplications(); // Refresh applications after applying
-      navigate("/dashboard"); // Redirect to dashboard after applying
-    } catch (err) {
-      setErrors([
-        {
-          msg: "An error occurred while applying for the job: " + err.message,
-        },
-      ]);
-    }
-  };
-
   // George Haeberlin: Handle unsave job
   // Handle unsave job
   const handleUnsaveJob = async (jobId) => {
     try {
+      // Filter out the jobId from savedJobIds
       const updatedSavedJobIds = savedJobIds.filter((id) => id !== jobId);
-      setSavedJobIds(updatedSavedJobIds); // Update saved job IDs
+
+      // Update the savedJobIds state
+      setSavedJobIds(updatedSavedJobIds);
+
+      // Update the savedJobs state accordingly
+      const updatedSavedJobs = savedJobs.filter((job) => job._id !== jobId);
+      setSavedJobs(updatedSavedJobs); // Update saved jobs state immediately
+
+      // Send request to update saved jobs in the backend
       await axios.put(
         `http://localhost:5050/api/profile/updateSavedJobs`,
         { savedJobs: updatedSavedJobIds },
         { withCredentials: true }
       );
-      redirect("/dashboard"); // Redirect to dashboard after unsaving
+
+      getSavedJobIds();
     } catch (err) {
       setErrors([
         {
@@ -306,7 +296,7 @@ const Dashboard = () => {
                         {job.title}
                       </h3>
                       <h4>Applicants:</h4>
-                      <div className="applicants-grid">
+                      <div className="applicants">
                         {jobApplicationsMap[job._id] &&
                         jobApplicationsMap[job._id].length > 0 ? (
                           jobApplicationsMap[job._id].map((app) => (
@@ -340,6 +330,52 @@ const Dashboard = () => {
                                   Delete Application
                                 </button>
                               </p>
+                              <div className="application-details">
+                                {/* Only show applicant answers if there are any questions */}
+                                {app.questions && app.questions.length > 0 && (
+                                  <>
+                                    <h4 className="application-heading">
+                                      Applicant Answers:
+                                    </h4>
+                                    {app.questions.map((question, index) => (
+                                      <div
+                                        key={index}
+                                        className="question-detail"
+                                      >
+                                        <p>
+                                          <strong>Question:</strong>{" "}
+                                          {question.question}
+                                        </p>
+                                        <p>
+                                          <strong>Answer:</strong>{" "}
+                                          {question.userAnswer}
+                                        </p>
+                                        <br />
+                                      </div>
+                                    ))}
+                                  </>
+                                )}
+                                {/* Display AI Evaluation results at the application level */}
+                                {app.aiEvaluation && (
+                                  <div className="ai-evaluation">
+                                    <h4 className="application-heading">
+                                      AI Evaluation:
+                                    </h4>
+                                    <p>
+                                      <strong>Score:</strong>{" "}
+                                      {app.aiEvaluation.score}
+                                    </p>
+                                    <p>
+                                      <strong>Evaluation:</strong>{" "}
+                                      {app.aiEvaluation.evaluation}
+                                    </p>
+                                    <p>
+                                      <strong>Recommended Outcome:</strong>{" "}
+                                      {app.aiEvaluation.recommendedOutcome}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           ))
                         ) : (
@@ -464,12 +500,6 @@ const Dashboard = () => {
                         Posted At:{" "}
                         {new Date(job.createdAt).toLocaleDateString()}
                       </p>
-                      <button
-                        className="small-btn"
-                        onClick={() => handleQuickApply(job._id)}
-                      >
-                        Quick Apply
-                      </button>
                       <button
                         className="small-btn btn-delete"
                         onClick={() => handleUnsaveJob(job._id)}
