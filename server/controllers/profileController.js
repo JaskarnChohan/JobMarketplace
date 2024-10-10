@@ -383,8 +383,8 @@ exports.getProfileByUserId = async (req, res) => {
 
     // Fetch related skills, education, and experience
     const skills = await Skill.find({ profile: profile._id });
-    const education = await Education.find({ profile: profile._id });
-    const experience = await Experience.find({ profile: profile._id });
+    const educations = await Education.find({ profile: profile._id });
+    const experiences = await Experience.find({ profile: profile._id });
 
     // Return the profile data with related skills, education, and experience
     const profileWithDetails = {
@@ -393,8 +393,8 @@ exports.getProfileByUserId = async (req, res) => {
       profilePicture,
       profileExists: true,
       skills,
-      education,
-      experience,
+      educations,
+      experiences,
     };
     res.json(profileWithDetails);
   } catch (err) {

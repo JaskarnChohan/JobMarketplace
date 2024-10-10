@@ -7,6 +7,11 @@ const Skill = require("../models/skill");
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
+const fs = require("fs");
+const path = require("path");
+const pdf = require("pdf-parse"); // For PDF files
+const mammoth = require("mammoth"); // For DOCX files
+
 // AI Improvement function
 exports.improveAnswer = async (req, res) => {
   const { question, answer } = req.body;
@@ -150,5 +155,181 @@ exports.improveAnswer = async (req, res) => {
     res
       .status(500)
       .json({ msg: "Error improving question/answer", error: err.message });
+  }
+};
+
+exports.evaluateResume = async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    // Fetch user profile to get the resume path
+    const profile = await Profile.findOne({ user: userId }).select("resume");
+
+    // Check if the resume path is available
+    if (!profile || !profile.resume) {
+      return res.status(404).json({ msg: "Resume not found." });
+    }
+
+    // Path to the uploaded resume file
+    const resumeFilePath = path.join("./", profile.resume);
+    console.log("resumeFilePath", resumeFilePath);
+
+    // Check if the file exists
+    if (!fs.existsSync(resumeFilePath)) {
+      return res
+        .status(404)
+        .json({ msg: "Resume file not found on the server." });
+    }
+
+    let resumeContent = "";
+
+    // Determine file type and read content accordingly
+    if (resumeFilePath.endsWith(".pdf")) {
+      const dataBuffer = fs.readFileSync(resumeFilePath);
+      const data = await pdf(dataBuffer);
+      resumeContent = data.text;
+    } else if (resumeFilePath.endsWith(".docx")) {
+      const data = await mammoth.extractRawText({ path: resumeFilePath });
+      resumeContent = data.value; // The raw text
+    } else if (resumeFilePath.endsWith(".doc")) {
+      return res.status(400).json({ msg: "DOC file format is not supported." });
+    } else {
+      return res.status(400).json({ msg: "Unsupported file format." });
+    }
+
+    // Prompt to correct the CV
+    const correctionPrompt = `
+        You are a professional resume editor. Your task is to correct any spelling mistakes, grammar errors, typos, and clarify any ambiguous wording related to degrees or certifications in the following resume content.
+  
+        **Resume Content:** ${resumeContent}
+  
+        **Response Format:**
+        <correctedResume>
+          <!-- Provide the corrected resume text here. -->
+        </correctedResume>
+      `;
+
+    // Generate corrected content using the AI model
+    const correctionResult = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: correctionPrompt }],
+        },
+      ],
+      generationConfig: {
+        maxOutputTokens: 1000,
+        temperature: 0.7,
+      },
+    });
+
+    console.log(
+      "Correction AI response:",
+      JSON.stringify(correctionResult, null, 2)
+    );
+
+    // Check for the corrected resume
+    if (
+      correctionResult?.response?.candidates &&
+      correctionResult.response.candidates.length > 0
+    ) {
+      const correctedResumeText =
+        correctionResult.response.candidates[0].content.parts[0].text;
+
+      if (!correctedResumeText) {
+        console.log(
+          "Correction AI response did not contain corrected resume text."
+        );
+        return res
+          .status(500)
+          .json({ msg: "Failed to retrieve corrected resume text." });
+      }
+
+      // Now, create the analysis prompt using the corrected resume
+      const analysisPrompt = `
+      You are an employer who is going to evulate this resume to share with other employers to see if they are fit for your jobs. Your task is to provide a professional and comprehensive analysis of the following resume in terms of employers to see. Focus solely on aspects that are valuable for hiring decisions, such as relevant skills, professional experience, and achievements. **Ignore any spelling, grammar, or formatting issues.**
+
+      **You are writing to employers and not job seekers. Don't recommend any solutions for potential concerns.**
+
+      **Resume Content:** ${correctedResumeText}
+
+      **Response Format:**
+      <response>
+        <h3>Resume Summary</h3>
+        <p><!-- A clear summary of the candidate's experience, skills, and qualifications that are relevant for hiring decisions --></p>
+        <br>
+
+        <h3>Strengths</h3>
+        <ul>
+          <li><!-- Highlight the candidate's key strengths (e.g., skills, achievements, professional experience) that make them a strong contender for the roles they are applying for --></li>
+        </ul>
+        <br>
+
+        <h3>Potential Employment Concerns</h3>
+        <ul>
+          <li><!-- **Identify any potential employment concerns specific to the candidate's qualifications or experience that may affect your decision as an employer on hiring this job seeker. Focus on content-related concerns that employers should know. These concerns are for employers to see on the job seeker. Don't recommend any solutions. You aren't evulating the layout of the CV but instead the content. Ignore things like formating. ** --></li>
+        </ul>
+        <br>
+
+        <h3>Suggested Job Roles/Industries</h3>
+        <ul>
+          <li><!-- Suggest job roles or industries that align with the candidate's skills, experience, and qualifications. --></li>
+        </ul>
+      </response>
+    `;
+
+      // Generate analysis using the AI model
+      const analysisResult = await model.generateContent({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: analysisPrompt }],
+          },
+        ],
+        generationConfig: {
+          maxOutputTokens: 1000,
+          temperature: 0.7,
+        },
+      });
+
+      console.log(
+        "Analysis AI response:",
+        JSON.stringify(analysisResult, null, 2)
+      );
+
+      // Check the candidates array for analysis
+      if (
+        analysisResult?.response?.candidates &&
+        analysisResult.response.candidates.length > 0
+      ) {
+        const evaluationText =
+          analysisResult.response.candidates[0].content.parts[0].text;
+
+        if (!evaluationText) {
+          console.log("Analysis AI response did not contain evaluation text.");
+          return res
+            .status(500)
+            .json({ msg: "Failed to retrieve evaluation text from the AI." });
+        }
+
+        // Send the evaluation text in response
+        return res.json({ evaluationText });
+      } else {
+        console.log("No candidates found in analysis AI response.");
+        return res
+          .status(500)
+          .json({ msg: "No candidates found in analysis AI response." });
+      }
+    } else {
+      console.log("No candidates found in correction AI response.");
+      return res
+        .status(500)
+        .json({ msg: "No candidates found in correction AI response." });
+    }
+  } catch (err) {
+    console.error("Error during resume evaluation:", err.message);
+    res
+      .status(500)
+      .json({ msg: "Error evaluating resume", error: err.message });
   }
 };

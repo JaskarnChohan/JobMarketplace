@@ -9,7 +9,6 @@ import "../styles/job/Job.css";
 import "../styles/job/JobCards.css";
 import { FaTag } from "react-icons/fa";
 import Spinner from "../components/Spinner/Spinner";
-import AIAnswerImprover from "./AIAnswerImprover";
 
 const Dashboard = () => {
   const { logout, user } = useAuth(); // Get logout function and user info from context

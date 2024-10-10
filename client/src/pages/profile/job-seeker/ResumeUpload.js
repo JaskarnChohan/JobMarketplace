@@ -223,7 +223,7 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
                 <div className="file-select-name">{resumeFileName}</div>
                 <input
                   type="file"
-                  accept=".pdf,.doc,.docx"
+                  accept=".pdf,.docx"
                   onChange={handleFileChange}
                 />
               </div>
