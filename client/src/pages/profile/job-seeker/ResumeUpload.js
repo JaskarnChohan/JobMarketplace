@@ -11,6 +11,7 @@ import {
 } from "react-icons/fa";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/Resume.css";
+import Spinner from "../../../components/Spinner/Spinner";
 
 // Required to make the modal accessible by specifying the root element
 Modal.setAppElement("#root");
@@ -37,6 +38,10 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
 
   // State to manage the privacy setting of the resume
   const [isResumePublic, setIsResumePublic] = useState(false);
+
+  // AI feedback states
+  const [aiFeedback, setAiFeedback] = useState(null);
+  const [loading, setLoading] = useState(false); // Loading state for API calls
 
   // Fetch the existing resume from the server when the component is mounted
   useEffect(() => {
@@ -158,53 +163,97 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
     }
   };
 
-  return (
-    <div className="section">
-      <h2 className="section-title">Resume Upload</h2>
-      <p className="section-text">
-        Upload your resume to enhance your profile!
-      </p>
+  // Get AI feedback
+  const handleAiFeedback = async () => {
+    setLoading(true); // Start loading
+    try {
+      const response = await axios.post(
+        `http://localhost:5050/api/ai/resume-feedback/${profileId}`,
+        { withCredentials: true }
+      );
+      setAiFeedback(response.data.feedbackText); // Store feedback
+    } catch (error) {
+      // Handle error
+      console.error("Failed to fetch AI feedback:", error);
+    } finally {
+      // Stop loading
+      setLoading(false);
+    }
+  };
 
-      {existingResume ? (
-        <div className="resume-card last">
-          <div className="resume-card-content">
-            <div className="resume-card-icon">
-              <FaFileAlt size={50} />
-            </div>
-            <div className="resume-card-info">
-              <h3 className="resume-card-title">{`${firstName} ${lastName}'s Resume`}</h3>
-              <p>Privacy Setting: {isResumePublic ? "Public" : "Private"}</p>
-            </div>
-            <div className="resume-card-actions">
-              <a
-                href={`http://localhost:5050/${existingResume}`}
-                download
-                className="btn resume-btn"
-              >
-                <FaDownload />
-                <span>Download</span>
-              </a>
-              <button
-                onClick={openConfirmationModal}
-                className="btn resume-btn"
-              >
-                <FaTrashAlt />
-                <span>Delete</span>
-              </button>
-              <button
-                onClick={openPrivacyToggleModal}
-                className="btn resume-btn"
-              >
-                {isResumePublic ? <FaLock /> : <FaUnlock />}
-                <span>{isResumePublic ? "Make Private" : "Make Public"}</span>
-              </button>
+  // If loading then display a spinner
+  if (loading) {
+    return <Spinner />;
+  }
+
+  return (
+    <div>
+      <div className="section">
+        <h2 className="section-title">Resume Upload</h2>
+        <p className="section-text">
+          Upload your resume to enhance your profile!
+        </p>
+
+        {existingResume ? (
+          <div className="resume-card last">
+            <div className="resume-card-content">
+              <div className="resume-card-icon">
+                <FaFileAlt size={50} />
+              </div>
+              <div className="resume-card-info">
+                <h3 className="resume-card-title">{`${firstName} ${lastName}'s Resume`}</h3>
+                <p>Privacy Setting: {isResumePublic ? "Public" : "Private"}</p>
+              </div>
+              <div className="resume-card-actions">
+                <a
+                  href={`http://localhost:5050/${existingResume}`}
+                  download
+                  className="btn resume-btn"
+                >
+                  <FaDownload />
+                  <span>Download</span>
+                </a>
+                {/* Button for AI Feedback */}
+                <button
+                  className="btn resume-btn ai-evaluation-btn"
+                  onClick={handleAiFeedback} // Pass as a function
+                >
+                  AI Feedback
+                </button>
+                <button
+                  onClick={openConfirmationModal}
+                  className="btn resume-btn"
+                >
+                  <FaTrashAlt />
+                  <span>Delete</span>
+                </button>
+                <button
+                  onClick={openPrivacyToggleModal}
+                  className="btn resume-btn"
+                >
+                  {isResumePublic ? <FaLock /> : <FaUnlock />}
+                  <span>{isResumePublic ? "Make Private" : "Make Public"}</span>
+                </button>
+              </div>
             </div>
           </div>
+        ) : (
+          <button onClick={openResumeModal} className="btn btn-primary">
+            <FaFileUpload /> Upload Resume
+          </button>
+        )}
+      </div>
+      {/* AI Feedback Results Section */}
+      {aiFeedback && (
+        <div className="section">
+          <h3 className="section-title">AI Feedback</h3>
+          <div className="ai-response">
+            <div
+              className="improved-text"
+              dangerouslySetInnerHTML={{ __html: aiFeedback }}
+            />
+          </div>
         </div>
-      ) : (
-        <button onClick={openResumeModal} className="btn btn-primary">
-          <FaFileUpload /> Upload Resume
-        </button>
       )}
 
       {/* Resume Upload Modal */}
@@ -223,7 +272,7 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
                 <div className="file-select-name">{resumeFileName}</div>
                 <input
                   type="file"
-                  accept=".pdf,.doc,.docx"
+                  accept=".pdf,.docx"
                   onChange={handleFileChange}
                 />
               </div>

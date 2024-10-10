@@ -180,6 +180,7 @@ const ProfilePage = () => {
                     onProfileUpdate={handleProfileUpdate}
                   />
                   <ResumeUpload
+                    profileId={formData._id}
                     firstName={formData.firstName}
                     lastName={formData.lastName}
                     formData={formData}

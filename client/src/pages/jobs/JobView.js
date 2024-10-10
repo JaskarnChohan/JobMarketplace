@@ -110,16 +110,18 @@ const JobView = () => {
 
   // Fetch saved jobs on component mount
   useEffect(() => {
-    const fetchSavedJobs = async () => {
-      try {
-        const response = await axios.get(`/api/profile/getSavedJobs`);
-        setSavedJobs(response.data.savedJobs); // Update saved jobs state
-      } catch (err) {
-        console.error(err);
-      }
-    };
+    if (isJobSeeker()) {
+      const fetchSavedJobs = async () => {
+        try {
+          const response = await axios.get(`/api/profile/getSavedJobs`);
+          setSavedJobs(response.data.savedJobs); // Update saved jobs state
+        } catch (err) {
+          console.error(err);
+        }
+      };
 
-    fetchSavedJobs();
+      fetchSavedJobs();
+    }
   }, []);
 
   if (loading) return <Spinner />; // Show loading spinner while data is being fetched
@@ -139,7 +141,8 @@ const JobView = () => {
 
   // get saved jobs
   const getSavedJobs = async () => {
-    try { // Send request to fetch saved jobs
+    try {
+      // Send request to fetch saved jobs
       const response = await axios.get(`/api/profile/getSavedJobs`);
       setSavedJobs(response.data.savedJobs); // Update saved jobs state
     } catch (err) {
@@ -176,9 +179,11 @@ const JobView = () => {
   const handleSaveJob = async (job) => {
     try {
       let updatedSavedJobs = []; // Initialize updated saved jobs array
-      if (savedJobs.includes(job._id)) { // Remove job from saved jobs if already saved
+      if (savedJobs.includes(job._id)) {
+        // Remove job from saved jobs if already saved
         updatedSavedJobs = savedJobs.filter((savedJob) => savedJob !== job._id);
-      } else { // Add job to saved jobs if not already saved
+      } else {
+        // Add job to saved jobs if not already saved
         updatedSavedJobs = [...savedJobs, job._id];
       }
       setSavedJobs(updatedSavedJobs); // Update saved jobs state
@@ -186,7 +191,7 @@ const JobView = () => {
         `http://localhost:5050/api/profile/updateSavedJobs`,
         { savedJobs: updatedSavedJobs }, // Ensure the payload is correctly formatted
         { withCredentials: true } // Ensure credentials (cookies) are included in request
-      );  
+      );
     } catch (err) {
       console.error(err);
     }
@@ -352,13 +357,22 @@ const JobView = () => {
             >
               {job.company}
             </p>
-            {isJobSaved(job._id) ? (
-              <button className="btn btn-delete" onClick={() => handleSaveJob(job)}>
-                Unsave Job
-              </button>
-            ) : (
-            <button className="btn" onClick={() => handleSaveJob(job)}>Save Job</button>
-            )}
+            {/* Check if user is authenticated and is a job seeker before showing the save button */}
+            {isAuthenticated && isJobSeeker() ? (
+              isJobSaved(job._id) ? (
+                <button
+                  className="btn btn-delete"
+                  onClick={() => handleSaveJob(job)}
+                >
+                  Unsave Job
+                </button>
+              ) : (
+                <button className="btn" onClick={() => handleSaveJob(job)}>
+                  Save Job
+                </button>
+              )
+            ) : null}{" "}
+            {/* Don't show anything if not logged in or not a job seeker */}
           </div>
 
           <div className="job-icons">
