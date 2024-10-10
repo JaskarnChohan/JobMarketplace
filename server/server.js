@@ -11,6 +11,8 @@ const profileRoutes = require("./routes/profileRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
+const createAIPlan = require("./config/paypal");
 const cors = require("cors"); // Middleware to enable CORS
 const cookieParser = require("cookie-parser"); // Middleware to parse cookies
 require("dotenv").config(); // Load environment variables from .env file
@@ -20,6 +22,9 @@ const app = express();
 
 // Connect to the Database
 connectDatabase();
+
+// Activate the plan
+createAIPlan();
 
 // Create HTTP server with Express app
 const server = http.createServer(app);
@@ -46,6 +51,7 @@ app.use("/api/employer", employerRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/application", applicationRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // Middleware to initialize message routes with Socket.IO instance
 const { router: messageRouter, initSocketRoutes } = messageRoutes;
