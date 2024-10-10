@@ -453,12 +453,23 @@ const Dashboard = () => {
                         Posted At:{" "}
                         {new Date(job.createdAt).toLocaleDateString()}
                       </p>
-                      <button
-                        className="small-btn"
-                        onClick={() => handleQuickApply(job._id)}
-                      >
-                        Quick Apply
-                      </button>
+                      {console.log("groupedApplications:", groupedApplications)}
+                      {console.log("job._id:", job._id)}
+                      {Object.values(groupedApplications).flat().forEach(app => {
+                        console.log("app:", app);
+                        console.log("app.jobId:", app.jobId);
+                      })}
+                      {groupedApplications && !Object.values(groupedApplications).flat().some(app => {
+                        console.log("Checking app:", app);
+                        return app.jobId && app.jobId._id && String(app.jobId._id) === String(job._id);
+                      }) ? (
+                        <button
+                          className="small-btn"
+                          onClick={() => handleQuickApply(job._id)}
+                        >
+                          Quick Apply
+                        </button>
+                      ) : null}
                       <button
                         className="small-btn btn-delete"
                         onClick={() => handleUnsaveJob(job._id)}

@@ -149,6 +149,7 @@ exports.deleteJobListing = async (req, res) => {
 
 // Update job listing
 exports.updateJobListing = async (req, res) => {
+  console.log("updateJobListing called: ", req.body);
   const { _id } = req.params;
 
   try {
@@ -160,10 +161,12 @@ exports.updateJobListing = async (req, res) => {
     if (!job) {
       return res.status(404).json({ msg: "Job not found" });
     }
+    console.log("Job updated successfully returning: ", job);
     res.json(job);
   } catch (err) {
     // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
+    console.log("Error updating job: ", err);
   }
 };
 

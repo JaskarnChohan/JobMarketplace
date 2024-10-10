@@ -352,6 +352,7 @@ exports.deleteResume = async (req, res) => {
 };
 // Fetch profile by user ID
 exports.getProfileByUserId = async (req, res) => {
+  console.log("getProfileByUserId called with: ", req.params.userId);
   try {
     // Fetch the profile using the user ID
     const profile = await Profile.findOne({ user: req.params.userId });
@@ -389,6 +390,8 @@ exports.getProfileByUserId = async (req, res) => {
     // Return the profile data with related skills, education, and experience
     const profileWithDetails = {
       ...profile.toObject(),
+      firstName: profile.firstName,
+      lastName: profile.lastName,
       email: user.email,
       profilePicture,
       profileExists: true,
