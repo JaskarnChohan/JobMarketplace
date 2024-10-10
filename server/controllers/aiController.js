@@ -172,7 +172,6 @@ exports.evaluateResume = async (req, res) => {
 
     // Path to the uploaded resume file
     const resumeFilePath = path.join("./", profile.resume);
-    console.log("resumeFilePath", resumeFilePath);
 
     // Check if the file exists
     if (!fs.existsSync(resumeFilePath)) {
@@ -292,11 +291,6 @@ exports.evaluateResume = async (req, res) => {
         },
       });
 
-      console.log(
-        "Analysis AI response:",
-        JSON.stringify(analysisResult, null, 2)
-      );
-
       // Check the candidates array for analysis
       if (
         analysisResult?.response?.candidates &&
@@ -319,6 +313,180 @@ exports.evaluateResume = async (req, res) => {
         return res
           .status(500)
           .json({ msg: "No candidates found in analysis AI response." });
+      }
+    } else {
+      console.log("No candidates found in correction AI response.");
+      return res
+        .status(500)
+        .json({ msg: "No candidates found in correction AI response." });
+    }
+  } catch (err) {
+    console.error("Error during resume evaluation:", err.message);
+    res
+      .status(500)
+      .json({ msg: "Error evaluating resume", error: err.message });
+  }
+};
+
+exports.feedbackResume = async (req, res) => {
+  const profileId = req.params.profileId;
+
+  try {
+    // Fetch user profile to get the resume path
+    const profile = await Profile.findOne({ _id: profileId }).select("resume");
+
+    // Check if the resume path is available
+    if (!profile || !profile.resume) {
+      return res.status(404).json({ msg: "Resume not found." });
+    }
+
+    // Path to the uploaded resume file
+    const resumeFilePath = path.join("./", profile.resume);
+    console.log("resumeFilePath", resumeFilePath);
+
+    // Check if the file exists
+    if (!fs.existsSync(resumeFilePath)) {
+      return res
+        .status(404)
+        .json({ msg: "Resume file not found on the server." });
+    }
+
+    let resumeContent = "";
+
+    // Determine file type and read content accordingly
+    if (resumeFilePath.endsWith(".pdf")) {
+      const dataBuffer = fs.readFileSync(resumeFilePath);
+      const data = await pdf(dataBuffer);
+      resumeContent = data.text;
+    } else if (resumeFilePath.endsWith(".docx")) {
+      const data = await mammoth.extractRawText({ path: resumeFilePath });
+      resumeContent = data.value; // The raw text
+    } else if (resumeFilePath.endsWith(".doc")) {
+      return res.status(400).json({ msg: "DOC file format is not supported." });
+    } else {
+      return res.status(400).json({ msg: "Unsupported file format." });
+    }
+
+    // Prompt to correct the CV
+    const correctionPrompt = `
+        You are a professional resume editor. Your task is to correct any spelling mistakes, grammar errors, typos, and clarify any ambiguous wording related to degrees or certifications in the following resume content.
+  
+        **Resume Content:** ${resumeContent}
+  
+        **Response Format:**
+        <correctedResume>
+          <!-- Provide the corrected resume text here. -->
+        </correctedResume>
+      `;
+
+    // Generate corrected content using the AI model
+    const correctionResult = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: correctionPrompt }],
+        },
+      ],
+      generationConfig: {
+        maxOutputTokens: 1000,
+        temperature: 0.7,
+      },
+    });
+
+    console.log(
+      "Correction AI response:",
+      JSON.stringify(correctionResult, null, 2)
+    );
+
+    // Check for the corrected resume
+    if (
+      correctionResult?.response?.candidates &&
+      correctionResult.response.candidates.length > 0
+    ) {
+      const correctedResumeText =
+        correctionResult.response.candidates[0].content.parts[0].text;
+
+      if (!correctedResumeText) {
+        console.log(
+          "Correction AI response did not contain corrected resume text."
+        );
+        return res
+          .status(500)
+          .json({ msg: "Failed to retrieve corrected resume text." });
+      }
+
+      // Now, create the analysis prompt using the corrected resume
+      const feedbackPrompt = `
+      You are a career advisor evaluating the following resume. Provide constructive feedback to the job seeker on how they can improve their resume. Focus on the following aspects: relevance of skills, clarity of experience, alignment with job market expectations, and overall presentation. Be specific in your feedback without recommending specific changes. Do not use * but use <strong> for emphasis.
+
+      **Resume Content:** ${correctedResumeText}
+
+      **Response Format:**
+      <response>
+        <h3>Feedback Summary</h3>
+        <p><!-- A summary of key points that the candidate should consider for improvement --></p>
+        <br>
+
+        <h3>Strengths</h3>
+        <ul>
+          <li><!-- Highlight the candidate's strengths based on their resume --></li>
+        </ul>
+        <br>
+
+        <h3>Areas for Improvement</h3>
+        <ul>
+          <li><!-- Identify specific areas where the candidate can improve their resume (e.g., skills to highlight, experience to clarify, etc.) --></li>
+        </ul>
+        <br>
+
+        <h3>Additional Suggestions</h3>
+        <ul>
+          <li><!-- Provide general suggestions that could enhance the resume further, such as formatting tips or ways to showcase achievements. --></li>
+        </ul>
+      </response>
+    `;
+
+      // Generate feedback using the AI model
+      const feedbackResult = await model.generateContent({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: feedbackPrompt }],
+          },
+        ],
+        generationConfig: {
+          maxOutputTokens: 1000,
+          temperature: 0.7,
+        },
+      });
+
+      console.log(
+        "Feedback AI response:",
+        JSON.stringify(feedbackResult, null, 2)
+      );
+
+      // Check the candidates array for feedback
+      if (
+        feedbackResult?.response?.candidates &&
+        feedbackResult.response.candidates.length > 0
+      ) {
+        const feedbackText =
+          feedbackResult.response.candidates[0].content.parts[0].text;
+
+        if (!feedbackText) {
+          console.log("Feedback AI response did not contain feedback text.");
+          return res
+            .status(500)
+            .json({ msg: "Failed to retrieve feedback text from the AI." });
+        }
+
+        // Send the feedback text in response
+        return res.json({ feedbackText });
+      } else {
+        console.log("No candidates found in feedback AI response.");
+        return res
+          .status(500)
+          .json({ msg: "No candidates found in feedback AI response." });
       }
     } else {
       console.log("No candidates found in correction AI response.");
