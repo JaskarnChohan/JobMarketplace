@@ -1,0 +1,104 @@
+.payment-page {
+    padding: 40px 20px; 
+    text-align: center;
+}
+  
+.payment-page .subheading {
+    font-size: 1.5rem; 
+    margin: 15px 0px 30px 0px; 
+    font-weight: 300;
+}
+  
+.plan-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; 
+}
+  
+.tier-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 30px; 
+    width: 350px; 
+    min-height: 400px; 
+    display: flex;
+    flex-direction: column; 
+}
+  
+.price {
+    font-size: 1.5rem; 
+    margin: 20px 0; 
+}
+
+.payment-page .note {
+    margin: 15px 0;
+}
+  
+.features-title {
+    margin-top: 20px; 
+    font-weight: bold; 
+}
+  
+.features-list {
+    text-align: left; 
+    list-style-type: none; 
+    padding: 0; 
+    margin: 10px 0; 
+}
+  
+.features-list li {
+    margin-bottom: 10px; 
+}
+  
+.join-message {
+    margin-top: 30px; 
+    font-size: 1.2rem; 
+    font-weight: bold; 
+}
+
+.success-container,
+.cancel-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; 
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+  
+.success-content,
+.cancel-content {
+    background-color: white; 
+    border-radius: 8px;
+    padding: 40px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+}
+  
+.success-icon {
+    font-size: 80px; 
+    color: #28a745; 
+    margin-bottom: 20px;
+}
+  
+.cancel-icon {
+    font-size: 80px; 
+    color: #fcc707; 
+    margin-bottom: 20px;
+}
+  
+.cancel-container p,
+.success-container p {
+    font-size: 16px;
+    margin-top: 15px;
+}
+  
+.payment-page .btn,
+.cancel-container .btn,
+.success-container .btn {
+    margin-top: 15px; 
+}
