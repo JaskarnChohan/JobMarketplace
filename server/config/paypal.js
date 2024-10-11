@@ -8,7 +8,7 @@ paypal.configure({
 });
 
 // Create a plan for $5 NZD per month
-const createAIPlan = () => {
+const createPremiumPlan = () => {
   return new Promise((resolve, reject) => {
     const billingPlanAttributes = {
       name: "JobHive Premium",
@@ -83,4 +83,4 @@ const createAIPlan = () => {
 };
 
 // Export the function to create the plan
-module.exports = { createAIPlan, paypal };
+module.exports = { createPremiumPlan, paypal };

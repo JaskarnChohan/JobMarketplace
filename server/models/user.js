@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema(
     subscription: {
       type: {
         type: String,
-        enum: ["Free", "AI Plan"],
+        enum: ["Free", "JobHive Premium"],
         default: "Free",
       },
       startDate: { type: Date },

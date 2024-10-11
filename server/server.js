@@ -12,7 +12,7 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
-const { createAIPlan } = require("./config/paypal");
+const { createPremiumPlan } = require("./config/paypal");
 const cors = require("cors"); // Middleware to enable CORS
 const cookieParser = require("cookie-parser"); // Middleware to parse cookies
 const localtunnel = require("localtunnel"); // Import localtunnel
@@ -26,7 +26,7 @@ connectDatabase();
 
 let planId;
 
-createAIPlan()
+createPremiumPlan()
   .then((id) => {
     planId = id; // Store the plan ID
     console.log("Created Plan ID:", planId);
