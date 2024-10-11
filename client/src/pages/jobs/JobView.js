@@ -22,6 +22,8 @@ const JobView = () => {
   const { isAuthenticated, logout, user, isJobSeeker } = useAuth(); // Grab authentication details from context
   const [hasProfile, setHasProfile] = useState(false); // State to track if user has a profile
   const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // State to manage modal visibility
+  const [confirmationDialogIsOpen, setConfirmationDialogIsOpen] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState(null);
   const navigate = useNavigate(); // Hook to navigate programmatically
   const [loading, setLoading] = useState(true); // State to manage loading status
   const [errors, setErrors] = useState([]); // State to hold error messages
@@ -65,8 +67,6 @@ const JobView = () => {
   const [newQuestion, setNewQuestion] = useState(""); // State to hold new question
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null); // State to hold the index of the question being edited
   const [editedQuestion, setEditedQuestion] = useState(""); // State to hold the edited question
-  const [confirmationDialogIsOpen, setConfirmationDialogIsOpen] = useState(false);
-  const [questionToDelete, setQuestionToDelete] = useState(null);
 
 
   // Fetch job details on component mount
@@ -173,6 +173,42 @@ const JobView = () => {
     } catch (err) {
       closeConfirmationModal(); // Close modal on error
     }
+  };
+
+  const handleDeleteQuestion = async (index) => {
+    try {
+      const updatedQnA = job.QnA.filter((_, i) => i !== index); // Remove the question at the specified index
+      const response = await axios.put(
+        `http://localhost:5050/api/jobs/update/${job._id}`,
+        { QnA: updatedQnA },
+        { withCredentials: true }
+      );
+      setJob((prevJob) => ({
+        ...prevJob,
+        QnA: response.data.QnA, // Ensure we update the state with the response data
+      })); // Update job state
+    } catch (err) {
+      console.error(err); // Log any errors
+      setErrors([{ msg: "Failed to delete question" }]); // Display error message
+    }
+  };
+
+  const handleDeleteQuestionClick = (index) => {
+    setQuestionToDelete(index);
+    setConfirmationDialogIsOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (questionToDelete !== null) {
+      await handleDeleteQuestion(questionToDelete);
+      setQuestionToDelete(null);
+      setConfirmationDialogIsOpen(false);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setQuestionToDelete(null);
+    setConfirmationDialogIsOpen(false);
   };
 
   const isJobSaved = () => {
@@ -535,7 +571,7 @@ const JobView = () => {
                             <button onClick={() => handleEditQuestion(index)} className="edit-question-btn">Edit</button>
                           )}
                           {isAuthenticated && user && (user._id === qa.author || user._id === job.employer) && (
-                            <button onClick={() => handleDeleteQuestion(index)} className="delete-question-btn">Delete</button>
+                            <button onClick={() => handleDeleteQuestionClick(index)} className="delete-question-btn">Delete</button>
                           )}
                         </div>
                     </>
@@ -570,6 +606,20 @@ const JobView = () => {
           </div>
         </div>
       </Modal>
+      {confirmationDialogIsOpen && (
+        <Modal
+          isOpen={confirmationDialogIsOpen}
+          onRequestClose={handleCancelDelete}
+          className="modal-content"
+          overlayClassName="modal-overlay"
+        >
+          <div>
+            <p>Are you sure you want to delete this question?</p>
+            <button onClick={handleConfirmDelete} className="btn-confirm">Yes</button>
+            <button onClick={handleCancelDelete} className="btn-cancel">No</button>
+          </div>
+        </Modal>
+      )}
       <Footer />
     </div>
   );

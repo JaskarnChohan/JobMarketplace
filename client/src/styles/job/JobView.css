@@ -374,3 +374,76 @@
   border: none; /* Ensure no border on hover */
   box-shadow: none; /* Ensure no box-shadow on hover */
 }
+
+/* Style for the delete button */
+.delete-question-btn {
+  background-color: #e57373; /* Red color for delete button */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
+
+.delete-question-btn:hover {
+  background-color: #d32f2f; /* Darker red for hover */
+  transform: scale(1.05);
+}
+
+/* Modal background */
+.modal-overlay {
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+
+/* Modal container */
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Modal buttons */
+.modal-content button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.modal-content .btn-confirm {
+  background-color: #4caf50; /* Green */
+  color: white;
+}
+
+.modal-content .btn-confirm:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+.modal-content .btn-cancel {
+  background-color: #f44336; /* Red */
+  color: white;
+}
+
+.modal-content .btn-cancel:hover {
+  background-color: #e53935;
+  transform: scale(1.05);
+}
