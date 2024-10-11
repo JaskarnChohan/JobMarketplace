@@ -316,24 +316,6 @@ const JobView = () => {
     setEditedQuestion(job.QnA[index].questionInfo[0].question);
   };
 
-  const handleDeleteQuestion = async (index) => {
-    try {
-      const updatedQnA = job.QnA.filter((_, i) => i !== index); // Remove the question at the specified index
-      const response = await axios.put(
-        `http://localhost:5050/api/jobs/update/${job._id}`,
-        { QnA: updatedQnA },
-        { withCredentials: true }
-      );
-      setJob((prevJob) => ({
-        ...prevJob,
-        QnA: response.data.QnA, // Ensure we update the state with the response data
-      })); // Update job state
-    } catch (err) {
-      console.error(err); // Log any errors
-      setErrors([{ msg: "Failed to delete question" }]); // Display error message
-    }
-  };
-
   //George Haeberlin: handle question update
   const handleSubmitEditedQuestion = async (index) => {
     try {

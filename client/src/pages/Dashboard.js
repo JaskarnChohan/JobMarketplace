@@ -213,26 +213,6 @@ const Dashboard = () => {
       ]);
     }
   };
-
-  // George Haeberlin: Handle quick apply for job
-  // Handle quick apply for job
-  const handleQuickApply = async (jobId) => {
-    try {
-      await axios.post(`http://localhost:5050/api/application`, {
-        userId: user._id,
-        jobId: jobId,
-      });
-      fetchUserApplications(); // Refresh applications after applying
-      navigate("/dashboard"); // Redirect to dashboard after applying
-    } catch (err) {
-      setErrors([
-        {
-          msg: "An error occurred while applying for the job: " + err.message,
-        },
-      ]);
-    }
-  };
-
   // George Haeberlin: Handle unsave job
   // Handle unsave job
   const handleUnsaveJob = async (jobId) => {
