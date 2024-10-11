@@ -12,9 +12,10 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
-const createAIPlan = require("./config/paypal");
+const { createAIPlan } = require("./config/paypal");
 const cors = require("cors"); // Middleware to enable CORS
 const cookieParser = require("cookie-parser"); // Middleware to parse cookies
+const localtunnel = require("localtunnel"); // Import localtunnel
 require("dotenv").config(); // Load environment variables from .env file
 
 // Initialise the Express application
@@ -23,8 +24,16 @@ const app = express();
 // Connect to the Database
 connectDatabase();
 
-// Activate the plan
-createAIPlan();
+let planId;
+
+createAIPlan()
+  .then((id) => {
+    planId = id; // Store the plan ID
+    console.log("Created Plan ID:", planId);
+  })
+  .catch((error) => {
+    console.error("Error creating plan:", error);
+  });
 
 // Create HTTP server with Express app
 const server = http.createServer(app);
@@ -76,6 +85,16 @@ app.use((req, res, next) => {
 
 // Define PORT
 const PORT = process.env.PORT || 5050; // Use the PORT from environment variables or default to 5050
+
+// Start the Localtunnel (Used for Paypal Webhooks)
+const subdomain = "jobhive";
+localtunnel(PORT, { subdomain })
+  .then((lt) => {
+    console.log(`Localtunnel running on: ${lt.url}`);
+  })
+  .catch((err) => {
+    console.error("Error starting Localtunnel:", err);
+  });
 
 // Start the server
 server.listen(PORT, () => {
