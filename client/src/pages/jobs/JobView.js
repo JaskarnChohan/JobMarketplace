@@ -65,6 +65,9 @@ const JobView = () => {
   const [newQuestion, setNewQuestion] = useState(""); // State to hold new question
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null); // State to hold the index of the question being edited
   const [editedQuestion, setEditedQuestion] = useState(""); // State to hold the edited question
+  const [confirmationDialogIsOpen, setConfirmationDialogIsOpen] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState(null);
+
 
   // Fetch job details on component mount
   useEffect(() => {
@@ -545,14 +548,14 @@ const JobView = () => {
                     <>
                       <p><strong>Question:</strong> {qa.questionInfo[0]?.question}</p>
                       <p className="posted-date"><strong>Posted on:</strong> {qa.questionInfo[0]?.datePosted ? new Date(qa.questionInfo[0].datePosted).toLocaleDateString() : "Invalid date"}</p>
-                      {isAuthenticated && user && user._id === qa.author && (
                         <div className="btn-container">
-                          <button onClick={() => handleEditQuestion(index)} className="edit-question-btn">Edit</button>
+                          {isAuthenticated && user && user._id === qa.author && (
+                            <button onClick={() => handleEditQuestion(index)} className="edit-question-btn">Edit</button>
+                          )}
                           {isAuthenticated && user && (user._id === qa.author || user._id === job.employer) && (
                             <button onClick={() => handleDeleteQuestion(index)} className="delete-question-btn">Delete</button>
                           )}
                         </div>
-                      )}
                     </>
                   )}
                 </div>
