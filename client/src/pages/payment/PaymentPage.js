@@ -5,15 +5,20 @@ import { useAuth } from "../../context/AuthContext";
 import Spinner from "../../components/Spinner/Spinner";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
+import Modal from "react-modal"; // Import react-modal
 import "../../styles/Payment.css";
 
-const PaymentPage = () => {
-  const { logout, user, isEmployer, isJobSeeker } = useAuth();
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [subscription, setSubscription] = useState(null);
+Modal.setAppElement("#root"); // To prevent screen readers from reading content behind the modal
 
+const PaymentPage = () => {
+  const { logout, user, isEmployer, isJobSeeker } = useAuth(); // Get user type
+  const navigate = useNavigate(); // For navigation
+  const [loading, setLoading] = useState(false); // Loading state
+  const [error, setError] = useState(null); // Error state
+  const [subscription, setSubscription] = useState(null); // Subscription state
+  const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // Modal state
+
+  // Define the tiers for the subscription
   const tiers = [
     {
       name: "Free",
@@ -101,64 +106,85 @@ const PaymentPage = () => {
     },
   ];
 
+  // Fetch the user's subscription status
   useEffect(() => {
     const fetchUserSubscription = async () => {
-      setLoading(true);
+      setLoading(true); // Start loading
       try {
         const response = await axios.get("/api/payment/subscription-status");
-        setSubscription(response.data);
+        setSubscription(response.data); // Set the subscription state
       } catch (err) {
+        // Handle errors
         console.error(err);
         setError("Error fetching subscription details");
       } finally {
-        setLoading(false);
+        setLoading(false); // Stop loading when data fetch is done
       }
     };
 
     fetchUserSubscription();
   }, []);
 
-  const handlePayment = async () => {
+  // Reset loading state when navigating back to the page
+  useEffect(() => {
     setLoading(true);
-    setError(null);
+  }, []); // Run only once on page load
+
+  const handlePayment = async () => {
+    setLoading(true); // Start loading
+    setError(null); // Clear any previous errors
 
     try {
       const response = await axios.post("/api/payment/create-payment");
       const { approvalUrl } = response.data;
 
-      window.location.href = approvalUrl;
+      // Keep loading state until redirection to PayPal
+      window.location.href = approvalUrl; // Redirect to PayPal
     } catch (err) {
       console.error(err);
       setError("Error initiating payment");
-    } finally {
-      setLoading(false);
+      setLoading(false); // Stop loading on error
     }
   };
 
+  // Handle the downgrade process
   const handleDowngrade = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true); // Start loading
+    setError(null); // Clear any previous errors
 
     try {
+      // Send the downgrade request
       const response = await axios.post(
         `/api/payment/downgrade-subscription`,
         {},
-        { withCredentials: true } // Ensure credentials are passed
+        { withCredentials: true }
       );
 
-      // Update the subscription state with the returned data
-      setSubscription(response.data.subscription);
+      // Update the subscription state immediately to reflect "Free"
+      setSubscription({
+        ...subscription,
+        subscriptionType: "Free", // Manually set to "Free"
+      });
     } catch (err) {
       console.error(err);
       setError("Error downgrading subscription");
     } finally {
       setLoading(false);
+      closeConfirmationModal(); // Close the modal after downgrading
     }
   };
 
   const handleLogout = () => {
     logout();
     navigate("/");
+  };
+
+  const openConfirmationModal = () => {
+    setConfirmationModalIsOpen(true);
+  };
+
+  const closeConfirmationModal = () => {
+    setConfirmationModalIsOpen(false);
   };
 
   return (
@@ -168,7 +194,7 @@ const PaymentPage = () => {
         <h1 className="large-heading">
           Purchase a JobHive Premium Subscription
         </h1>
-        <h2 className="subheading">Cancel or pause anytime</h2>
+        <h2 className="subheading">Cancel Anytime</h2>
         {error && <p className="error-messages">{error}</p>}
         {loading ? (
           <Spinner />
@@ -188,7 +214,7 @@ const PaymentPage = () => {
                     onClick={
                       tier.name === "JobHive Premium"
                         ? handlePayment
-                        : handleDowngrade
+                        : openConfirmationModal
                     }
                   >
                     {tier.name === "JobHive Premium"
@@ -213,6 +239,28 @@ const PaymentPage = () => {
           regularly!
         </p>
       </div>
+      {/* Confirmation Modal */}
+      <Modal
+        isOpen={confirmationModalIsOpen}
+        onRequestClose={closeConfirmationModal}
+        className="modal-wrapper"
+      >
+        <div className="modal">
+          <h1 className="lrg-heading">Downgrade Subscription</h1>
+          <p className="med-text">
+            Are you sure you want to downgrade to the Free plan? You will lose
+            access to premium features.
+          </p>
+          <div className="btn-container">
+            <button onClick={handleDowngrade} className="btn-delete">
+              Confirm
+            </button>
+            <button onClick={closeConfirmationModal} className="btn-cancel">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
       <Footer /> {/* Add footer here */}
     </div>
   );
