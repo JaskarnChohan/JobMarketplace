@@ -313,6 +313,24 @@ const JobView = () => {
     setEditedQuestion(job.QnA[index].questionInfo[0].question);
   };
 
+  const handleDeleteQuestion = async (index) => {
+    try {
+      const updatedQnA = job.QnA.filter((_, i) => i !== index); // Remove the question at the specified index
+      const response = await axios.put(
+        `http://localhost:5050/api/jobs/update/${job._id}`,
+        { QnA: updatedQnA },
+        { withCredentials: true }
+      );
+      setJob((prevJob) => ({
+        ...prevJob,
+        QnA: response.data.QnA, // Ensure we update the state with the response data
+      })); // Update job state
+    } catch (err) {
+      console.error(err); // Log any errors
+      setErrors([{ msg: "Failed to delete question" }]); // Display error message
+    }
+  };
+
   //George Haeberlin: handle question update
   const handleSubmitEditedQuestion = async (index) => {
     try {
@@ -527,8 +545,13 @@ const JobView = () => {
                     <>
                       <p><strong>Question:</strong> {qa.questionInfo[0]?.question}</p>
                       <p className="posted-date"><strong>Posted on:</strong> {qa.questionInfo[0]?.datePosted ? new Date(qa.questionInfo[0].datePosted).toLocaleDateString() : "Invalid date"}</p>
-                      {isAuthenticated && user._id === qa.author && (
-                        <button onClick={() => handleEditQuestion(index)} className="edit-question-btn">Edit</button>
+                      {isAuthenticated && user && user._id === qa.author && (
+                        <div className="btn-container">
+                          <button onClick={() => handleEditQuestion(index)} className="edit-question-btn">Edit</button>
+                          {isAuthenticated && user && (user._id === qa.author || user._id === job.employer) && (
+                            <button onClick={() => handleDeleteQuestion(index)} className="delete-question-btn">Delete</button>
+                          )}
+                        </div>
                       )}
                     </>
                   )}
