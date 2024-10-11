@@ -269,10 +269,10 @@ const JobView = () => {
             <p>
               {daysAgo === 0 ? "Posted Today" : `Posted ${daysAgo} days ago`}
             </p>
-
             {isAuthenticated ? (
-              hasProfile ? (
-                isJobSeeker() && job.status === "Open" && !hasApplied ? (
+              isJobSeeker() &&
+              (hasProfile ? (
+                job.status === "Open" && !hasApplied ? (
                   <div className="apply-button-container">
                     <button
                       className="btn"
@@ -294,8 +294,9 @@ const JobView = () => {
                 <p className="profile-notification">
                   You need to complete your profile before applying.
                 </p>
-              )
+              ))
             ) : (
+              // Show "Login to Apply" button if the user isn't authenticated
               <div className="login-prompt-container">
                 <button className="btn" onClick={() => navigate("/login")}>
                   Login to Apply

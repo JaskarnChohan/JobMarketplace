@@ -308,6 +308,8 @@ exports.evaluateApplication = async (application) => {
     };
   } else {
     throw new Error("No candidates found in AI response.");
+  }
+};
 
 exports.evaluateResume = async (req, res) => {
   const userId = req.params.userId;
