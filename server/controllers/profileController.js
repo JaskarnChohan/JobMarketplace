@@ -348,7 +348,6 @@ exports.deleteResume = async (req, res) => {
 };
 // Fetch profile by user ID
 exports.getProfileByUserId = async (req, res) => {
-  console.log("getProfileByUserId called with: ", req.params.userId);
   try {
     // Fetch the profile using the user ID
     const profile = await Profile.findOne({ user: req.params.userId });

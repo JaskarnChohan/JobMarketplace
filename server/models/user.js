@@ -24,6 +24,22 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     lastPasswordResetRequest: Date,
+
+    // New subscription fields
+    subscription: {
+      type: {
+        type: String,
+        enum: ["Free", "JobHive Premium"],
+        default: "Free",
+      },
+      startDate: { type: Date },
+      status: {
+        type: String,
+        enum: ["active", "canceled", "expired"],
+        default: "active",
+      },
+      agreementId: { type: String }, // To store PayPal agreement ID
+    },
   },
   { timestamps: true, versionKey: false }
 );

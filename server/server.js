@@ -11,8 +11,11 @@ const profileRoutes = require("./routes/profileRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
+const { createPremiumPlan } = require("./config/paypal");
 const cors = require("cors"); // Middleware to enable CORS
 const cookieParser = require("cookie-parser"); // Middleware to parse cookies
+const localtunnel = require("localtunnel"); // Import localtunnel
 require("dotenv").config(); // Load environment variables from .env file
 
 // Initialise the Express application
@@ -20,6 +23,17 @@ const app = express();
 
 // Connect to the Database
 connectDatabase();
+
+let planId;
+
+createPremiumPlan()
+  .then((id) => {
+    planId = id; // Store the plan ID
+    console.log("Created Plan ID:", planId);
+  })
+  .catch((error) => {
+    console.error("Error creating plan:", error);
+  });
 
 // Create HTTP server with Express app
 const server = http.createServer(app);
@@ -46,6 +60,7 @@ app.use("/api/employer", employerRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/application", applicationRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // Middleware to initialize message routes with Socket.IO instance
 const { router: messageRouter, initSocketRoutes } = messageRoutes;
@@ -70,6 +85,32 @@ app.use((req, res, next) => {
 
 // Define PORT
 const PORT = process.env.PORT || 5050; // Use the PORT from environment variables or default to 5050
+
+// Start the Localtunnel (Used for Paypal Webhooks)
+const startLocalTunnel = () => {
+  const subdomain = "jobhive";
+  localtunnel(PORT, { subdomain })
+    .then((lt) => {
+      console.log(`Localtunnel running on: ${lt.url}`);
+
+      // Handle tunnel close event
+      lt.on("close", () => {
+        console.log("Localtunnel closed");
+      });
+
+      // Handle tunnel error event
+      lt.on("error", (error) => {
+        console.error("Localtunnel error:", error);
+      });
+    })
+    .catch((err) => {
+      console.error("Error starting Localtunnel:", err);
+      setTimeout(startLocalTunnel, 10000); // Restart after 10 seconds
+    });
+};
+
+// Start the local tunnel
+startLocalTunnel();
 
 // Start the server
 server.listen(PORT, () => {

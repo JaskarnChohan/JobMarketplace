@@ -20,13 +20,15 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "express-authenticator": "^1.0.26",
+    "express-authenticator": "^1.0.22",
     "express-validator": "^7.2.0",
     "jsonwebtoken": "^9.0.2",
+    "localtunnel": "^2.0.2",
     "mammoth": "^1.8.0",
     "mongoose": "^8.5.3",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.14",
+    "paypal-rest-sdk": "^1.8.1",
     "pdf-parse": "^1.1.1",
     "socket.io": "^4.8.0"
   }

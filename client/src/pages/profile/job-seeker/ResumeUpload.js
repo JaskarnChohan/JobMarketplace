@@ -39,6 +39,8 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
   // State to manage the privacy setting of the resume
   const [isResumePublic, setIsResumePublic] = useState(false);
 
+  const [premiumModalIsOpen, setPremiumModalIsOpen] = useState(false); // Modal state for premium access
+
   // AI feedback states
   const [aiFeedback, setAiFeedback] = useState(null);
   const [loading, setLoading] = useState(false); // Loading state for API calls
@@ -61,6 +63,16 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
 
     fetchResume();
   }, [profileId]); // Run only when profileId changes
+
+  // Open the modal for premium access
+  const openPremiumModal = () => {
+    setPremiumModalIsOpen(true);
+  };
+
+  // Close the modal
+  const closePremiumModal = () => {
+    setPremiumModalIsOpen(false);
+  };
 
   // Opens the resume upload modal
   const openResumeModal = () => {
@@ -163,21 +175,41 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
     }
   };
 
-  // Get AI feedback
+  // Handle AI evaluation behind the paywall
   const handleAiFeedback = async () => {
-    setLoading(true); // Start loading
+    setLoading(true); // Set loading state to true
+
     try {
-      const response = await axios.post(
-        `http://localhost:5050/api/ai/resume-feedback/${profileId}`,
+      // Check subscription status
+      const subscriptionResponse = await axios.get(
+        "http://localhost:5050/api/payment/subscription-status",
         { withCredentials: true }
       );
-      setAiFeedback(response.data.feedbackText); // Store feedback
+
+      const { subscriptionType, status } = subscriptionResponse.data;
+
+      // If the user has "JobHive Premium", proceed with AI evaluation
+      if (subscriptionType === "JobHive Premium" && status === "active") {
+        const response = await axios.post(
+          `http://localhost:5050/api/ai/resume-feedback/${profileId}`,
+          { withCredentials: true }
+        );
+
+        // If AI evaluation succeeds, set the AI results
+        if (response.data.feedbackText) {
+          setAiFeedback(response.data.feedbackText); // Store feedback
+        } else {
+          console.error("Error evaluating resume:", response.data.error);
+        }
+      } else {
+        // If not a premium user, open the modal
+        openPremiumModal();
+      }
+
+      setLoading(false); // Set loading state to false
     } catch (error) {
-      // Handle error
-      console.error("Failed to fetch AI feedback:", error);
-    } finally {
-      // Stop loading
-      setLoading(false);
+      console.error("Error during AI evaluation:", error);
+      setLoading(false); // Set loading state to false
     }
   };
 
@@ -333,6 +365,26 @@ const ResumeUpload = ({ profileId, firstName, lastName }) => {
             </button>
             <button onClick={closePrivacyToggleModal} className="btn-cancel">
               Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Premium access required modal */}
+      <Modal
+        isOpen={premiumModalIsOpen}
+        onRequestClose={closePremiumModal}
+        className="modal-wrapper"
+      >
+        <div className="modal">
+          <h1 className="lrg-heading">Premium Feature</h1>
+          <p className="med-text">
+            You need a JobHive Premium subscription to access the AI resume
+            evaluation feature.
+          </p>
+          <div className="btn-container">
+            <button onClick={closePremiumModal} className="btn-close">
+              Close
             </button>
           </div>
         </div>
