@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FaUser } from "react-icons/fa";
 import "../../styles/misc/Nav.css";
 import "../../styles/Global.css";
@@ -8,10 +8,21 @@ import { useAuth } from "../../context/AuthContext";
 const Navbar = ({ isAuthenticated, handleLogout }) => {
   const { user } = useAuth(); // Get user information from Auth context
   const [dropdownOpen, setDropdownOpen] = useState(false); // State for dropdown menu
+  const navigate = useNavigate(); // Navigation hook
 
   // Toggle the dropdown menu visibility
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
+  };
+
+  // George Haeberlin: handle logout andd navigation
+  const handleLogoutAndRedirect = async () => {
+    try {
+      await handleLogout();
+      navigate("/");
+    } catch (err) {
+      console.error("Failed to logout", err);
+    }
   };
 
   // Render navigation links based on authentication status

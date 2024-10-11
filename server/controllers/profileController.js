@@ -385,6 +385,8 @@ exports.getProfileByUserId = async (req, res) => {
     // Return the profile data with related skills, education, and experience
     const profileWithDetails = {
       ...profile.toObject(),
+      firstName: profile.firstName,
+      lastName: profile.lastName,
       email: user.email,
       profilePicture,
       profileExists: true,

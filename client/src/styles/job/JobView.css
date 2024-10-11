@@ -114,3 +114,336 @@
     font-size: 1rem;
   }
 
+/* George Haeberlin: QnA Section */
+.qa-section {
+  margin-top: 40px;
+  background-color: var(--light-gray);
+  padding: 20px;
+  border-radius: var(--border-radius);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.qa-section h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--primary-color);
+  text-align: center;
+}
+
+.qa-list {
+  list-style-type: none;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.qa-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.qa-item:hover {
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.qa-vote {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 20px;
+}
+
+.qa-vote .btn {
+  background-color: #e0e0e0; /* Subtle color for vote buttons */
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  font-size: 1.2rem; /* Adjust font size for icons */
+}
+
+.qa-vote .btn-upvote {
+  margin-bottom: 5px;
+}
+
+.qa-vote .btn-downvote {
+  margin-top: 5px;
+}
+
+.qa-vote .btn:hover {
+  background-color: #bdbdbd; /* Slightly darker shade for hover */
+  transform: scale(1.05);
+}
+
+.qa-vote .btn.voted-up {
+  background-color: #81c784 !important; /* Subtle green for upvoted buttons */
+}
+
+.qa-vote .btn.voted-down {
+  background-color: #e57373 !important; /* Subtle red for downvoted buttons */
+}
+
+.qa-vote p {
+  margin: 10px 0;
+  font-size: 1rem; /* Adjust font size */
+  font-weight: bold;
+  color: var(--dark-gray);
+}
+
+.qa-content {
+  flex-grow: 1;
+}
+
+.qa-question {
+  margin-bottom: 10px;
+}
+
+.qa-question p {
+  color: var(--dark-gray);
+  margin: 5px 0;
+  font-size: 1rem; /* Adjust font size */
+}
+
+.qa-question p strong {
+  color: var(--primary-color);
+}
+
+.qa-answer {
+  margin-top: 10px;
+  padding-left: 20px;
+  border-left: 3px solid var(--primary-color);
+}
+
+.qa-answer p {
+  color: var(--dark-gray);
+  margin: 5px 0;
+  font-size: 1rem; /* Adjust font size */
+}
+
+.qa-answer p strong {
+  color: var(--primary-color);
+}
+
+.qa-section .posted-date {
+  color: var(--secondary-gray);
+  font-size: 0.9rem;
+}
+
+/* QnA Form Styles */
+.qa-form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.qa-form .qa-textarea {
+  width: 100%;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid var(--primary-color);
+  resize: vertical;
+  font-size: 1rem;
+  background-color: #fff;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.qa-form .qa-submit-btn {
+  align-self: flex-end;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.qa-form .qa-submit-btn:hover {
+  background-color: #0056b3; /* Different shade for hover */
+  transform: scale(1.05);
+}
+
+/* Error Messages */
+.error-messages {
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f8d7da;
+  color: #721c24;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.error-message {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Center the button vertically */
+  margin-bottom: 10px;
+  padding: 10px; /* Add padding to the error message */
+  text-align: center; /* Center the error text */
+}
+
+.error-message p {
+  margin: 0;
+  font-size: 1rem;
+  flex-grow: 1; /* Allow the text to take up available space */
+}
+
+.remove-error-btn {
+  background-color: #f5c6cb;
+  color: #721c24;
+  border: none;
+  border-radius: 50%; /* Make the button circular */
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  width: 30px; /* Set a fixed width */
+  height: 30px; /* Set a fixed height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-error-btn:hover {
+  background-color: #f1b0b7;
+  transform: scale(1.05);
+}
+
+/* Edit Question Button */
+.edit-question-btn {
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
+
+.edit-question-btn:hover {
+  background-color: #bdbdbd;
+  transform: scale(1.05);
+}
+
+/* Edit Question Textarea */
+.qa-edit-textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--primary-color);
+  resize: vertical;
+  font-size: 1rem;
+  background-color: #fff;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 10px;
+}
+
+/* Submit Edited Question Button */
+.qa-submit-edit-btn {
+  align-self: flex-end;
+  padding: 6px 16px;
+  border: none; /* Ensure no border */
+  border-radius: 8px;
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 10px;
+  box-shadow: none; /* Ensure no box-shadow */
+}
+
+.qa-submit-edit-btn:hover {
+  background-color: #0056b3; /* Different shade for hover */
+  color: white; /* Ensure text color remains white */
+  transform: scale(1.05);
+  border: none; /* Ensure no border on hover */
+  box-shadow: none; /* Ensure no box-shadow on hover */
+}
+
+/* Style for the delete button */
+.delete-question-btn {
+  background-color: #e57373; /* Red color for delete button */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
+
+.delete-question-btn:hover {
+  background-color: #d32f2f; /* Darker red for hover */
+  transform: scale(1.05);
+}
+
+/* Modal background */
+.modal-overlay {
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+
+/* Modal container */
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Modal buttons */
+.modal-content button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.modal-content .btn-confirm {
+  background-color: #4caf50; /* Green */
+  color: white;
+}
+
+.modal-content .btn-confirm:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+.modal-content .btn-cancel {
+  background-color: #f44336; /* Red */
+  color: white;
+}
+
+.modal-content .btn-cancel:hover {
+  background-color: #e53935;
+  transform: scale(1.05);
+}
