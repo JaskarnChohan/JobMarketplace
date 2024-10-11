@@ -26,6 +26,9 @@ const JobView = () => {
   const [loading, setLoading] = useState(true); // State to manage loading status
   const [errors, setErrors] = useState([]); // State to hold error messages
 
+  const [questions, setQuestions] = useState([]); // State to hold job questions
+  const [answers, setAnswers] = useState({}); // State to hold user answers
+
   // State to hold job details
   const [job, setJob] = useState({
     employer: "",
@@ -55,6 +58,7 @@ const JobView = () => {
           `http://localhost:5050/api/jobs/${_id}`
         );
         setJob(response.data);
+        setQuestions(response.data.questions);
 
         if (isAuthenticated && user) {
           // Check if the user has already applied for this job
@@ -143,15 +147,46 @@ const JobView = () => {
 
   const closeConfirmationModal = () => setConfirmationModalIsOpen(false); // Close the modal
 
+  // Handle answer change
+  const handleAnswerChange = (question, answer) => {
+    setAnswers((prevAnswers) => ({
+      ...prevAnswers,
+      [question]: answer,
+    }));
+  };
+
+  // Modify the handleApply function to include answers
   const handleApply = async () => {
+    const unansweredQuestions = questions.filter(
+      (question) => !answers[question]
+    );
+
+    if (unansweredQuestions.length > 0) {
+      // Set error message for unanswered questions
+      setErrors([{ msg: "Please answer all questions before applying." }]);
+      return; // Exit the function to prevent further execution
+    }
     try {
-      // Send application request
+      setLoading(true); // Set loading state to true
+      // Prepare the questions and answers for submission
+      const questionsAndAnswers = questions.map((question) => ({
+        question,
+        userAnswer: answers[question] || "", // Default to empty if no answer provided
+      }));
+
+      // Send application request with answers
       await axios.post(`http://localhost:5050/api/application/`, {
         jobId: _id,
         userId: user._id,
+        questions: questionsAndAnswers, // Include questions and answers
       });
+
+      // Reset errors
+      setErrors([]);
+
       setHasApplied(true); // Update applied status
       navigate("/dashboard"); // Redirect to dashboard
+      setLoading(false); // Set loading state to false
     } catch (err) {
       closeConfirmationModal(); // Close modal on error
     }
@@ -316,6 +351,25 @@ const JobView = () => {
           <p className="med-text">
             By applying to this job, the employer can see your profile.
           </p>
+          {questions.map((question, index) => (
+            <div key={index}>
+              <label>{question}</label>
+              <input
+                required
+                type="text"
+                value={answers[question] || ""}
+                onChange={(e) => handleAnswerChange(question, e.target.value)}
+              />
+            </div>
+          ))}
+          {/* Display errors */}
+          {errors.length > 0 && (
+            <div className="error-messages">
+              {errors.map((error, index) => (
+                <p key={index}>{error.msg}</p>
+              ))}
+            </div>
+          )}
           <div className="btn-container">
             <button onClick={handleApply} className="btn-confirm">
               Confirm

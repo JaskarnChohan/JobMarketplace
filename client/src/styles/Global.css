@@ -172,6 +172,11 @@ margin-top: 20px;
   margin-bottom: 30px;
 }
 
+.application-heading {
+  margin-top: 10px;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
 .help-guide {
   text-align: center;
   white-space: normal !important;

@@ -8,6 +8,7 @@ const {
   updateJobListing,
   deleteJobListing,
   getLatestJobs,
+  addJobQuestions, // Import the new function
 } = require("../controllers/jobController");
 
 const router = express.Router(); // Create a new router instance
@@ -32,6 +33,9 @@ router.get("/latest", getLatestJobs);
 
 // Route to fetch details of a specific job by job ID
 router.get("/:jobId", getJobDetails);
+
+// Route to add or update questions for a specific job listing
+router.post("/:jobId/questions", addJobQuestions); // New route for job questions
 
 // Export the router for use in other modules
 module.exports = router;

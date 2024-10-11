@@ -1,14 +1,34 @@
 const Application = require("../models/application");
+const { evaluateApplication } = require("./aiController");
 
 // Create a new application
 exports.createApplication = async (req, res) => {
-  const { userId, jobId } = req.body;
+  const { userId, jobId, questions } = req.body;
 
   try {
-    const application = new Application({ userId, jobId });
+    const application = new Application({
+      userId,
+      jobId,
+      questions,
+    });
     await application.save();
-    res.status(201).json(application);
+
+    // Send the application to the AI controller for evaluation only if there are questions
+    let evaluationResult = null;
+    if (questions && questions.length > 0) {
+      evaluationResult = await evaluateApplication(application);
+      // Update the application with the overall evaluation results
+      application.aiEvaluation = {
+        score: evaluationResult.score,
+        evaluation: evaluationResult.evaluation,
+        recommendedOutcome: evaluationResult.recommendedOutcome,
+      };
+      await application.save(); // Save the updated application
+    }
+
+    res.status(201).json({ application, evaluationResult });
   } catch (err) {
+    console.error(err);
     res
       .status(400)
       .json({ message: "Error creating application: " + err.message });
