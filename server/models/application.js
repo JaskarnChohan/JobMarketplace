@@ -26,6 +26,13 @@ const applicationSchema = new mongoose.Schema({
       userAnswer: { type: String, required: true }, // Store the user's answer
     },
   ],
+  aiEvaluation: {
+    score: { type: String }, // Format: "<score>/100"
+    evaluation: { type: String }, // AI's evaluation as plain text
+    recommendedOutcome: {
+      type: String,
+    },
+  },
 });
 
 // Export the model

@@ -276,6 +276,26 @@ const Dashboard = () => {
                                     ))}
                                   </>
                                 )}
+                                {/* Display AI Evaluation results at the application level */}
+                                {app.aiEvaluation && (
+                                  <div className="ai-evaluation">
+                                    <h4 className="application-heading">
+                                      AI Evaluation:
+                                    </h4>
+                                    <p>
+                                      <strong>Score:</strong>{" "}
+                                      {app.aiEvaluation.score}
+                                    </p>
+                                    <p>
+                                      <strong>Evaluation:</strong>{" "}
+                                      {app.aiEvaluation.evaluation}
+                                    </p>
+                                    <p>
+                                      <strong>Recommended Outcome:</strong>{" "}
+                                      {app.aiEvaluation.recommendedOutcome}
+                                    </p>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ))

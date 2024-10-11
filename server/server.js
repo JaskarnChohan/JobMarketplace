@@ -7,6 +7,7 @@ const jobRoutes = require("./routes/jobRoutes");
 const employerRoutes = require("./routes/employerRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
+const aiRoutes = require("./routes/aiRoutes");
 const cors = require("cors"); // Middleware to enable CORS
 const cookieParser = require("cookie-parser"); // Middleware to parse cookies
 require("dotenv").config(); // Load environment variables from .env file
@@ -35,6 +36,7 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/employer", employerRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/application", applicationRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Serve static files in the uploads folder
 app.use("/uploads", express.static("uploads"));
