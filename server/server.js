@@ -9,7 +9,6 @@ const jobRoutes = require("./routes/jobRoutes");
 const employerRoutes = require("./routes/employerRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
-const messageRoutes = require("./routes/messageRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const cors = require("cors"); // Middleware to enable CORS
 const cookieParser = require("cookie-parser"); // Middleware to parse cookies
@@ -46,12 +45,6 @@ app.use("/api/employer", employerRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/application", applicationRoutes);
 app.use("/api/ai", aiRoutes);
-
-// Middleware to initialize message routes with Socket.IO instance
-const { router: messageRouter, initSocketRoutes } = messageRoutes;
-initSocketRoutes(io); // Pass Socket.IO instance to message routes
-
-app.use("/api/messages", messageRouter);
 
 // Serve static files in the uploads folder
 app.use("/uploads", express.static("uploads"));
