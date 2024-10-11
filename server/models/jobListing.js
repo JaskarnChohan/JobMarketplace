@@ -72,6 +72,10 @@ const jobListingSchema = new mongoose.Schema(
       enum: ["Open", "Closed", "On Hold", "Cancelled", "Draft"],
       default: "Draft",
     },
+    questions: {
+      type: [String],
+      default: [],   
+    },
   },
   { timestamps: true }
 );
