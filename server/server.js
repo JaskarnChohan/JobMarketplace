@@ -87,14 +87,30 @@ app.use((req, res, next) => {
 const PORT = process.env.PORT || 5050; // Use the PORT from environment variables or default to 5050
 
 // Start the Localtunnel (Used for Paypal Webhooks)
-const subdomain = "jobhive";
-localtunnel(PORT, { subdomain })
-  .then((lt) => {
-    console.log(`Localtunnel running on: ${lt.url}`);
-  })
-  .catch((err) => {
-    console.error("Error starting Localtunnel:", err);
-  });
+const startLocalTunnel = () => {
+  const subdomain = "jobhive";
+  localtunnel(PORT, { subdomain })
+    .then((lt) => {
+      console.log(`Localtunnel running on: ${lt.url}`);
+
+      // Handle tunnel close event
+      lt.on("close", () => {
+        console.log("Localtunnel closed");
+      });
+
+      // Handle tunnel error event
+      lt.on("error", (error) => {
+        console.error("Localtunnel error:", error);
+      });
+    })
+    .catch((err) => {
+      console.error("Error starting Localtunnel:", err);
+      setTimeout(startLocalTunnel, 10000); // Restart after 10 seconds
+    });
+};
+
+// Start the local tunnel
+startLocalTunnel();
 
 // Start the server
 server.listen(PORT, () => {
