@@ -67,6 +67,8 @@ const JobView = () => {
   const [newQuestion, setNewQuestion] = useState(""); // State to hold new question
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null); // State to hold the index of the question being edited
   const [editedQuestion, setEditedQuestion] = useState(""); // State to hold the edited question
+  const [editingAnswerIndex, setEditingAnswerIndex] = useState(null); // State to hold the index of the question being edited
+  const [answeredQuestion, setAnsweredQuestion] = useState(""); // State to hold the edited question
 
 
   // Fetch job details on component mount
@@ -241,14 +243,32 @@ const JobView = () => {
     console.log("getAuthorName called with authorId:", authorId); // Debugging log
     if (authorId === job.employer) {
       return job.company;
-    // } else if (authorId === user._id) {
-    //   return user.name;
+    } else if (user.role === "employer") {
+      try {
+        const response = await axios.get(
+          `http://localhost:5050/api/employer/profile/fetch/`,
+          { withCredentials: true },
+        );
+        console.log("API response:", response.data); // Debugging log
+        if (response.data.name === undefined) {
+          return -1;
+        }
+        let name = response.data.name;
+        console.log("Employer name:", name); // Debugging log
+        return name;
+      } catch (err) {
+        console.error("Error fetching company name:", err); // Debugging log
+        return "Unknown";
+      }
     } else {
       try {
         const response = await axios.get(
           `http://localhost:5050/api/profile/user/${authorId}`
         );
         console.log("API response:", response.data); // Debugging log
+        if (response.data.firstName === undefined && response.data.lastName === undefined) {
+          return -1;
+        }
         let name = response.data.firstName + " " + response.data.lastName;
         return name;
       } catch (err) {
@@ -268,6 +288,10 @@ const JobView = () => {
         return; // Do nothing if the question is empty
       }
       const authorName = await getAuthorName(user._id); // Get author name
+      if (authorName === -1) {
+        setErrors([{ msg: "Failed to get profile name. Must have a profile to ask a question" }]); // Display error if author name is not found
+        return; // Do nothing if the author name is not found
+      }
       const updatedQnA = [
         ...job.QnA.map((qa) => ({
           author: qa.author,
@@ -378,7 +402,50 @@ const JobView = () => {
     }
   };
 
-  if (!user) {
+  const handleAnswerQuestion = (index) => {
+    setEditingAnswerIndex(index);
+    setAnsweredQuestion(job.QnA[index].answer || ""); // Set the answer to the current answer or an empty string
+  };
+
+  const handleSubmitAnsweredQuestion = async (index) => {
+    try {
+      const updatedQnA = job.QnA.map((qa, i) => {
+        if (i === index) {
+          return {
+            ...qa,
+            answer: answeredQuestion,
+          };
+        }
+        return qa;
+      });
+      const response = await axios.put(
+        `http://localhost:5050/api/jobs/update/${job._id}`,
+        { QnA: updatedQnA },
+        { withCredentials: true }
+      );
+      setJob((prevJob) => ({
+        ...prevJob,
+        QnA: response.data.QnA, // Ensure we update the state with the response data
+      })); // Update job state
+      setEditingAnswerIndex(null); // Clear editing index
+      setAnsweredQuestion(""); // Clear edited question
+    } catch (err) {
+      console.error(err); // Log any errors
+      setErrors([{ msg: "Failed to update answer" }]); // Display error message
+    }
+  };
+
+  const handleCancelAnswer = () => {
+    setEditingAnswerIndex(null);
+    setAnsweredQuestion("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingQuestionIndex(null);
+    setEditedQuestion("");
+  };
+
+  if (!isAuthenticated) {
     return null; // or some fallback UI
   }
 
@@ -555,12 +622,20 @@ const JobView = () => {
                         onChange={(e) => setEditedQuestion(e.target.value)}
                         className="qa-edit-textarea"
                       />
-                      <button
-                        className="btn qa-submit-edit-btn"
-                        onClick={() => handleSubmitEditedQuestion(index)}
-                      >
-                        Save
-                      </button>
+                      <div className="btn-container">
+                        <button
+                          className="qa-submit-edit-btn"
+                          onClick={() => handleSubmitEditedQuestion(index)}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="qa-cancel-edit-btn"
+                          onClick={handleCancelEdit}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </>
                   ) : (
                     <>
@@ -570,6 +645,9 @@ const JobView = () => {
                           {isAuthenticated && user && user._id === qa.author && (
                             <button onClick={() => handleEditQuestion(index)} className="edit-question-btn">Edit</button>
                           )}
+                          {isAuthenticated && user && user._id === job.employer && !qa.answer && (
+                            <button onClick={() => handleAnswerQuestion(index)} className="answer-question-btn">Answer</button>
+                          )}
                           {isAuthenticated && user && (user._id === qa.author || user._id === job.employer) && (
                             <button onClick={() => handleDeleteQuestionClick(index)} className="delete-question-btn">Delete</button>
                           )}
@@ -578,7 +656,38 @@ const JobView = () => {
                   )}
                 </div>
                 <div className="qa-answer">
-                  <p><strong>Answer:</strong> {qa.answer || "No answer yet."}</p>
+                  {editingAnswerIndex === index ? (
+                    <>
+                      <textarea
+                        value={answeredQuestion}
+                        onChange={(e) => setAnsweredQuestion(e.target.value)}
+                        className="qa-edit-textarea"
+                      />
+                      <div className="btn-container">
+                        <button
+                          className="qa-submit-edit-btn"
+                          onClick={() => handleSubmitAnsweredQuestion(index)}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="qa-cancel-edit-btn"
+                          onClick={handleCancelAnswer}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p><strong>Answer:</strong> {qa.answer || "No answer yet."}</p>
+                      <div className="btn-container">
+                      {isAuthenticated && user && user._id === job.employer && qa.answer && (
+                        <button onClick={() => handleAnswerQuestion(index)} className="answer-question-btn">Edit</button>
+                      )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </li>

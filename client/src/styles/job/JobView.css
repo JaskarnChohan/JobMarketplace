@@ -353,26 +353,35 @@
 }
 
 /* Submit Edited Question Button */
-.qa-submit-edit-btn {
-  align-self: flex-end;
-  padding: 6px 16px;
-  border: none; /* Ensure no border */
-  border-radius: 8px;
-  background-color: var(--primary-color);
+.qa-submit-edit-btn, .qa-cancel-edit-btn {
+  background-color: #559d57; /* Green for save */
   color: white;
-  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px; /* Ensure consistent padding */
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
   margin-top: 10px;
-  box-shadow: none; /* Ensure no box-shadow */
+  outline: none; /* Remove default focus outline */
+  text-align: center; /* Center text */
+}
+
+.qa-cancel-edit-btn {
+  background-color: #e57373; /* Red for cancel */
 }
 
 .qa-submit-edit-btn:hover {
-  background-color: #0056b3; /* Different shade for hover */
+  background-color: rgb(34, 132, 52); /* Different shade for hover */
   color: white; /* Ensure text color remains white */
   transform: scale(1.05);
   border: none; /* Ensure no border on hover */
   box-shadow: none; /* Ensure no box-shadow on hover */
+}
+
+.qa-cancel-edit-btn:hover {
+  background-color: #d32f2f; /* Darker red for hover */
+  transform: scale(1.05);
+  outline: none; /* Remove default focus outline */
 }
 
 /* Style for the delete button */
@@ -445,5 +454,22 @@
 
 .modal-content .btn-cancel:hover {
   background-color: #e53935;
+  transform: scale(1.05);
+}
+
+/* Answer button */
+.answer-question-btn {
+  background-color: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  margin-top: 10px;
+}
+
+.answer-question-btn:hover {
+  background-color: #bdbdbd;
   transform: scale(1.05);
 }
