@@ -7,6 +7,7 @@ import Modal from "react-modal";
 import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/job/JobView.css";
 import Spinner from "../../components/Spinner/Spinner";
+import JobQnA from "./JobQnA";
 import {
   FaMapMarkerAlt,
   FaMoneyBillWave,
@@ -94,16 +95,18 @@ const JobView = () => {
 
   // Fetch saved jobs on component mount
   useEffect(() => {
-    const fetchSavedJobs = async () => {
-      try {
-        const response = await axios.get(`/api/profile/getSavedJobs`);
-        setSavedJobs(response.data.savedJobs); // Update saved jobs state
-      } catch (err) {
-        console.error(err);
-      }
-    };
+    if (isJobSeeker()) {
+      const fetchSavedJobs = async () => {
+        try {
+          const response = await axios.get(`/api/profile/getSavedJobs`);
+          setSavedJobs(response.data.savedJobs); // Update saved jobs state
+        } catch (err) {
+          console.error(err);
+        }
+      };
 
-    fetchSavedJobs();
+      fetchSavedJobs();
+    }
   }, []);
 
   if (loading) return <Spinner />; // Show loading spinner while data is being fetched
@@ -228,18 +231,22 @@ const JobView = () => {
             >
               {job.company}
             </p>
-            {isJobSaved(job._id) ? (
-              <button
-                className="btn btn-delete"
-                onClick={() => handleSaveJob(job)}
-              >
-                Unsave Job
-              </button>
-            ) : (
-              <button className="btn" onClick={() => handleSaveJob(job)}>
-                Save Job
-              </button>
-            )}
+            {/* Check if user is authenticated and is a job seeker before showing the save button */}
+            {isAuthenticated && isJobSeeker() ? (
+              isJobSaved(job._id) ? (
+                <button
+                  className="btn btn-delete"
+                  onClick={() => handleSaveJob(job)}
+                >
+                  Unsave Job
+                </button>
+              ) : (
+                <button className="btn" onClick={() => handleSaveJob(job)}>
+                  Save Job
+                </button>
+              )
+            ) : null}{" "}
+            {/* Don't show anything if not logged in or not a job seeker */}
           </div>
 
           <div className="job-icons">
@@ -324,6 +331,7 @@ const JobView = () => {
           </div>
         </div>
       </div>
+      <JobQnA job={job} setErrors={setErrors} setJob={setJob} />
       {/* display errors */}
       {errors.length > 0 && (
         <div className="error-messages">

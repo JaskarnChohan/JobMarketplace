@@ -36,6 +36,56 @@ const jobListingSchema = new mongoose.Schema(
       type: [String], // An array of strings to list job benefits
       default: [],
     },
+    QnA: {
+      type: [
+        {
+          author: {
+            type: String,
+            required: true,
+          },
+          authorName: {
+            type: String,
+            required: true,
+          },
+          questionInfo: {
+            type: [
+              {
+                question: {
+                  type: String,
+                  required: true,
+                },
+                datePosted: {
+                  type: Date,
+                  default: Date.now,
+                },
+                votes: {
+                  type: [
+                    {
+                      voter: {
+                        type: String,
+                        required: true,
+                      },
+                      vote: {
+                        type: Number,
+                        required: true,
+                      },
+                    }
+                  ],
+                }
+              },
+            ],
+          },
+          answer: {
+            type: String,
+            datePosted: {
+              type: Date,
+              default: Date.now,
+            },
+          },
+        },
+      ],
+      default: [],
+    },
     salaryRange: {
       type: String,
       enum: [

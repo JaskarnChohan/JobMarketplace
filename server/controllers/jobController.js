@@ -1,5 +1,7 @@
 const jobListing = require("../models/jobListing.js");
 const application = require("../models/application.js");
+const Profile = require("../models/profile"); // Import the Profile model
+const Application = require("../models/application"); // Import the Application model
 const { validationResult, check } = require("express-validator");
 const mongoose = require("mongoose");
 
@@ -136,16 +138,26 @@ exports.deleteJobListing = async (req, res) => {
       return res.status(404).json({ msg: "Job not found" });
     }
 
+    // Remove the job ID from all profiles' savedJobs
+    await Profile.updateMany(
+      { savedJobs: _id }, // Find profiles where savedJobs contains the job ID
+      { $pull: { savedJobs: _id } } // Remove the job ID from savedJobs
+    );
+
+    // Delete all applications related to the job
+    await Application.deleteMany({ jobId: _id });
+
     res.json({ msg: "Job successfully deleted!" });
   } catch (err) {
     // Handle server error
     console.error(err.message);
-    res.status(404).json({ errors: [{ msg: "Server error" }] });
+    res.status(500).json({ errors: [{ msg: "Server error" }] }); // Use 500 for server errors
   }
 };
 
 // Update job listing
 exports.updateJobListing = async (req, res) => {
+  console.log("updateJobListing called: ", req.body);
   const { _id } = req.params;
 
   try {
@@ -158,10 +170,12 @@ exports.updateJobListing = async (req, res) => {
     if (!job) {
       return res.status(404).json({ msg: "Job not found" });
     }
+    console.log("Job updated successfully returning: ", job);
     res.json(job);
   } catch (err) {
     // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
+    console.log("Error updating job: ", err);
   }
 };
 

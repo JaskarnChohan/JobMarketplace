@@ -22,6 +22,9 @@ import ViewCompanyProfile from "./pages/profile/employer/ViewCompanyProfile";
 import ViewUserProfile from "./pages/profile/job-seeker/ViewUserProfile";
 import BrowseEmployers from "./pages/profile/employer/BrowseEmployers";
 import AIAnswerImprover from "./pages/AIAnswerImprover";
+import PaymentPage from "./pages/payment/PaymentPage";
+import PaymentSuccess from "./pages/payment/PaymentSuccess";
+import PaymentCancel from "./pages/payment/PaymentCancel";
 import EditJob from "./pages/jobs/EditJob";
 import JobView from "./pages/jobs/JobView";
 
@@ -83,6 +86,26 @@ const App = () => {
             path="/profile"
             element={
               isAuthenticated ? <ProfilePage /> : <Navigate to="/login" />
+            }
+          />
+
+          {/* Payment routes */}
+          <Route
+            path="/premium"
+            element={
+              isAuthenticated ? <PaymentPage /> : <Navigate to="/login" />
+            }
+          />
+          <Route
+            path="/payment/success"
+            element={
+              isAuthenticated ? <PaymentSuccess /> : <Navigate to="/login" />
+            }
+          />
+          <Route
+            path="/payment/cancel"
+            element={
+              isAuthenticated ? <PaymentCancel /> : <Navigate to="/login" />
             }
           />
 

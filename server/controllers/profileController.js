@@ -108,7 +108,6 @@ exports.getSavedJobs = async (req, res) => {
     }
 
     res.json({ savedJobs: profile.savedJobs });
-    console.log("getSavedJobs called: " + profile.savedJobs);
   } catch (err) {
     // Handle server error
     console.error(err.message);
@@ -120,7 +119,6 @@ exports.getSavedJobs = async (req, res) => {
 exports.updateSavedJobs = async (req, res) => {
   try {
     const { savedJobs } = req.body;
-    console.log("updateSavedJobs called with: " + savedJobs);
 
     // Fetch the user's profile
     let profile = await Profile.findOne({ user: req.user.id });
@@ -134,8 +132,6 @@ exports.updateSavedJobs = async (req, res) => {
     // Update the saved jobs using $set operator
     profile.savedJobs = savedJobs;
     await profile.save();
-
-    console.log("Saved jobs updated: " + profile.savedJobs);
 
     res.json({ savedJobs: profile.savedJobs });
   } catch (err) {
@@ -383,18 +379,20 @@ exports.getProfileByUserId = async (req, res) => {
 
     // Fetch related skills, education, and experience
     const skills = await Skill.find({ profile: profile._id });
-    const education = await Education.find({ profile: profile._id });
-    const experience = await Experience.find({ profile: profile._id });
+    const educations = await Education.find({ profile: profile._id });
+    const experiences = await Experience.find({ profile: profile._id });
 
     // Return the profile data with related skills, education, and experience
     const profileWithDetails = {
       ...profile.toObject(),
+      firstName: profile.firstName,
+      lastName: profile.lastName,
       email: user.email,
       profilePicture,
       profileExists: true,
       skills,
-      education,
-      experience,
+      educations,
+      experiences,
     };
     res.json(profileWithDetails);
   } catch (err) {

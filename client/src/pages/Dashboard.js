@@ -9,7 +9,6 @@ import "../styles/job/Job.css";
 import "../styles/job/JobCards.css";
 import { FaTag } from "react-icons/fa";
 import Spinner from "../components/Spinner/Spinner";
-import AIAnswerImprover from "./AIAnswerImprover";
 
 const Dashboard = () => {
   const { logout, user } = useAuth(); // Get logout function and user info from context
@@ -214,38 +213,28 @@ const Dashboard = () => {
       ]);
     }
   };
-
-  // George Haeberlin: Handle quick apply for job
-  // Handle quick apply for job
-  const handleQuickApply = async (jobId) => {
-    try {
-      await axios.post(`http://localhost:5050/api/application`, {
-        userId: user._id,
-        jobId: jobId,
-      });
-      fetchUserApplications(); // Refresh applications after applying
-      navigate("/dashboard"); // Redirect to dashboard after applying
-    } catch (err) {
-      setErrors([
-        {
-          msg: "An error occurred while applying for the job: " + err.message,
-        },
-      ]);
-    }
-  };
-
   // George Haeberlin: Handle unsave job
   // Handle unsave job
   const handleUnsaveJob = async (jobId) => {
     try {
+      // Filter out the jobId from savedJobIds
       const updatedSavedJobIds = savedJobIds.filter((id) => id !== jobId);
-      setSavedJobIds(updatedSavedJobIds); // Update saved job IDs
+
+      // Update the savedJobIds state
+      setSavedJobIds(updatedSavedJobIds);
+
+      // Update the savedJobs state accordingly
+      const updatedSavedJobs = savedJobs.filter((job) => job._id !== jobId);
+      setSavedJobs(updatedSavedJobs); // Update saved jobs state immediately
+
+      // Send request to update saved jobs in the backend
       await axios.put(
         `http://localhost:5050/api/profile/updateSavedJobs`,
         { savedJobs: updatedSavedJobIds },
         { withCredentials: true }
       );
-      redirect("/dashboard"); // Redirect to dashboard after unsaving
+
+      getSavedJobIds();
     } catch (err) {
       setErrors([
         {
@@ -307,7 +296,7 @@ const Dashboard = () => {
                         {job.title}
                       </h3>
                       <h4>Applicants:</h4>
-                      <div className="applicants-grid">
+                      <div className="applicants">
                         {jobApplicationsMap[job._id] &&
                         jobApplicationsMap[job._id].length > 0 ? (
                           jobApplicationsMap[job._id].map((app) => (
@@ -511,12 +500,6 @@ const Dashboard = () => {
                         Posted At:{" "}
                         {new Date(job.createdAt).toLocaleDateString()}
                       </p>
-                      <button
-                        className="small-btn"
-                        onClick={() => handleQuickApply(job._id)}
-                      >
-                        Quick Apply
-                      </button>
                       <button
                         className="small-btn btn-delete"
                         onClick={() => handleUnsaveJob(job._id)}
