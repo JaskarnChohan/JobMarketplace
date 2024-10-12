@@ -8,7 +8,6 @@ import {
   FaFileAlt,
   FaDownload,
   FaHeart,
-  FaHeartBroken,
 } from "react-icons/fa";
 import axios from "axios";
 import { useAuth } from "../../../context/AuthContext";
@@ -20,7 +19,6 @@ import profileImage from "../../../assets/profile.png";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/ProfileInfo.css";
 import "../../../styles/Global.css";
-import { FaArrowUp, FaArrowDown } from "react-icons/fa";
 
 const ViewUserProfile = () => {
   const { id } = useParams();
@@ -131,11 +129,15 @@ const ViewUserProfile = () => {
   };
 
   const handlePostDeletion = async (postId) => {
-    const confirmDeletion = window.confirm("Are you sure you want to delete this post?");
+    const confirmDeletion = window.confirm(
+      "Are you sure you want to delete this post?"
+    );
     if (!confirmDeletion) return;
 
     try {
-      const updatedPosts = profileData.posts.filter((post) => post._id !== postId);
+      const updatedPosts = profileData.posts.filter(
+        (post) => post._id !== postId
+      );
       await handlePostUpdate(updatedPosts);
     } catch (err) {
       console.error(err);
@@ -161,21 +163,21 @@ const ViewUserProfile = () => {
         }
         return post;
       });
-  
+
       console.log("Updated posts:", updatedPosts);
-  
+
       setProfileData((prevProfile) => ({
         ...prevProfile,
         posts: updatedPosts,
       }));
-  
+
       // Ensure the request includes the necessary credentials
       const response = await axios.put(
         `http://localhost:5050/api/profile/update/${profileData._id}`,
         { posts: updatedPosts },
         { withCredentials: true }
       );
-  
+
       console.log("Vote update response:", response.data);
     } catch (err) {
       console.error(err);
@@ -185,7 +187,6 @@ const ViewUserProfile = () => {
   const hasVoted = (votes, userId, voteType) => {
     return votes.some((v) => v.voter === userId && v.vote === voteType);
   };
-
 
   const { skills = [], experiences = [], educations = [] } = profileData;
   const fullName = `${profileData.firstName} ${profileData.lastName}`;
@@ -409,7 +410,9 @@ const ViewUserProfile = () => {
                   className="post-input"
                   placeholder="Share your thoughts..."
                 />
-                <button className="btn post-btn" type="submit">Post</button>
+                <button className="btn post-btn" type="submit">
+                  Post
+                </button>
               </form>
             )}
             <div className="feed-body">
@@ -431,7 +434,9 @@ const ViewUserProfile = () => {
                     </p>
                     <div className="post-vote">
                       <button
-                        className={`btn btn-upvote ${hasVoted(post.votes, user._id, 1) ? "voted-up" : ""}`}
+                        className={`btn btn-upvote ${
+                          hasVoted(post.votes, user._id, 1) ? "voted-up" : ""
+                        }`}
                         onClick={() => handleVote(post._id, 1)}
                       >
                         <FaHeart />

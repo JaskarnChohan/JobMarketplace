@@ -66,11 +66,11 @@ const ViewCompany = () => {
         fetchJobListings(); // Fetch job listings for the company
         fetchCompanyReviews(); // Fetch reviews for the company
         // Check if the user has a profile
-        // const profileResponse = await axios.get(
-        //   `http://localhost:5050/api/profile/fetch/`,
-        //   { withCredentials: true }
-        // );
-        // setHasProfile(profileResponse.data.profileExists); // Set the profile existence flag
+        const profileResponse = await axios.get(
+          `http://localhost:5050/api/profile/fetch/`,
+          { withCredentials: true }
+        );
+        setHasProfile(profileResponse.data.profileExists); // Set the profile existence flag
         setPosts(response.data.posts || []);
       } catch (error) {
         console.error("Failed to fetch company data:", error);
@@ -281,7 +281,9 @@ const ViewCompany = () => {
   };
 
   const handlePostDeletion = async (postId) => {
-    const confirmDeletion = window.confirm("Are you sure you want to delete this post?");
+    const confirmDeletion = window.confirm(
+      "Are you sure you want to delete this post?"
+    );
     if (!confirmDeletion) return;
 
     try {
@@ -371,7 +373,9 @@ const ViewCompany = () => {
                   </div>
                 ))
               ) : (
-                <p className="section-text">No active job listings available.</p>
+                <p className="section-text">
+                  No active job listings available.
+                </p>
               )}
             </div>
           </div>
@@ -466,7 +470,9 @@ const ViewCompany = () => {
                   className="post-input"
                   placeholder="Share your thoughts..."
                 />
-                <button className="btn post-btn" type="submit">Post</button>
+                <button className="btn post-btn" type="submit">
+                  Post
+                </button>
               </form>
             )}
             <div className="feed-body">
@@ -486,30 +492,36 @@ const ViewCompany = () => {
                       </p>
                       {user && (
                         <div className="post-vote">
-                        <button
-                          className={`btn btn-upvote ${hasVoted(post.votes, user._id, 1) ? "voted-up" : ""}`}
-                          onClick={() => handleVote(post._id, 1)}
-                        >
-                          <FaHeart />
-                        </button>
-                        <p>
-                          {post.votes.reduce((acc, vote) => acc + vote.vote, 0)}
-                        </p>
-                      </div>
-                      
-                        )}
+                          <button
+                            className={`btn btn-upvote ${
+                              hasVoted(post.votes, user._id, 1)
+                                ? "voted-up"
+                                : ""
+                            }`}
+                            onClick={() => handleVote(post._id, 1)}
+                          >
+                            <FaHeart />
+                          </button>
+                          <p>
+                            {post.votes.reduce(
+                              (acc, vote) => acc + vote.vote,
+                              0
+                            )}
+                          </p>
+                        </div>
+                      )}
                       {!user && (
                         <div className="post-vote">
-                        <button
-                          className={`btn btn-upvote`}
-                          onClick={null}
-                        >
-                          <FaHeart />
-                        </button>
-                        <p>
-                          {post.votes.reduce((acc, vote) => acc + vote.vote, 0)}
-                        </p>
-                      </div>
+                          <button className={`btn btn-upvote`} onClick={null}>
+                            <FaHeart />
+                          </button>
+                          <p>
+                            {post.votes.reduce(
+                              (acc, vote) => acc + vote.vote,
+                              0
+                            )}
+                          </p>
+                        </div>
                       )}
                       {user && user._id === id && (
                         <button
@@ -525,7 +537,6 @@ const ViewCompany = () => {
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Review Modal */}
