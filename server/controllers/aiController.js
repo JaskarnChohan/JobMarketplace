@@ -655,6 +655,136 @@ exports.feedbackResume = async (req, res) => {
   }
 };
 
+// AI Evaluation function for recommended jobs
+exports.evaluateRecommendedJobs = async (
+  userId,
+  recommendedJobs,
+  homeLocation
+) => {
+  // Fetch user profile
+  const profile = await Profile.findOne({ user: userId });
+  if (!profile) {
+    throw new Error("User profile not found");
+  }
+
+  // Fetch user's experience, education, and skills
+  const experience = await Experience.find({ profile: profile._id });
+  const education = await Education.find({ profile: profile._id });
+  const skills = await Skill.find({ profile: profile._id });
+
+  // Create a context string from user profile
+  let userInfo = `
+    First Name: ${profile.firstName || "N/A"}
+    Last Name: ${profile.lastName || "N/A"}
+    Location: ${profile.location || "N/A"}
+    Bio: ${profile.bio || "N/A"}
+    Preferred Work Category: ${profile.preferredClassification || "N/A"}
+    Experience: ${
+      experience
+        .map(
+          (exp) =>
+            `${exp.title} at ${exp.company} (${exp.startMonth} ${
+              exp.startYear
+            } - ${exp.endMonth ? exp.endMonth + " " + exp.endYear : "Present"})`
+        )
+        .join(", ") || "N/A"
+    }
+    Education: ${
+      education
+        .map(
+          (edu) =>
+            `${edu.degree} in ${edu.fieldOfStudy} from ${edu.school} (${
+              edu.startMonth
+            } ${edu.startYear} - ${
+              edu.endMonth ? edu.endMonth + " " + edu.endYear : "Present"
+            })`
+        )
+        .join(", ") || "N/A"
+    }
+    Skills: ${
+      skills
+        .map(
+          (skill) =>
+            `${skill.name} (Level: ${skill.level}, Description: ${skill.description})`
+        )
+        .join(", ") || "N/A"
+    }
+  `;
+
+  // Loop through recommended jobs and evaluate each
+  const evaluations = [];
+  for (const job of recommendedJobs) {
+    // Create the prompt for the AI
+    const prompt = `You are an expert in evaluating job recommendations based on job descriptions and user profiles.
+
+      Your response should:
+      1. Provide a score out of 100 based on the fit between the user and the job. Example criteria include skills match, experience relevance, and location proximity.
+
+      **Job Details:**
+      Title: ${job.title}
+      Description: ${job.description}
+      Requirements: ${job.requirements.join(", ") || "N/A"}
+      Benefits: ${job.benefits.join(", ") || "N/A"}
+      Salary Range: ${job.salaryRange}
+      Employment Type: ${job.employmentType}
+      Location: ${job.location}
+
+      **User Home Location:** ${homeLocation}
+
+      ${userInfo ? `**User Info:** ${userInfo}` : ""}
+
+      **Response Format:**
+      <response>
+        Score: <score>/100
+      </response>
+    `;
+
+    // Generate evaluation content using the AI model
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+      generationConfig: {
+        maxOutputTokens: 1000, // Maximum number of tokens to generate
+        temperature: 0.7,
+      },
+    });
+
+    // Check the candidates array
+    if (result?.response?.candidates && result.response.candidates.length > 0) {
+      const evaluationText =
+        result.response.candidates[0].content.parts[0].text;
+
+      // If no evaluation text is returned
+      if (!evaluationText) {
+        throw new Error("AI response did not contain evaluation text.");
+      }
+
+      // Extract score
+      const responseRegex = /Score:\s*(\d+)\/100/s;
+      const matches = evaluationText.match(responseRegex);
+
+      if (!matches) {
+        throw new Error("AI response did not match expected format.");
+      }
+
+      const score = matches[1]; // Extract score
+
+      evaluations.push({
+        jobId: job._id,
+        score: Number(score), // Store score as a number for sorting
+      });
+    } else {
+      throw new Error("No candidates found in AI response.");
+    }
+  }
+
+  return evaluations; // Return evaluations for all recommended jobs
+};
+
 // AI Job Insights function for employers
 exports.getJobInsights = async (req, res) => {
   const { jobTitle, location } = req.body;
@@ -709,7 +839,6 @@ exports.getJobInsights = async (req, res) => {
     </response>
     `;
 
-    // Generate job insights using the Gemini API
     const result = await model.generateContent({
       contents: [
         {
