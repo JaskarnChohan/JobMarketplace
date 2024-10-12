@@ -344,7 +344,7 @@ const JobManagement = () => {
                           className="btn button-red"
                           onClick={() => handleOnPublish(item, "Draft")}
                         >
-                          Unpublish
+                          Hide from Public
                         </button>
                       )}
                       <button
