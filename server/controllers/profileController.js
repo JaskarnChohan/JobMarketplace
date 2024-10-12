@@ -1,8 +1,10 @@
 const Profile = require("../models/profile");
+const CompanyProfile = require("../models/companyProfile");
 const Skill = require("../models/skill");
 const Experience = require("../models/experience");
 const Education = require("../models/education");
 const User = require("../models/user");
+const UserReview = require("../models/userReviews");
 const fs = require("fs");
 const path = require("path");
 
@@ -425,5 +427,182 @@ exports.updateResumePrivacy = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Create a new review for a job seeker
+exports.createReview = async (req, res) => {
+  // Check if the user is authenticated
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ message: "Unauthorized. User not found." });
+  }
+
+  const { rating, content } = req.body; // Extract rating and content from the request body
+  const jobSeekerID = req.params.id; // Extract the job seeker ID from the request parameters
+
+  // Check if all required fields are provided
+  if (!jobSeekerID || !rating || !content) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    // Check if the user has already reviewed this job seeker
+    const existingReview = await UserReview.findOne({
+      user: req.user.id,
+      jobSeeker: jobSeekerID,
+    });
+
+    // If a review already exists, return an error
+    if (existingReview) {
+      return res.status(400).json({
+        message: "You have already submitted a review for this job seeker.",
+      });
+    }
+
+    // Create a new review
+    const review = new UserReview({
+      jobSeeker: jobSeekerID,
+      user: req.user.id,
+      rating,
+      content,
+    });
+
+    await review.save(); // Save the review to the database
+
+    // Update the job seeker's profile with the new review
+    await Profile.findByIdAndUpdate(jobSeekerID, {
+      $push: { reviews: review._id },
+    });
+
+    res.status(201).json(review);
+  } catch (error) {
+    // Handle server error
+    console.error("Error creating review:", error);
+    res
+      .status(500)
+      .json({ message: "Error creating review", error: error.message });
+  }
+};
+
+// Fetch reviews for a job seeker
+exports.getUserReviews = async (req, res) => {
+  const { userId } = req.params; // Extract the job seeker ID from the request parameters
+
+  try {
+    // Fetch reviews for the job seeker
+    const reviews = await UserReview.find({ jobSeeker: userId })
+      .populate("user", "email") // Populate user details
+      .sort({ createdAt: -1 }); // Sort by creation time
+
+    // Check if reviews exist
+    if (!reviews.length) {
+      return res.status(200).json([]); // Respond with an empty array if no reviews are found
+    }
+
+    // Extract user IDs from reviews
+    const userIds = reviews.map((review) => review.user._id);
+
+    // Fetch profiles for the users who wrote the reviews
+    const companyProfiles = await CompanyProfile.find({
+      user: { $in: userIds },
+    }).select("name user");
+
+    // Map reviews to include company profiles
+    const reviewsWithProfiles = reviews.map((review) => {
+      // Find the corresponding company profile
+      const companyProfile = companyProfiles.find(
+        (profile) => profile.user.toString() === review.user._id.toString()
+      );
+
+      return {
+        ...review.toObject(),
+        companyProfile: companyProfile
+          ? {
+              name: companyProfile.name,
+            }
+          : { name: "Unknown" },
+      };
+    });
+
+    // Respond with the reviews and user profiles
+    res.json(reviewsWithProfiles);
+  } catch (error) {
+    // Handle server error
+    console.error("Error fetching reviews:", error);
+    res.status(500).json({ message: "Error fetching reviews" });
+  }
+};
+
+// Delete a review
+exports.deleteReview = async (req, res) => {
+  const { reviewId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    // Find the review by ID
+    const review = await UserReview.findById(reviewId);
+
+    // Check if the review exists
+    if (!review) {
+      return res.status(404).json({ message: "Review not found" });
+    }
+
+    // Check if the logged-in user is the author of the review
+    if (review.user.toString() !== userId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this review" });
+    }
+
+    // Delete the review using deleteOne method
+    await UserReview.deleteOne({ _id: reviewId });
+
+    // Update the job seeker's profile to remove the review reference
+    await Profile.findByIdAndUpdate(review.jobSeeker, {
+      $pull: { reviews: reviewId },
+    });
+
+    return res.status(200).json({ message: "Review deleted successfully" });
+  } catch (error) {
+    // Handle server error
+    console.error("Failed to delete review:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Edit a review
+exports.editReview = async (req, res) => {
+  const { reviewId } = req.params; // Extract the review ID from the request parameters
+  const { content, rating } = req.body; // Extract the content and rating from the request body
+
+  try {
+    // Find the review by ID
+    const review = await UserReview.findById(reviewId);
+
+    // Check if the review was not found
+    if (!review) {
+      return res.status(404).json({ message: "Review not found." });
+    }
+
+    // Check if the logged-in user is the author of the review
+    if (review.user.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to edit this review." });
+    }
+
+    // Update the review
+    review.content = content; // Update content
+    review.rating = rating; // Update rating
+    await review.save(); // Save the changes
+
+    // Return the updated review
+    res.status(200).json(review);
+  } catch (error) {
+    // Handle server error
+    console.error("Error editing review:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to edit review.", error: error.message });
   }
 };
