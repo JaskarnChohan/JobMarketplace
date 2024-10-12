@@ -70,7 +70,9 @@ const ViewCompany = () => {
           `http://localhost:5050/api/profile/fetch/`,
           { withCredentials: true }
         );
-        setHasProfile(profileResponse.data.profileExists); // Set the profile existence flag
+        if (profileResponse.data){
+          setHasProfile(profileResponse.data.profileExists); // Set the profile existence flag
+        }
         setPosts(response.data.posts || []);
       } catch (error) {
         console.error("Failed to fetch company data:", error);
