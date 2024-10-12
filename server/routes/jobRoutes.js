@@ -1,5 +1,6 @@
 // Import necessary modules
 const express = require("express");
+const authenticate = require("../middleware/authMiddleware");
 const {
   getJobs,
   getJobDetails,
@@ -8,7 +9,8 @@ const {
   updateJobListing,
   deleteJobListing,
   getLatestJobs,
-  addJobQuestions, // Import the new function
+  addJobQuestions,
+  getRecommendedJobs,
 } = require("../controllers/jobController");
 
 const router = express.Router(); // Create a new router instance
@@ -30,6 +32,9 @@ router.post("/create", createJob);
 
 // Route to fetch the latest job listings
 router.get("/latest", getLatestJobs);
+
+// Route to get recommended jobs for the authenticated user
+router.get("/recommended", authenticate, getRecommendedJobs); // New route for matching jobs
 
 // Route to fetch details of a specific job by job ID
 router.get("/:jobId", getJobDetails);
