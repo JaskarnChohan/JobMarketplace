@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../components/layout/Navbar";
+import Footer from "../components/layout/Footer";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate, Link, redirect } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Modal from "react-modal";
 import "../styles/Global.css";
 import "../styles/job/Job.css";
@@ -11,7 +12,7 @@ import { FaTag } from "react-icons/fa";
 import Spinner from "../components/Spinner/Spinner";
 
 const Dashboard = () => {
-  const { logout, user } = useAuth(); // Get logout function and user info from context
+  const { logout, user, isJobSeeker } = useAuth(); // Get logout function and user info from context
   const navigate = useNavigate();
   const [userJobs, setUserJobs] = useState([]); // State to hold user's jobs
   const [jobApplicationsMap, setJobApplicationsMap] = useState({}); // Map to track job applications
@@ -131,12 +132,14 @@ const Dashboard = () => {
   // George Haeberlin: Get saved jobs functionality
   // get saved job IDs
   const getSavedJobIds = async () => {
-    try {
-      // Send request to fetch saved jobs
-      const response = await axios.get(`/api/profile/getSavedJobs`);
-      setSavedJobIds(response.data.savedJobs); // Update saved jobs state
-    } catch (err) {
-      console.error(err);
+    if (isJobSeeker()) {
+      try {
+        // Send request to fetch saved jobs
+        const response = await axios.get(`/api/profile/getSavedJobs`);
+        setSavedJobIds(response.data.savedJobs); // Update saved jobs state
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
@@ -550,6 +553,7 @@ const Dashboard = () => {
           </div>
         </Modal>
       </div>
+      <Footer />
     </div>
   );
 };

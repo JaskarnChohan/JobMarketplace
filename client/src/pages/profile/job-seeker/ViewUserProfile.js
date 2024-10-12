@@ -24,6 +24,7 @@ import "../../../styles/Global.css";
 const ViewUserProfile = () => {
   const { id } = useParams();
   const [profileData, setProfileData] = useState(null);
+  const [premiumModalIsOpen, setPremiumModalIsOpen] = useState(false); // Modal state for premium access
   const [aiEvaluation, setAiEvaluation] = useState(null); // State to store AI evaluation results
   const [loading, setLoading] = useState(false); // Loading state for API calls
   const [reviews, setReviews] = useState([]); // State for reviews
@@ -189,24 +190,48 @@ const ViewUserProfile = () => {
     navigate("/");
   };
 
-  // Handle AI evaluation and open a modal to display results
+  // Open the modal for premium access
+  const openPremiumModal = () => {
+    setPremiumModalIsOpen(true);
+  };
+
+  // Close the modal
+  const closePremiumModal = () => {
+    setPremiumModalIsOpen(false);
+  };
+
+  // Handle AI evaluation behind the paywall
   const handleAiEvaluation = async () => {
     setLoading(true); // Set loading state to true
+
     try {
-      const response = await axios.post(
-        `http://localhost:5050/api/ai/evaluate-resume/${id}`,
-        {
-          resume: profileData.resume,
-        },
+      // Check subscription status
+      const subscriptionResponse = await axios.get(
+        "http://localhost:5050/api/payment/subscription-status",
         { withCredentials: true }
       );
 
-      // If AI evaluation succeeds, set the AI results and open the modal
-      if (response.data.evaluationText) {
-        setAiEvaluation(response.data.evaluationText);
+      const { subscriptionType, status } = subscriptionResponse.data;
+
+      // If the user has "JobHive Premium", proceed with AI evaluation
+      if (subscriptionType === "JobHive Premium" && status === "active") {
+        const response = await axios.post(
+          `http://localhost:5050/api/ai/evaluate-resume/${id}`,
+          { resume: profileData.resume },
+          { withCredentials: true }
+        );
+
+        // If AI evaluation succeeds, set the AI results
+        if (response.data.evaluationText) {
+          setAiEvaluation(response.data.evaluationText);
+        } else {
+          console.error("Error evaluating resume:", response.data.error);
+        }
       } else {
-        console.error("Error evaluating resume:", response.data.error);
+        // If not a premium user, open the modal
+        openPremiumModal();
       }
+
       setLoading(false); // Set loading state to false
     } catch (error) {
       console.error("Error during AI evaluation:", error);
@@ -412,7 +437,6 @@ const ViewUserProfile = () => {
             </div>
           </div>
         )}
-
         {/* New Reviews Section */}
         <div className="section">
           <h2 className="section-title">User Reviews</h2>
@@ -480,6 +504,26 @@ const ViewUserProfile = () => {
             )}
           </div>
         </div>
+        {/* Premium access required modal */}
+        <Modal
+          isOpen={premiumModalIsOpen}
+          onRequestClose={closePremiumModal}
+          className="modal-wrapper"
+        >
+          <div className="modal">
+            <h1 className="lrg-heading">Premium Feature</h1>
+            <p className="med-text">
+              You need a JobHive Premium subscription to access the AI resume
+              evaluation feature.
+            </p>
+            <div className="btn-container">
+              <button onClick={closePremiumModal} className="btn-close">
+                Close
+              </button>
+            </div>
+          </div>
+        </Modal>
+        <Footer />
       </div>
 
       {/* Review Modal */}

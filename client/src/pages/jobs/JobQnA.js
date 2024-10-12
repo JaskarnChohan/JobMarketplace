@@ -13,6 +13,8 @@ const JobQnA = ({ job, setErrors, setJob }) => {
   const [newQuestion, setNewQuestion] = useState("");
   const [editingQuestionIndex, setEditingQuestionIndex] = useState(null);
   const [editedQuestion, setEditedQuestion] = useState("");
+  const [editingAnswerIndex, setEditingAnswerIndex] = useState(null); // State to hold the index of the question being edited
+  const [answeredQuestion, setAnsweredQuestion] = useState(""); // State to hold the edited question
 
   //George Haeberlin: check if user has voted on a question
   const hasVoted = (votes, userId, voteType) => {
@@ -60,97 +62,151 @@ const JobQnA = ({ job, setErrors, setJob }) => {
   };
 
   const getAuthorName = async (authorId) => {
+    console.log("getAuthorName called with authorId:", authorId); // Debugging log
     if (authorId === job.employer) {
       return job.company;
+    } else if (user.role === "employer") {
+      try {
+        const response = await axios.get(
+          `http://localhost:5050/api/employer/profile/fetch/`,
+          { withCredentials: true }
+        );
+        console.log("API response:", response.data); // Debugging log
+        if (response.data.name === undefined) {
+          return -1;
+        }
+        let name = response.data.name;
+        console.log("Employer name:", name); // Debugging log
+        return name;
+      } catch (err) {
+        console.error("Error fetching company name:", err); // Debugging log
+        return "Unknown";
+      }
     } else {
       try {
         const response = await axios.get(
           `http://localhost:5050/api/profile/user/${authorId}`
         );
-        return `${response.data.firstName} ${response.data.lastName}`;
+        console.log("API response:", response.data); // Debugging log
+        if (
+          response.data.firstName === undefined &&
+          response.data.lastName === undefined
+        ) {
+          return -1;
+        }
+        let name = response.data.firstName + " " + response.data.lastName;
+        return name;
       } catch (err) {
-        console.error("Error fetching author name:", err);
+        console.error("Error fetching author name:", err); // Debugging log
         return "Unknown";
       }
     }
   };
 
+  //George Haeberlin: handle new question submission
   const handleSubmitQuestion = async (e) => {
     e.preventDefault();
+    console.log("User._id:", user._id); // Debugging log
     try {
       if (!newQuestion) {
-        setErrors([{ msg: "Question cannot be empty" }]);
-        return;
+        setErrors([{ msg: "Question cannot be empty" }]); // Display error if question is empty
+        return; // Do nothing if the question is empty
       }
-      console.log("User: ", user);
-      const authorName = await getAuthorName(user._id);
-      const newQnA = {
-        author: user._id,
-        authorName,
-        questionInfo: [
-          { question: newQuestion, datePosted: new Date(), votes: [] },
-        ],
-        answer: null,
-      };
-
-      const updatedQnA = [...job.QnA, newQnA];
-
-      await updateJobQnA(job._id, updatedQnA);
-      setNewQuestion("");
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const updateJobQnA = async (jobId, updatedQnA) => {
-    try {
+      const authorName = await getAuthorName(user._id); // Get author name
+      if (authorName === -1) {
+        setErrors([
+          {
+            msg: "Failed to get profile name. Must have a profile to ask a question",
+          },
+        ]); // Display error if author name is not found
+        return; // Do nothing if the author name is not found
+      }
+      const updatedQnA = [
+        ...job.QnA.map((qa) => ({
+          author: qa.author,
+          authorName: qa.authorName,
+          questionInfo: qa.questionInfo,
+          answer: qa.answer,
+          _id: qa._id, // preserve the _id for existing questions
+        })),
+        {
+          author: user._id,
+          authorName: authorName,
+          questionInfo: [
+            { question: newQuestion, datePosted: new Date(), votes: [] },
+          ],
+          answer: null,
+        }, // Add new question
+      ];
       const response = await axios.put(
-        `http://localhost:5050/api/jobs/update/${jobId}`,
+        `http://localhost:5050/api/jobs/update/${job._id}`,
         { QnA: updatedQnA },
         { withCredentials: true }
       );
       setJob((prevJob) => ({
         ...prevJob,
-        QnA: response.data.QnA,
-      }));
+        QnA: response.data.QnA, // Ensure we update the state with the response data
+      })); // Update job state
+      setNewQuestion(""); // Clear new question inputs
     } catch (err) {
-      console.error(err);
+      console.error(err); // Log any errors
     }
   };
 
+  //George Haeberlin: handle vote submission and removal
   const handleVote = async (qaId, vote) => {
+    console.log("handleVote called with qaId:", qaId, "and vote:", vote); // Debugging log
     try {
       const updatedQnA = job.QnA.map((qa) => {
         if (qa._id === qaId) {
-          const hasVoted = qa.questionInfo[0].votes.find(
-            (v) => v.voter === user._id
-          );
-
-          if (hasVoted) {
-            if (hasVoted.vote === vote) {
-              qa.questionInfo[0].votes = qa.questionInfo[0].votes.filter(
-                (v) => v.voter !== user._id
-              );
-            } else {
-              hasVoted.vote = vote; // Change vote to new value
-            }
+          if (
+            qa.questionInfo[0].votes.find(
+              (v) => v.voter === user._id && v.vote === vote
+            )
+          ) {
+            // if the user has already voted, remove the vote
+            qa.questionInfo[0].votes = qa.questionInfo[0].votes.filter(
+              (v) => v.voter !== user._id
+            );
+          } else if (
+            qa.questionInfo[0].votes.find(
+              (v) => v.voter === user._id && v.vote !== vote
+            )
+          ) {
+            // remove vote if user has voted with a different vote
+            qa.questionInfo[0].votes = qa.questionInfo[0].votes.filter(
+              (v) => v.voter !== user._id
+            );
+            // add new vote
+            qa.questionInfo[0].votes.push({ voter: user._id, vote });
           } else {
+            // if the user has not voted, add the vote
             qa.questionInfo[0].votes.push({ voter: user._id, vote });
           }
         }
         return qa;
       });
-      await updateJobQnA(job._id, updatedQnA);
+      const response = await axios.put(
+        `http://localhost:5050/api/jobs/update/${job._id}`,
+        { QnA: updatedQnA },
+        { withCredentials: true }
+      );
+      setJob((prevJob) => ({
+        ...prevJob,
+        QnA: response.data.QnA, // Ensure we update the state with the response data
+      })); // Update job state
     } catch (err) {
-      console.error(err);
+      console.error(err); // Log any errors
     }
   };
 
+  //George Haeberlin: handle editing a question
   const handleEditQuestion = (index) => {
     setEditingQuestionIndex(index);
     setEditedQuestion(job.QnA[index].questionInfo[0].question);
   };
 
+  //George Haeberlin: handle question update
   const handleSubmitEditedQuestion = async (index) => {
     try {
       const updatedQnA = job.QnA.map((qa, i) => {
@@ -159,18 +215,71 @@ const JobQnA = ({ job, setErrors, setJob }) => {
         }
         return qa;
       });
-      await updateJobQnA(job._id, updatedQnA);
-      setEditingQuestionIndex(null);
-      setEditedQuestion("");
+      const response = await axios.put(
+        `http://localhost:5050/api/jobs/update/${job._id}`,
+        { QnA: updatedQnA },
+        { withCredentials: true }
+      );
+      setJob((prevJob) => ({
+        ...prevJob,
+        QnA: response.data.QnA, // Ensure we update the state with the response data
+      })); // Update job state
+      setEditingQuestionIndex(null); // Clear editing index
+      setEditedQuestion(""); // Clear edited question
     } catch (err) {
-      console.error(err);
-      setErrors([{ msg: "Failed to update question" }]);
+      console.error(err); // Log any errors
+      setErrors([{ msg: "Failed to update question" }]); // Display error message
     }
+  };
+
+  const handleAnswerQuestion = (index) => {
+    setEditingAnswerIndex(index);
+    setAnsweredQuestion(job.QnA[index].answer || ""); // Set the answer to the current answer or an empty string
+  };
+
+  const handleSubmitAnsweredQuestion = async (index) => {
+    try {
+      const updatedQnA = job.QnA.map((qa, i) => {
+        if (i === index) {
+          return {
+            ...qa,
+            answer: answeredQuestion,
+          };
+        }
+        return qa;
+      });
+      const response = await axios.put(
+        `http://localhost:5050/api/jobs/update/${job._id}`,
+        { QnA: updatedQnA },
+        { withCredentials: true }
+      );
+      setJob((prevJob) => ({
+        ...prevJob,
+        QnA: response.data.QnA, // Ensure we update the state with the response data
+      })); // Update job state
+      setEditingAnswerIndex(null); // Clear editing index
+      setAnsweredQuestion(""); // Clear edited question
+    } catch (err) {
+      console.error(err); // Log any errors
+      setErrors([{ msg: "Failed to update answer" }]); // Display error message
+    }
+  };
+
+  const handleCancelAnswer = () => {
+    setEditingAnswerIndex(null);
+    setAnsweredQuestion("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingQuestionIndex(null);
+    setEditedQuestion("");
   };
 
   return (
     <div className="qa-section">
       <h3>Questions & Answers</h3>
+
+      {/* Only job seekers can write a question */}
       {isAuthenticated && isJobSeeker() && (
         <form className="qa-form" onSubmit={handleSubmitQuestion}>
           <textarea
@@ -184,6 +293,7 @@ const JobQnA = ({ job, setErrors, setJob }) => {
           </button>
         </form>
       )}
+
       <ul className="qa-list">
         {job.QnA.sort((a, b) => {
           const aVotes =
@@ -199,36 +309,39 @@ const JobQnA = ({ job, setErrors, setJob }) => {
           return bVotes - aVotes;
         }).map((qa, index) => (
           <li key={index} className="qa-item">
-            {isAuthenticated && (
-              <div className="qa-vote">
-                <button
-                  className={`btn btn-upvote ${
-                    hasVoted(qa.questionInfo[0]?.votes, user._id, 1)
-                      ? "voted-up"
-                      : ""
-                  }`}
-                  onClick={() => handleVote(qa._id, 1)}
-                >
-                  <FaArrowUp />
-                </button>
-                <p>
-                  {qa.questionInfo[0]?.votes.reduce(
-                    (acc, vote) => acc + vote.vote,
-                    0
-                  )}
-                </p>
-                <button
-                  className={`btn btn-downvote ${
-                    hasVoted(qa.questionInfo[0]?.votes, user._id, -1)
-                      ? "voted-down"
-                      : ""
-                  }`}
-                  onClick={() => handleVote(qa._id, -1)}
-                >
-                  <FaArrowDown />
-                </button>
-              </div>
-            )}
+            <div className="qa-vote">
+              {/* Votes are only visible and clickable if the user is authenticated and a job seeker */}
+              {isAuthenticated && isJobSeeker() && (
+                <>
+                  <button
+                    className={`btn btn-upvote ${
+                      hasVoted(qa.questionInfo[0]?.votes, user._id, 1)
+                        ? "voted-up"
+                        : ""
+                    }`}
+                    onClick={() => handleVote(qa._id, 1)}
+                  >
+                    <FaArrowUp />
+                  </button>
+                  <p>
+                    {qa.questionInfo[0]?.votes.reduce(
+                      (acc, vote) => acc + vote.vote,
+                      0
+                    )}
+                  </p>
+                  <button
+                    className={`btn btn-downvote ${
+                      hasVoted(qa.questionInfo[0]?.votes, user._id, -1)
+                        ? "voted-down"
+                        : ""
+                    }`}
+                    onClick={() => handleVote(qa._id, -1)}
+                  >
+                    <FaArrowDown />
+                  </button>
+                </>
+              )}
+            </div>
             <div className="qa-content">
               <div className="qa-question">
                 <p>
@@ -241,12 +354,20 @@ const JobQnA = ({ job, setErrors, setJob }) => {
                       onChange={(e) => setEditedQuestion(e.target.value)}
                       className="qa-edit-textarea"
                     />
-                    <button
-                      className="btn qa-submit-edit-btn"
-                      onClick={() => handleSubmitEditedQuestion(index)}
-                    >
-                      Save
-                    </button>
+                    <div className="btn-container">
+                      <button
+                        className="qa-submit-edit-btn"
+                        onClick={() => handleSubmitEditedQuestion(index)}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="qa-cancel-edit-btn"
+                        onClick={handleCancelEdit}
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <>
@@ -272,6 +393,17 @@ const JobQnA = ({ job, setErrors, setJob }) => {
                       )}
                       {isAuthenticated &&
                         user &&
+                        user._id === job.employer &&
+                        !qa.answer && (
+                          <button
+                            onClick={() => handleAnswerQuestion(index)}
+                            className="answer-question-btn"
+                          >
+                            Answer
+                          </button>
+                        )}
+                      {isAuthenticated &&
+                        user &&
                         (user._id === qa.author ||
                           user._id === job.employer) && (
                           <button
@@ -285,38 +417,76 @@ const JobQnA = ({ job, setErrors, setJob }) => {
                   </>
                 )}
               </div>
-              {qa.answer && (
-                <div className="qa-answer">
-                  <p>
-                    <strong>Answer:</strong> {qa.answer}
-                  </p>
-                </div>
-              )}
+              <div className="qa-answer">
+                {editingAnswerIndex === index ? (
+                  <>
+                    <textarea
+                      value={answeredQuestion}
+                      onChange={(e) => setAnsweredQuestion(e.target.value)}
+                      className="qa-edit-textarea"
+                    />
+                    <div className="btn-container">
+                      <button
+                        className="qa-submit-edit-btn"
+                        onClick={() => handleSubmitAnsweredQuestion(index)}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="qa-cancel-edit-btn"
+                        onClick={handleCancelAnswer}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p>
+                      <strong>Answer:</strong> {qa.answer || "No answer yet."}
+                    </p>
+                    <div className="btn-container">
+                      {isAuthenticated &&
+                        user &&
+                        user._id === job.employer &&
+                        qa.answer && (
+                          <button
+                            onClick={() => handleAnswerQuestion(index)}
+                            className="answer-question-btn"
+                          >
+                            Edit
+                          </button>
+                        )}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </li>
         ))}
       </ul>
-      <Modal
-        isOpen={confirmationDialogIsOpen}
-        onRequestClose={handleCancelDelete}
-        contentLabel="Confirm Delete"
-        className="modal-wrapper"
-      >
-        <div className="modal">
-          <h1 className="lrg-heading">Confirm Delete</h1>
-          <p className="med-text">
-            Are you sure you want to delete this question?
-          </p>
-          <div className="btn-container">
-            <button onClick={handleConfirmDelete} className="btn-delete">
-              Delete
-            </button>
-            <button onClick={handleCancelDelete} className="btn-cancel">
-              Cancel
-            </button>
+      {confirmationDialogIsOpen && (
+        <Modal
+          isOpen={confirmationDialogIsOpen}
+          onRequestClose={handleCancelDelete}
+          className="modal-wrapper"
+        >
+          <div className="modal">
+            <h1 className="lrg-heading">Delete Question</h1>
+            <p className="med-text">
+              Are you sure you want to delete this question?
+            </p>
+            <div className="btn-container">
+              <button onClick={handleConfirmDelete} className="btn-delete">
+                Yes
+              </button>
+              <button onClick={handleCancelDelete} className="btn-cancel">
+                Cancel
+              </button>
+            </div>
           </div>
-        </div>
-      </Modal>
+        </Modal>
+      )}
     </div>
   );
 };

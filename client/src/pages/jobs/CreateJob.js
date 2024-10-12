@@ -28,6 +28,7 @@ const CreateJob = () => {
     location: "",
     jobCategory: "",
     requirements: [],
+    questions: [],
     benefits: [],
     salaryRange: "",
     employmentType: "",
@@ -86,6 +87,7 @@ const CreateJob = () => {
     location,
     jobCategory,
     requirements,
+    questions,
     benefits,
     salaryRange,
     employmentType,
@@ -131,12 +133,17 @@ const CreateJob = () => {
   };
 
   // State for input fields to add requirements and benefits
-  const [requirementinputitem, setInputValue] = useState("");
-  const [benefitsinputitem, setBenefitInputValue] = useState("");
+  const [requirementInputItem, setRequirementInputValue] = useState("");
+  const [questionInputItem, setQuestionInputValue] = useState("");
+  const [benefitsInputItem, setBenefitInputValue] = useState("");
 
-  // Handle input changes for requirement and benefit fields
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
+  // Handle input changes for requirement, requirement questions, and benefit fields
+  const handleRequirementInputChange = (e) => {
+    setRequirementInputValue(e.target.value);
+  };
+
+  const handleQuestionInputChange = (e) => {
+    setQuestionInputValue(e.target.value); // Update state for questions
   };
 
   const handleBenefitInputChange = (e) => {
@@ -144,27 +151,45 @@ const CreateJob = () => {
   };
 
   // Function to add requirement to the list
-  const handleAddItem = () => {
-    if (requirementinputitem.trim()) {
-      const updatedRequirements = [...requirements, requirementinputitem];
-      setInputValue(""); // Clear input field
+  const handleAddRequirementItem = () => {
+    if (requirementInputItem.trim()) {
+      const updatedRequirements = [...requirements, requirementInputItem];
+      setRequirementInputValue(""); // Clear input field
       setFormData({ ...formData, requirements: updatedRequirements });
+    }
+  };
+
+  // Function to add  question to the list
+  const handleAddQuestionItem = () => {
+    if (questionInputItem.trim()) {
+      const updatedQuestions = [...questions, questionInputItem];
+      setQuestionInputValue(""); // Clear input field
+      setFormData({
+        ...formData,
+        questions: updatedQuestions,
+      });
     }
   };
 
   // Function to add benefit to the list
   const handleBenefitAddItem = () => {
-    if (benefitsinputitem.trim()) {
-      const updatedBenefits = [...benefits, benefitsinputitem];
+    if (benefitsInputItem.trim()) {
+      const updatedBenefits = [...benefits, benefitsInputItem];
       setFormData({ ...formData, benefits: updatedBenefits });
       setBenefitInputValue(""); // Clear input field
     }
   };
 
   // Function to remove a requirement from the list
-  const removeItem = (index) => {
+  const removeRequirementItem = (index) => {
     const updatedRequirements = requirements.filter((_, i) => i !== index);
     setFormData({ ...formData, requirements: updatedRequirements });
+  };
+
+  // Function to remove a question from the list
+  const removeQuestionItem = (index) => {
+    const updatedQuestions = questions.filter((_, i) => i !== index);
+    setFormData({ ...formData, questions: updatedQuestions });
   };
 
   // Function to remove a benefit from the list
@@ -320,13 +345,13 @@ const CreateJob = () => {
               <input
                 type="text"
                 id="requirements"
-                value={requirementinputitem}
-                onChange={handleInputChange}
+                value={requirementInputItem}
+                onChange={handleRequirementInputChange}
               />
               <button
                 className="small-btn"
                 type="button"
-                onClick={handleAddItem}
+                onClick={handleAddRequirementItem}
               >
                 Add to List of Requirements
               </button>
@@ -335,7 +360,7 @@ const CreateJob = () => {
               <input
                 type="text"
                 id="benefits"
-                value={benefitsinputitem}
+                value={benefitsInputItem}
                 onChange={handleBenefitInputChange}
               />
               <button
@@ -344,6 +369,26 @@ const CreateJob = () => {
                 onClick={handleBenefitAddItem}
               >
                 Add to List of Benefits
+              </button>
+            </div>
+          </div>
+
+          <div className="form-section">
+            <div className="add-questions">
+              <h4>Questions</h4>
+              <input
+                type="text"
+                placeholder="Add Question..."
+                value={questionInputItem}
+                onChange={handleQuestionInputChange}
+                className="input-field"
+              />
+              <button
+                type="button"
+                className="small-btn"
+                onClick={handleAddQuestionItem}
+              >
+                Add Question
               </button>
             </div>
           </div>
@@ -357,7 +402,7 @@ const CreateJob = () => {
                     {item}{" "}
                     <FaTrash
                       className="red-btn"
-                      onClick={() => removeItem(index)}
+                      onClick={() => removeRequirementItem(index)}
                     />
                   </li>
                 ))}
@@ -372,6 +417,20 @@ const CreateJob = () => {
                     <FaTrash
                       className="red-btn"
                       onClick={() => removeBenefitItem(index)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="list-container">
+              <h3>Questions:</h3>
+              <ul className="item-list">
+                {questions.map((question, index) => (
+                  <li key={index}>
+                    {question}{" "}
+                    <FaTrash
+                      className="red-btn"
+                      onClick={() => removeQuestionItem(index)}
                     />
                   </li>
                 ))}

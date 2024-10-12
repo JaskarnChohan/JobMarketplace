@@ -52,6 +52,9 @@ const Footer = () => {
               <Link to="/dashboard">Applied Jobs</Link>
             </li>
             <li>
+              <Link to="/enchanceanswers">AI Interview Answer Improver</Link>
+            </li>
+            <li>
               <Link to="/profile">Profile</Link>
             </li>
           </ul>
@@ -64,13 +67,13 @@ const Footer = () => {
               <Link to="/jobmanagement">Job Management</Link>
             </li>
             <li>
+              <Link to="/createjob">Create Job</Link>
+            </li>
+            <li>
               <Link to="/dashboard">Applications</Link>
             </li>
             <li>
               <Link to="/profile">Profile</Link>
-            </li>
-            <li>
-              <Link to="/createjob">Create Job</Link>
             </li>
           </ul>
         </div>

@@ -13,10 +13,7 @@ const createJobValidationRules = [
   check("jobCategory", "Please select a job category").notEmpty(),
   check("salaryRange", "Please select a salary range").notEmpty(),
   check("employmentType", "Please select an employment type").notEmpty(),
-  check(
-    "applicationDeadline",
-    "Please enter an application deadline"
-  ).notEmpty(),
+  check("applicationDeadline", "Please enter an application deadline").notEmpty(),
 ];
 
 exports.getLatestJobs = async (req, res) => {
@@ -169,6 +166,7 @@ exports.updateJobListing = async (req, res) => {
       new: true,
       runValidators: true,
     });
+
     if (!job) {
       return res.status(404).json({ msg: "Job not found" });
     }
@@ -239,24 +237,11 @@ exports.getJobsByEmployer = async (req, res) => {
       .sort({ datePosted: sortBy })
       .skip((page - 1) * limit)
       .limit(limit);
+
     res.send({ jobs, totalPages });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ errors: [{ msg: "Server error" }] });
-  }
-};
-
-// Get job details
-exports.getJobDetails = async (req, res) => {
-  const jobId = req.params.jobId;
-  try {
-    const job = await jobListing.findById(jobId);
-    if (!job) {
-      return res.status(404).json({ errors: [{ msg: "Job not found" }] });
-    }
-    res.send(job);
-  } catch (err) {
     // Handle server error
+    console.error(err.message);
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
@@ -284,7 +269,9 @@ exports.createJob = [
       employmentType,
       applicationDeadline,
       status,
+      questions, 
     } = req.body;
+
     try {
       let joblisting = await jobListing.findOne({
         employer,
@@ -301,7 +288,7 @@ exports.createJob = [
         status,
       });
 
-      // Check if job listing already exists
+      // Check if identical job listing already exists
       if (joblisting) {
         return res
           .status(400)
@@ -321,6 +308,7 @@ exports.createJob = [
         employmentType,
         applicationDeadline,
         status,
+        questions, 
       });
       await joblisting.save();
 
@@ -331,3 +319,43 @@ exports.createJob = [
     }
   },
 ];
+
+// Add or update questions for a specific job listing
+exports.addJobQuestions = async (req, res) => {
+  const { jobId } = req.params;
+  const { questions } = req.body;
+
+  try {
+    // Find the job listing by ID
+    const job = await jobListing.findById(jobId);
+
+    if (!job) {
+      return res.status(404).json({ msg: "Job not found" });
+    }
+
+    // Update the job listing's questions
+    job.questions = questions;
+
+    await job.save();
+
+    res.json({ success: true, job });
+  } catch (err) {
+    // Handle server error
+    res.status(500).json({ errors: [{ msg: "Server error" }] });
+  }
+};
+
+exports.getJobDetails = async (req, res) => {
+  const { jobId } = req.params;
+  try {
+    const job = await jobListing.findById(jobId);
+    if (!job) {
+      return res.status(404).json({ msg: "Job not found" });
+    }
+    res.json(job);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ errors: [{ msg: "Server error" }] });
+  }
+};
+
