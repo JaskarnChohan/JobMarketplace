@@ -19,6 +19,34 @@ exports.sendMessage = async (req, res, io) => {
   }
 
   try {
+    let senderName = "";
+
+    // Try to find the sender's profile in the Profile schema
+    const userProfile = await Profile.findOne({ user: req.user.id });
+
+    if (userProfile) {
+      // If a user profile is found, set the senderName using firstName and lastName
+      senderName = `${userProfile.firstName} ${userProfile.lastName}`;
+    } else {
+      // If no user profile is found, try to find the sender's company profile
+      const companyProfile = await CompanyProfile.findOne({
+        user: req.user.id,
+      });
+      if (companyProfile) {
+        // If a company profile is found, set the senderName using the company name
+        senderName = companyProfile.name;
+      } else {
+        return res.status(404).json({ message: "Sender profile not found." });
+      }
+    }
+
+    // Delete old notifications for this sender-receiver pair to avoid piling up
+    await Notification.deleteMany({
+      user: receiverId, // The user receiving the notification
+      message: { $regex: `${senderName} sent you a message.` }, // Match old message pattern
+      type: "Message", // Only delete message notifications
+    });
+
     // Create the message object with sender and recipient information
     const message = new Message({
       sender: req.user.id,
@@ -28,6 +56,17 @@ exports.sendMessage = async (req, res, io) => {
 
     // Save the message to the database
     await message.save();
+
+    // Create a notification for the recipient
+    const notificationMessage = `${senderName} sent you a message.`;
+    const notification = new Notification({
+      user: receiverId, // The user receiving the notification
+      message: notificationMessage,
+      type: "MESSAGE", // Specify the type of notification
+    });
+
+    // Save the notification to the database
+    await notification.save();
 
     // Emit the new message to all connected clients using Socket.io
     io.emit("receiveMessage", message); // Emit the message to all clients
