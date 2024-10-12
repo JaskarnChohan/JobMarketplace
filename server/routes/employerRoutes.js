@@ -16,6 +16,7 @@ router.get(
 );
 
 // Route for updating the company profile of the logged-in user
+router.put("/update/:profileId", authenticate, employerController.updateCompanyProfileById);
 router.put("/update", authenticate, employerController.updateCompanyProfile);
 
 // Route for updating the company logo of the logged-in user

@@ -11,6 +11,7 @@ import Footer from "../../components/layout/Footer";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../../components/Spinner/Spinner";
+import { FaHeart, FaHeartBroken } from "react-icons/fa";
 
 const ProfilePage = () => {
   const [formData, setFormData] = useState({});
@@ -19,8 +20,13 @@ const ProfilePage = () => {
   const [skills, setSkills] = useState([]);
   const [profileExists, setProfileExists] = useState(false); // Track if a profile exists
   const [loading, setLoading] = useState(true); // Loading state for fetching data
-  const { logout, isEmployer } = useAuth(); // Context for authentication
+  const { logout, isEmployer, user } = useAuth(); // Context for authentication
+  const id = user._id; // Get user ID from context
   const navigate = useNavigate(); // For navigating between routes
+  const [postTitle, setPostTitle] = useState(""); // State to store post title
+  const [postBody, setPostBody] = useState(""); // State to store post body
+  const [errors, setErrors] = useState([]); // State to hold error messages
+  const [profileData, setProfileData] = useState(null); // State to store profile data
 
   const handleLogout = () => {
     logout(); // Call logout function from context
@@ -34,23 +40,25 @@ const ProfilePage = () => {
       if (isEmployer()) {
         // Fetch data for employer profile
         const response = await axios.get(
-          "http://localhost:5050/api/employer/profile/fetch",
+          `http://localhost:5050/api/employer/profile/fetch/${id}`,
           { withCredentials: true } // Ensure credentials (cookies) are included in request
         );
 
         if (response.data) {
           setFormData(response.data); // Set fetched data to formData state
+          setProfileData(response.data); // Set profile data
           setProfileExists(!!response.data._id); // Check if profile exists
         }
       } else {
         // Fetch data for job seeker profile
         const response = await axios.get(
-          "http://localhost:5050/api/profile/fetch",
+          `http://localhost:5050/api/profile/fetch/${id}`,
           { withCredentials: true }
         );
 
         if (response.data) {
           setFormData(response.data); // Set profile data
+          setProfileData(response.data); // Set profile data
           if (response.data._id) {
             setProfileExists(true); // If profile exists, set the state
             fetchExperiences(response.data._id); // Fetch related experiences
@@ -133,6 +141,107 @@ const ProfilePage = () => {
     fetchProfileData();
   };
 
+  const handlePostUpdate = async (updatedPosts) => {
+    try {
+      console.log("Updating posts with: ", updatedPosts);
+      const response = await axios.put(
+        "http://localhost:5050/api/profile/update",
+        { posts: updatedPosts },
+        { withCredentials: true }
+      );
+      console.log("Updated Posts: ", response.data.posts);
+      setProfileData((prevProfile) => ({
+        ...prevProfile,
+        posts: response.data.posts,
+      }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePostCreation = async (event) => {
+    // console.log("Creating post");
+    event.preventDefault();
+    try {
+      if (!postBody || !postTitle) {
+        setErrors([{ msg: "Post/Title cannot be empty" }]);
+        // console.log("Post/Title cannot be empty");
+        return;
+      }
+      const newPost = {
+        title: postTitle,
+        body: postBody,
+        votes: [],
+      };
+
+      const updatedPosts = [...profileData.posts, newPost];
+      // console.log("Updated Posts: ", updatedPosts);
+      await handlePostUpdate(updatedPosts);
+      setPostBody("");
+      setPostTitle("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePostDeletion = async (postId) => {
+    const confirmDeletion = window.confirm("Are you sure you want to delete this post?");
+    if (!confirmDeletion) return;
+
+    try {
+      const updatedPosts = profileData.posts.filter((post) => post._id !== postId);
+      await handlePostUpdate(updatedPosts);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleVote = async (postId, vote) => {
+    try {
+      console.log("Voting on post:", postId, "with vote:", vote);
+      const updatedPosts = profileData.posts.map((post) => {
+        if (post._id === postId) {
+          const existingVote = post.votes.find((v) => v.voter === user._id);
+          if (existingVote) {
+            if (existingVote.vote === vote) {
+              // Remove vote if the same vote is clicked again
+              post.votes = post.votes.filter((v) => v.voter !== user._id);
+            } else {
+              existingVote.vote = vote;
+            }
+          } else {
+            post.votes.push({ voter: user._id, vote });
+          }
+        }
+        return post;
+      });
+  
+      console.log("Updated posts:", updatedPosts);
+  
+      setProfileData((prevProfile) => ({
+        ...prevProfile,
+        posts: updatedPosts,
+      }));
+  
+      // Ensure the request includes the necessary credentials
+      const response = await axios.put(
+        `http://localhost:5050/api/profile/update/${profileData._id}`,
+        { posts: updatedPosts },
+        { withCredentials: true }
+      );
+  
+      console.log("Vote update response:", response.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const hasVoted = (votes, userId, voteType) => {
+    return votes.some((v) => v.voter === userId && v.vote === voteType);
+  };
+
+  const fullName = `${profileData?.firstName || ""} ${profileData?.lastName || ""}`;
+
   return (
     <div>
       {/* Navbar with logout button */}
@@ -144,12 +253,14 @@ const ProfilePage = () => {
         <div className="profile-container">
           {/* Render employer or job seeker profile depending on user type */}
           {isEmployer() ? (
-            <EmployerProfileInformation
-              formData={formData}
-              setFormData={setFormData}
-              profileExists={profileExists}
-              onProfileUpdate={handleProfileUpdate}
-            />
+            <>
+              <EmployerProfileInformation
+                formData={formData}
+                setFormData={setFormData}
+                profileExists={profileExists}
+                onProfileUpdate={handleProfileUpdate}
+              />
+            </>
           ) : (
             <>
               <ProfileInformation
@@ -158,36 +269,114 @@ const ProfilePage = () => {
                 profileExists={profileExists}
                 onProfileUpdate={handleProfileUpdate}
               />
-              {profileExists && (
-                <>
-                  {/* Render experiences, education, skills, and resume upload if profile exists */}
-                  <Experience
-                    experiences={experiences}
-                    setExperiences={setExperiences}
-                    formData={formData}
-                    onProfileUpdate={handleProfileUpdate}
-                  />
-                  <Education
-                    educations={educations}
-                    setEducations={setEducations}
-                    formData={formData}
-                    onProfileUpdate={handleProfileUpdate}
-                  />
-                  <Skills
-                    skills={skills}
-                    setSkills={setSkills}
-                    formData={formData}
-                    onProfileUpdate={handleProfileUpdate}
-                  />
-                  <ResumeUpload
-                    profileId={formData._id}
-                    firstName={formData.firstName}
-                    lastName={formData.lastName}
-                    formData={formData}
-                    onProfileUpdate={handleProfileUpdate}
-                  />
-                </>
-              )}
+              <div className="profile-content-container">
+                <div className="profile-sections">
+                  {profileExists && (
+                    <>
+                      {/* Render experiences, education, skills, and resume upload if profile exists */}
+                      <div className="section">
+                        <Experience
+                          experiences={experiences}
+                          setExperiences={setExperiences}
+                          formData={formData}
+                          onProfileUpdate={handleProfileUpdate}
+                        />
+                      </div>
+                      <div className="section">
+                        <Education
+                          educations={educations}
+                          setEducations={setEducations}
+                          formData={formData}
+                          onProfileUpdate={handleProfileUpdate}
+                        />
+                      </div>
+                      <div className="section">
+                        <Skills
+                          skills={skills}
+                          setSkills={setSkills}
+                          formData={formData}
+                          onProfileUpdate={handleProfileUpdate}
+                        />
+                      </div>
+                      <div className="section">
+                        <ResumeUpload
+                          profileId={formData._id}
+                          firstName={formData.firstName}
+                          lastName={formData.lastName}
+                          formData={formData}
+                          onProfileUpdate={handleProfileUpdate}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Post Feed Section */}
+                <div className="feed-content">
+                  <div className="feed">
+                    <div className="feed-header">
+                      <h1 className="feed-title">Feed:</h1>
+                    </div>
+                    {/* Conditionally render the post form if the logged-in user is the owner */}
+                    {user && user._id === id && (
+                      <form className="post-form" onSubmit={handlePostCreation}>
+                        <textarea
+                          value={postTitle}
+                          onChange={(e) => setPostTitle(e.target.value)}
+                          className="post-title-input"
+                          placeholder="Post Title..."
+                        />
+                        <textarea
+                          value={postBody}
+                          onChange={(e) => setPostBody(e.target.value)}
+                          className="post-input"
+                          placeholder="Share your thoughts..."
+                        />
+                        <button className="btn post-btn" type="submit">Post</button>
+                      </form>
+                    )}
+                    <div className="feed-body">
+                      {/* If user has not posted anything yet, display a message */}
+                      {profileData?.posts && profileData.posts.length === 0 && (
+                        <p className="feed-text">
+                          {fullName} has not posted anything yet.
+                        </p>
+                      )}
+                      {/* Display user posts */}
+                      {profileData?.posts
+                        .sort((a, b) => new Date(b.date) - new Date(a.date))
+                        .map((post) => (
+                          <div key={post._id} className="post">
+                            <h2 className="post-title">{post.title}</h2>
+                            <p className="post-body">{post.body}</p>
+                            <p className="post-date">
+                              {new Date(post.date).toLocaleDateString()}
+                            </p>
+                            <div className="post-vote">
+                              <button
+                                className={`btn btn-upvote ${hasVoted(post.votes, user._id, 1) ? "voted-up" : ""}`}
+                                onClick={() => handleVote(post._id, 1)}
+                              >
+                                <FaHeart />
+                              </button>
+                              <p>
+                                {post.votes.reduce((acc, vote) => acc + vote.vote, 0)}
+                              </p>
+                            </div>
+                            {user && user._id === id && (
+                              <button
+                                className="btn delete-btn"
+                                onClick={() => handlePostDeletion(post._id)}
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </>
           )}
         </div>

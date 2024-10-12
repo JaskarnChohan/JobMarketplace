@@ -39,6 +39,38 @@ const companyProfileSchema = new mongoose.Schema(
         ref: "CompanyReview", // Reference to the company reviews
       },
     ],
+    posts: {
+      type: [
+        {
+          title: {
+            type: String,
+            required: true,
+          },
+          body: {
+            type: String,
+            required: true,
+          },
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          votes: {
+            type: [
+              {
+                voter: {
+                  type: String,
+                  required: true,
+                },
+                vote: {
+                  type: Number,
+                  required: true,
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
   },
   { timestamps: true }
 );

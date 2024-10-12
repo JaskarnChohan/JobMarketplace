@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Modal from "react-modal";
 import {
@@ -23,6 +23,7 @@ import profileImage from "../../../assets/profile.png";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/ProfileInfo.css";
 import "../../../styles/Global.css";
+import { FaHeart } from "react-icons/fa";
 
 // Set the app element for the modal accessibility
 Modal.setAppElement("#root");
@@ -43,6 +44,7 @@ const EmployerProfileInformation = ({
 
   // Authentication context to get the current user
   const { user } = useAuth();
+  const id = user._id; // Get user ID from context
 
   // State variables for managing modal visibility and job listings
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -53,15 +55,37 @@ const EmployerProfileInformation = ({
   const [jobListings, setJobListings] = useState([]);
   const [reviews, setReviews] = useState([]); // State for reviews
   const [averageRating, setAverageRating] = useState(0); // State for average rating
+  const [posts, setPosts] = useState([]); // State to hold posts
+  const [loading, setLoading] = useState(true); // Loading state for fetching data
+  const [postTitle, setPostTitle] = useState(""); // State to store post title
+  const [postBody, setPostBody] = useState(""); // State to store post body
+  const [profileData, setProfileData] = useState(null); // State to store profile data
 
   // Fetch profile data and job listings when the component mounts or updates
   useEffect(() => {
     if (profileExists) {
       reset(formData);
+      fetchProfileData();
       fetchJobListings();
       fetchReviews();
     }
   }, [formData, profileExists, reset]);
+
+  // Function to fetch profile data depending on the user's type (employer/job seeker)
+  const fetchProfileData = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get("http://localhost:5050/api/employer/profile/fetch", {
+        withCredentials: true,
+      });
+      setProfileData(response.data);
+      setPosts(response.data.posts); // Ensure posts are correctly set
+    } catch (error) {
+      console.error("Failed to fetch profile data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Function to fetch job listings from the API
   const fetchJobListings = async () => {
@@ -194,6 +218,94 @@ const EmployerProfileInformation = ({
     }
   };
 
+  const handleVote = async (postId, vote) => {
+    try {
+      const updatedPosts = posts.map((post) => {
+        if (post._id === postId) {
+          const existingVote = post.votes.find((v) => v.voter === user._id);
+          if (existingVote) {
+            if (existingVote.vote === vote) {
+              // Remove vote if the same vote is clicked again
+              post.votes = post.votes.filter((v) => v.voter !== user._id);
+            } else {
+              existingVote.vote = vote;
+            }
+          } else {
+            post.votes.push({ voter: user._id, vote });
+          }
+        }
+        return post;
+      });
+
+      setPosts(updatedPosts);
+
+      // Ensure the request includes the necessary credentials
+      await axios.put(
+        `http://localhost:5050/api/employer/update/${id}`,
+        { posts: updatedPosts },
+        { withCredentials: true }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const hasVoted = (votes, userId, voteType) => {
+    return votes.some((v) => v.voter === userId && v.vote === voteType);
+  };
+
+  const handlePostCreation = async (event) => {
+    console.log("handlePostCreation called");
+    event.preventDefault();
+    try {
+      if (!postBody || !postTitle) {
+        console.error("Post/Title cannot be empty");
+        return;
+      }
+      const newPost = {
+        title: postTitle,
+        body: postBody,
+        votes: [],
+        date: new Date(),
+      };
+
+      const updatedPosts = [...posts, newPost];
+      setPosts(updatedPosts);
+      console.log("called update api with: ", updatedPosts);
+      await axios.put(
+        `http://localhost:5050/api/employer/update/${id}`,
+        { posts: updatedPosts },
+        { withCredentials: true }
+      );
+      
+      fetchProfileData();
+      setPostBody("");
+      setPostTitle("");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePostDeletion = async (postId) => {
+    const confirmDeletion = window.confirm("Are you sure you want to delete this post?");
+    if (!confirmDeletion) return;
+
+    try {
+      const updatedPosts = posts.filter((post) => post._id !== postId);
+      setPosts(updatedPosts);
+
+      await axios.put(
+        `http://localhost:5050/api/employer/update/${id}`,
+        { posts: updatedPosts },
+        { withCredentials: true }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fullName = profileData ? profileData.name : "";
+
   return (
     <div className="profile-information-container">
       {profileExists ? (
@@ -232,6 +344,9 @@ const EmployerProfileInformation = ({
             <button className="btn edit-profile" onClick={openModal}>
               <FaPencilAlt /> Edit Profile
             </button>
+            <button className="btn edit-profile" onClick={() => navigate(`../viewcompany/${user._id}`)}>
+              <FaPencilAlt /> View Profile
+            </button>
           </div>
         </div>
       ) : (
@@ -254,80 +369,155 @@ const EmployerProfileInformation = ({
       )}
 
       {profileExists && formData && (
-        <div>
-          <div className="section">
-            <h2 className="section-title">About {formData.name}</h2>
-            <pre className="section-text wrap">{formData.description}</pre>
-          </div>
-          <div className="section">
-            <h2 className="section-title">Active Job Listings</h2>
-            <div className="job-listing-container">
-              {Array.isArray(jobListings) && jobListings.length > 0 ? (
-                jobListings.map((job) => (
-                  <div className="job-card job-management-card" key={job._id}>
-                    <h3
-                      className="job-title"
-                      onClick={() => navigate(`/jobview/${job._id}`)}
-                    >
-                      {job.title}
-                    </h3>
-                    <p className="job-info">
-                      <FaBuilding /> {job.jobCategory}
-                    </p>
-                    <p className="job-info">
-                      <FaMapMarkerAlt /> {job.location}
-                    </p>
-                    <p className="job-info">
-                      <FaClock /> {job.employmentType}
-                    </p>
-                    <p className="job-info">
-                      <FaTag /> {job.status}
-                    </p>
-                    <p className="job-info">
-                      <FaDollarSign /> {job.salaryRange}
-                    </p>
-                    <p className="job-info">
-                      <FaCalendarAlt />
-                      {"Deadline:  "}
-                      {new Date(job.applicationDeadline).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="section-text">
-                  No active job listings available.
-                </p>
-              )}
+        <div className="profile-content-container">
+          <div className="profile-sections">
+            <div className="section">
+              <h2 className="section-title">About {formData.name}</h2>
+              <pre className="section-text wrap">{formData.description}</pre>
+            </div>
+            <div className="section">
+              <h2 className="section-title">Active Job Listings</h2>
+              <div className="job-listing-container">
+                {Array.isArray(jobListings) && jobListings.length > 0 ? (
+                  jobListings.map((job) => (
+                    <div className="job-card job-management-card" key={job._id}>
+                      <h3
+                        className="job-title"
+                        onClick={() => navigate(`/jobview/${job._id}`)}
+                      >
+                        {job.title}
+                      </h3>
+                      <p className="job-info">
+                        <FaBuilding /> {job.jobCategory}
+                      </p>
+                      <p className="job-info">
+                        <FaMapMarkerAlt /> {job.location}
+                      </p>
+                      <p className="job-info">
+                        <FaClock /> {job.employmentType}
+                      </p>
+                      <p className="job-info">
+                        <FaTag /> {job.status}
+                      </p>
+                      <p className="job-info">
+                        <FaDollarSign /> {job.salaryRange}
+                      </p>
+                      <p className="job-info">
+                        <FaCalendarAlt />
+                        {"Deadline:  "}
+                        {new Date(job.applicationDeadline).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="section-text">
+                    No active job listings available.
+                  </p>
+                )}
+              </div>
+            </div>
+          
+            <div className="section">
+              <h2 className="section-title">Reviews</h2>
+              <p className="average-rating">
+                Average Rating: {averageRating} / 5
+              </p>
+              <div className="reviews-container">
+                {Array.isArray(reviews) && reviews.length > 0 ? (
+                  reviews.map((review) => (
+                    <div className="review-card" key={review._id}>
+                      <div className="review-rating">
+                        {Array.from({ length: review.rating }, (_, index) => (
+                          <FaStar key={index} className="star" />
+                        ))}
+                      </div>
+                      <p className="review-content">{review.content}</p>
+                      <p className="review-author">
+                        - {review.userProfile.firstName}{" "}
+                        {review.userProfile.lastName}
+                      </p>
+                      <p className="review-date">
+                        {new Date(review.createdAt).toLocaleDateString()}{" "}
+                        {/* Format the date */}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="section-text">No reviews available.</p>
+                )}
+              </div>
             </div>
           </div>
-          <div className="section">
-            <h2 className="section-title">Reviews</h2>
-            <p className="average-rating">
-              Average Rating: {averageRating} / 5
-            </p>
-            <div className="reviews-container">
-              {Array.isArray(reviews) && reviews.length > 0 ? (
-                reviews.map((review) => (
-                  <div className="review-card" key={review._id}>
-                    <div className="review-rating">
-                      {Array.from({ length: review.rating }, (_, index) => (
-                        <FaStar key={index} className="star" />
-                      ))}
-                    </div>
-                    <p className="review-content">{review.content}</p>
-                    <p className="review-author">
-                      - {review.userProfile.firstName}{" "}
-                      {review.userProfile.lastName}
-                    </p>
-                    <p className="review-date">
-                      {new Date(review.createdAt).toLocaleDateString()}{" "}
-                      {/* Format the date */}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="section-text">No reviews available.</p>
+          {/* Post Feed Section */}
+          <div className="feed-content">
+            <div className="feed">
+              <div className="feed-header">
+                <h1 className="feed-title">Feed:</h1>
+              </div>
+              {/* Conditionally render the post form if the logged-in user is the owner */}
+              {user && user._id === id && (
+                <form className="post-form" onSubmit={handlePostCreation}>
+                  <textarea
+                    value={postTitle}
+                    onChange={(e) => setPostTitle(e.target.value)}
+                    className="post-title-input"
+                    placeholder="Post Title..."
+                  />
+                  <textarea
+                    value={postBody}
+                    onChange={(e) => setPostBody(e.target.value)}
+                    className="post-input"
+                    placeholder="Share your thoughts..."
+                  />
+                  <button className="btn post-btn" type="submit">Post</button>
+                </form>
               )}
+              <div className="feed-body">
+                {/* If user has not posted anything yet, display a message */}
+                {profileData?.posts && profileData.posts.length === 0 && (
+                  <p className="feed-text">
+                    {fullName} has not posted anything yet.
+                  </p>
+                )}
+                {/* Display user posts */}
+                {profileData?.posts
+                  .sort((a, b) => new Date(b.date) - new Date(a.date))
+                  .map((post) => (
+                    <div key={post._id} className="post">
+                      <h2 className="post-title">{post.title}</h2>
+                      <p className="post-body">{post.body}</p>
+                      <p className="post-date">
+                        {new Date(post.date).toLocaleDateString()}
+                      </p>
+                      <div className="post-vote">
+                        <button
+                          className={`btn btn-upvote ${hasVoted(post.votes, user._id, 1) ? "voted-up" : ""}`}
+                          onClick={() => handleVote(post._id, 1)}
+                        >
+                          <FaHeart />
+                        </button>
+                        <p>
+                          {post.votes.reduce((acc, vote) => acc + vote.vote, 0)}
+                        </p>
+                        {/* Uncomment if downvote functionality is needed */}
+                        {/* <button
+                          className={`btn btn-downvote ${hasVoted(post.votes, user._id, -1) ? "voted-down" : ""}`}
+                          onClick={() => handleVote(post._id, -1)}
+                        >
+                          <FaHeartBroken />
+                        </button> */}
+                      </div>
+                      {user && user._id === id && (
+                        <button
+                          className="btn delete-btn"
+                          onClick={() => handlePostDeletion(post._id)}
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  ))}
+              </div>
             </div>
           </div>
         </div>

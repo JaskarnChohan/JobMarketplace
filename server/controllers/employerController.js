@@ -6,6 +6,7 @@ const Job = require("../models/jobListing");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const companyReviews = require("../models/companyReviews");
+const { updateProfile } = require("./profileController");
 
 // Default logo path
 const DEFAULT_LOGO = "uploads/profile-pictures/default.png";
@@ -93,58 +94,30 @@ exports.createCompanyProfile = async (req, res) => {
   }
 };
 
-/// Update existing company profile by user ID
 exports.updateCompanyProfile = async (req, res) => {
-  try {
-    const {
-      name,
-      description,
-      websiteURL,
-      industry,
-      phoneNumber,
-      location,
-      logo,
-    } = req.body;
+  const { profileId } = req.params;
+  const updateData = req.body;
 
-    // Find the existing company profile by user ID
-    const existingProfile = await CompanyProfile.findOne({ user: req.user.id });
+  try {
+    // Find the existing profile by ID
+    const existingProfile = await CompanyProfile.findById(profileId);
     if (!existingProfile) {
       return res.status(404).json({ message: "Company profile not found" });
     }
 
-    // Check if the company name has been changed
-    const nameChanged = name && name !== existingProfile.name;
-
-    // Find and update the company profile by user ID
-    const updatedProfile = await CompanyProfile.findOneAndUpdate(
-      { user: req.user.id },
-      {
-        name,
-        description,
-        websiteURL,
-        industry,
-        phoneNumber,
-        location,
-        logo: logo !== undefined ? logo : existingProfile.logo, // Keep existing logo if none provided
-      },
-      { new: true, runValidators: true }
-    );
-
-    // If profile is not found, return an error
-    if (!updatedProfile) {
-      return res.status(404).json({ message: "Company profile not found" });
-    }
+    // Update the profile with the new data
+    const updatedProfile = await CompanyProfile.findByIdAndUpdate(profileId, updateData, { new: true });
 
     // If the company name has changed, update the employerName in all related jobs
-    if (nameChanged) {
+    if (updateData.name && updateData.name !== existingProfile.name) {
       await Job.updateMany(
         { employer: existingProfile.user._id.toString() }, // Use the user's _id for comparison
-        { $set: { company: updatedProfile.name } } // Updating the company field
+        { $set: { company: updateData.name } } // Updating the company field
       );
     }
 
     // Fetch user's email
-    const user = await User.findById(req.user.id).select("email");
+    const user = await User.findById(existingProfile.user).select("email");
     if (!user) {
       return res.status(404).json({ errors: [{ msg: "User not found" }] });
     }
@@ -154,10 +127,42 @@ exports.updateCompanyProfile = async (req, res) => {
       email: user.email,
     };
 
-    res.status(200).json({
-      message: "Company profile updated successfully",
-      data: profileWithEmail,
-    });
+    res.json(profileWithEmail);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
+  }
+};
+
+/// Update existing company profile by user ID
+exports.updateCompanyProfileById = async (req, res) => {
+  console.log("updateCompanyProfileById called");
+  try {
+    const { profileId } = req.params;
+    const updateData = req.body;
+
+    // Find the existing company profile by user ID
+    const existingProfile = await CompanyProfile.findOne({ user: profileId });
+    if (!existingProfile) {
+      return res.status(404).json({ message: "Company profile not found" });
+    }
+
+    // Find and update the company profile by user ID
+    const updatedProfile = await CompanyProfile.findOneAndUpdate(
+      { user: profileId },
+      {
+        ...updateData,
+      },
+      { new: true, runValidators: true }
+    );
+
+    // If profile is not found, return an error
+    if (!updatedProfile) {
+      console.error("Company profile not found");
+      return res.status(404).json({ message: "Company profile not found" });
+    }
+
+    res.json(updatedProfile);
   } catch (err) {
     // Handle server error
     console.error("Failed to update company profile:", err.message);

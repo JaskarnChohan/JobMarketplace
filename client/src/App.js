@@ -156,7 +156,7 @@ const App = () => {
           <Route
             path="/viewprofile/:id"
             element={
-              isAuthenticated && isEmployer() ? (
+              isAuthenticated ? (
                 <ViewUserProfile />
               ) : (
                 <Navigate to="/login" />
