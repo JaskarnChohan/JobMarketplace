@@ -654,8 +654,6 @@ exports.feedbackResume = async (req, res) => {
       .json({ msg: "Error evaluating resume", error: err.message });
   }
 };
-<<<<<<< Updated upstream
-=======
 
 // AI Evaluation function for recommended jobs
 exports.evaluateRecommendedJobs = async (
@@ -786,4 +784,98 @@ exports.evaluateRecommendedJobs = async (
 
   return evaluations; // Return evaluations for all recommended jobs
 };
->>>>>>> Stashed changes
+
+// AI Job Insights function for employers
+exports.getJobInsights = async (req, res) => {
+  const { jobTitle, location } = req.body;
+
+  // Validate input
+  if (!jobTitle || !location) {
+    console.log("Validation failed: Missing job title or location.");
+    return res
+      .status(400)
+      .json({ msg: "Both job title and location are required." });
+  }
+
+  // Check if API key is set
+  if (!process.env.GOOGLE_AI_API_KEY) {
+    return res.status(500).json({ msg: "This feature requires AI setup." });
+  }
+
+  try {
+    // Create the prompt for the AI tailored to job insights
+    const prompt = `You are an expert in providing insights to employers looking to create job listings. The user needs help crafting a detailed and competitive job description for a position. This will be displayed on a job marketplace website where employers will create their job listings.
+
+    Your response should:
+    1. Include a competitive salary range based on the location and the job title.
+    2. Provide details on the typical experience required for the role, especially for the given location.
+    3. Suggest key job responsibilities and the most important qualifications for the position.
+    4. Provide market trends on the demand for this job title in the specified region.
+    5. Offer insights on how to make the job posting stand out, including attractive benefits or perks.
+    6. Format the response in HTML to maintain a user-friendly format. Do not use * for emphasis; use <strong> instead.
+    7. Structure the response to include headings like 'Salary Range,' 'Experience Requirements,' 'Job Description,' 'Market Trends,' and 'Job Posting Tips.'
+    8. Ensure that the response is detailed and informative to help employers create compelling job listings.
+
+    **Job Title:** ${jobTitle} 
+    
+    **Location:** ${location} 
+    
+    **Response Format:**
+    <response>
+      <h3>Salary Range</h3>
+      <p className="sub-headings"><!-- Insert salary range based on location and job title --></p>
+      <br>
+      <h3>Experience Requirements</h3>
+      <p className="sub-headings"><!-- Insert typical experience levels for the job --></p>
+      <br>
+      <h3>Job Description</h3>
+      <p className="sub-headings"><!-- Insert key responsibilities and qualifications --></p>
+      <br>
+      <h3>Market Trends</h3>
+      <p className="sub-headings"><!-- Insert job market trends and demand in the region --></p>
+      <br>
+      <h3>Job Posting Tips</h3>
+      <p className="sub-headings"><!-- Insert tips on making the job posting attractive --></p>
+    </response>
+    `;
+
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+      generationConfig: {
+        maxOutputTokens: 1000, // Maximum number of tokens to generate
+        temperature: 0.7,
+      },
+    });
+
+    // Check the candidates array
+    if (result?.response?.candidates && result.response.candidates.length > 0) {
+      const insights = result.response.candidates[0].content.parts[0].text;
+
+      // If no insights are returned
+      if (!insights) {
+        console.log("AI response did not contain job insights.");
+        return res
+          .status(500)
+          .json({ msg: "Failed to retrieve job insights from the AI." });
+      }
+
+      // Send the insights back to the employer
+      return res.json({ insights });
+    } else {
+      console.log("No candidates found in AI response.");
+      return res
+        .status(500)
+        .json({ msg: "No candidates found in AI response." });
+    }
+  } catch (err) {
+    console.error("Error during AI request:", err.message);
+    res
+      .status(500)
+      .json({ msg: "Error retrieving job insights", error: err.message });
+  }
+};

@@ -267,6 +267,16 @@ const Dashboard = () => {
               <h2 className="lrg-heading">Application Dashboard</h2>
               <p className="med-heading">Manage all your applications here!</p>
               <div className="help-guide">
+                <h2>Job Tools</h2>
+                <div className="help-links">
+                  <Link to="/jobinsights">
+                    <button className="btn help-button">
+                      Get Job Insights
+                    </button>
+                  </Link>
+                </div>
+              </div>
+              <div className="help-guide">
                 <h2>Employer Help Guide</h2>
                 <div className="help-links">
                   <Link to="/createjob">

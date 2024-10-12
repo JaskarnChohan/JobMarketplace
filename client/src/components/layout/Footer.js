@@ -73,6 +73,9 @@ const Footer = () => {
               <Link to="/dashboard">Applications</Link>
             </li>
             <li>
+              <Link to="/jobinsights">Job Insights Tool</Link>
+            </li>
+            <li>
               <Link to="/profile">Profile</Link>
             </li>
           </ul>
