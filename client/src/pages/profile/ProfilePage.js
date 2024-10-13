@@ -337,39 +337,39 @@ const ProfilePage = () => {
                             onProfileUpdate={handleProfileUpdate}
                           />
                         </div>
-                  {/* Add the reviews section */}
-                  <div className="section">
-                    <h2 className="section-title">Reviews</h2>
-                    <p className="average-rating">
-                      Average Rating: {averageRating} / 5
-                    </p>
-                    <div className="reviews-container">
-                      {Array.isArray(reviews) && reviews.length > 0 ? (
-                        reviews.map((review) => (
-                          <div className="review-card" key={review._id}>
-                            <div className="review-rating">
-                              {Array.from(
-                                { length: review.rating },
-                                (_, index) => (
-                                  <FaStar key={index} className="star" />
-                                )
-                              )}
-                            </div>
-                            <p className="review-content">{review.content}</p>
-                            <p className="review-author">
-                              - {review.companyProfile.name}
-                            </p>
-                            <p className="review-date">
-                              {new Date(review.createdAt).toLocaleDateString()}{" "}
-                              {/* Format the date */}
-                            </p>
+                        {/* Add the reviews section */}
+                        <div className="section">
+                          <h2 className="section-title">Reviews</h2>
+                          <p className="average-rating">
+                            Average Rating: {averageRating} / 5
+                          </p>
+                          <div className="reviews-container">
+                            {Array.isArray(reviews) && reviews.length > 0 ? (
+                              reviews.map((review) => (
+                                <div className="review-card" key={review._id}>
+                                  <div className="review-rating">
+                                    {Array.from(
+                                      { length: review.rating },
+                                      (_, index) => (
+                                        <FaStar key={index} className="star" />
+                                      )
+                                    )}
+                                  </div>
+                                  <p className="review-content">{review.content}</p>
+                                  <p className="review-author">
+                                    - {review.companyProfile.name}
+                                  </p>
+                                  <p className="review-date">
+                                    {new Date(review.createdAt).toLocaleDateString()}{" "}
+                                    {/* Format the date */}
+                                  </p>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="section-text">No reviews available.</p>
+                            )}
                           </div>
-                        ))
-                      ) : (
-                        <p className="section-text">No reviews available.</p>
-                      )}
-                    </div>
-                  </div>
+                        </div>
                       </>
                     )}
                   </div>
