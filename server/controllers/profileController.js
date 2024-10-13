@@ -413,6 +413,7 @@ exports.getProfileByUserId = async (req, res) => {
       skills,
       educations,
       experiences,
+      posts,
     };
     res.json(profileWithDetails);
   } catch (err) {
