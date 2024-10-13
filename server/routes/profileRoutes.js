@@ -39,6 +39,26 @@ router.put(
 // Fetch profile by user ID
 router.get("/user/:userId", profileController.getProfileByUserId); // Fetch profile by user ID
 
+// Route for adding a review
+router.post("/reviews/add/:id", authenticate, profileController.createReview);
+
+// Route for editing a review
+router.put(
+  "/reviews/edit/:reviewId",
+  authenticate,
+  profileController.editReview
+);
+
+// Route for deleting a review
+router.delete(
+  "/reviews/delete/:reviewId",
+  authenticate,
+  profileController.deleteReview
+);
+
+// Route for fetching company reviews
+router.get("/reviews/:userId/", profileController.getUserReviews);
+
 // Experience routes
 router.post(
   "/:profileId/experience/create",

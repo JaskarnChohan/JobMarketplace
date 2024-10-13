@@ -1,5 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Profile = require("../models/profile");
+const JobListing = require("../models/jobListing");
 const Experience = require("../models/experience");
 const Education = require("../models/education");
 const Skill = require("../models/skill");
@@ -155,6 +156,158 @@ exports.improveAnswer = async (req, res) => {
     res
       .status(500)
       .json({ msg: "Error improving question/answer", error: err.message });
+  }
+};
+
+// AI Evaluation function
+exports.evaluateApplication = async (application) => {
+  const { userId, jobId, questions } = application;
+
+  // Skip evaluation if there are no questions
+  if (!questions || questions.length === 0) {
+    return {
+      score: "N/A",
+      evaluation: "No questions provided for evaluation.",
+      recommendedOutcome: "N/A",
+    };
+  }
+
+  // Fetch job details using jobId
+  const jobDetails = await JobListing.findById(jobId);
+  if (!jobDetails) {
+    throw new Error("Job not found");
+  }
+
+  // Fetch user profile
+  const profile = await Profile.findOne({ user: userId });
+  let userInfo = "";
+
+  // If the profile exists, fetch user information
+  if (profile) {
+    // Fetch experience, education, and skills separately using profileId
+    const experience = await Experience.find({ profile: profile._id });
+    const education = await Education.find({ profile: profile._id });
+    const skills = await Skill.find({ profile: profile._id });
+
+    // Construct the context using the profile data
+    userInfo = `
+        First Name: ${profile.firstName || "N/A"}
+        Last Name: ${profile.lastName || "N/A"}
+        Location: ${profile.location || "N/A"}
+        Bio: ${profile.bio || "N/A"}
+        Preferred Work Category: ${profile.preferredClassification || "N/A"}
+        Experience: ${
+          experience
+            .map(
+              (exp) =>
+                `${exp.title} at ${exp.company} (${exp.startMonth} ${
+                  exp.startYear
+                } - ${
+                  exp.endMonth ? exp.endMonth + " " + exp.endYear : "Present"
+                })\nDescription: ${exp.description || "N/A"}`
+            )
+            .join(", ") || "N/A"
+        }
+        Education: ${
+          education
+            .map(
+              (edu) =>
+                `${edu.degree} in ${edu.fieldOfStudy} from ${edu.school} (${
+                  edu.startMonth
+                } ${edu.startYear} - ${
+                  edu.endMonth ? edu.endMonth + " " + edu.endYear : "Present"
+                })\nDescription: ${edu.description || "N/A"}`
+            )
+            .join(", ") || "N/A"
+        }
+        Skills: ${
+          skills
+            .map(
+              (skill) =>
+                `${skill.name} (Level: ${skill.level}, Description: ${skill.description})`
+            )
+            .join(", ") || "N/A"
+        }
+      `;
+  }
+
+  // Create the prompt for the AI
+  const prompt = `You are an expert in evaluating job applications based on job descriptions and applicant answers. Your task is to assess whether the applicant is a good fit for the job.
+      
+      Your response should:
+      1. Use job details and user information to provide a personalized evaluation.
+      2. Be formatted as plain text, with no HTML or special formatting.
+      3. Provide feedback on all the applicant's answers.
+      4. Evaluate all the answers and provide a score out of 100.
+      5. Recommend outcomes based on the evaluation.
+  
+      **Job Details:**
+      Title: ${jobDetails.title}
+      Description: ${jobDetails.description}
+      Requirements: ${jobDetails.requirements.join(", ") || "N/A"}
+      Benefits: ${jobDetails.benefits.join(", ") || "N/A"}
+      Salary Range: ${jobDetails.salaryRange}
+      Employment Type: ${jobDetails.employmentType}
+      Location: ${jobDetails.location}
+  
+      ${userInfo ? `**User Info:** ${userInfo}` : ""}
+  
+      **Questions and Answers:**
+      ${questions
+        .map((q) => `Question: ${q.question}\nAnswer: ${q.userAnswer}\n`)
+        .join("")}
+  
+      **Response Format:**
+      <response>
+        Score: <score>/100 <!-- Ensure you do the score out of 100. -->
+        Feedback: <!-- Your feedback here -->
+        Recommended Outcome: Accepted | Rejected | Interview | Wait<!-- Ensure the response matches these values -->
+      </response>
+      `;
+
+  // Generate evaluation content using the AI model
+  const result = await model.generateContent({
+    contents: [
+      {
+        role: "user",
+        parts: [{ text: prompt }],
+      },
+    ],
+    generationConfig: {
+      maxOutputTokens: 1000, // Maximum number of tokens to generate
+      temperature: 0.7,
+    },
+  });
+
+  // Check the candidates array
+  if (result?.response?.candidates && result.response.candidates.length > 0) {
+    const evaluationText = result.response.candidates[0].content.parts[0].text;
+
+    // If no evaluation text is returned
+    if (!evaluationText) {
+      throw new Error("AI response did not contain evaluation text.");
+    }
+
+    // Split evaluation text to extract score, feedback, and recommended outcome
+    const responseRegex =
+      /Score:\s*(\d+)\/100\s*Feedback:\s*(.*?)\s*Recommended Outcome:\s*(Accepted|Rejected|Interview|Wait)/s;
+    const matches = evaluationText.match(responseRegex);
+
+    if (!matches) {
+      throw new Error("AI response did not match expected format.");
+    }
+
+    const score = matches[1]; // Extract score
+    const feedback = matches[2]; // Extract feedback
+    const recommendedOutcome = matches[3]; // Extract recommended outcome
+
+    return {
+      score: `${score}/100`,
+      evaluation: feedback,
+      recommendedOutcome,
+    };
+  } else {
+    throw new Error("No candidates found in AI response.");
   }
 };
 
@@ -499,5 +652,230 @@ exports.feedbackResume = async (req, res) => {
     res
       .status(500)
       .json({ msg: "Error evaluating resume", error: err.message });
+  }
+};
+
+// AI Evaluation function for recommended jobs
+exports.evaluateRecommendedJobs = async (
+  userId,
+  recommendedJobs,
+  homeLocation
+) => {
+  // Fetch user profile
+  const profile = await Profile.findOne({ user: userId });
+  if (!profile) {
+    throw new Error("User profile not found");
+  }
+
+  // Fetch user's experience, education, and skills
+  const experience = await Experience.find({ profile: profile._id });
+  const education = await Education.find({ profile: profile._id });
+  const skills = await Skill.find({ profile: profile._id });
+
+  // Create a context string from user profile
+  let userInfo = `
+    First Name: ${profile.firstName || "N/A"}
+    Last Name: ${profile.lastName || "N/A"}
+    Location: ${profile.location || "N/A"}
+    Bio: ${profile.bio || "N/A"}
+    Preferred Work Category: ${profile.preferredClassification || "N/A"}
+    Experience: ${
+      experience
+        .map(
+          (exp) =>
+            `${exp.title} at ${exp.company} (${exp.startMonth} ${
+              exp.startYear
+            } - ${exp.endMonth ? exp.endMonth + " " + exp.endYear : "Present"})`
+        )
+        .join(", ") || "N/A"
+    }
+    Education: ${
+      education
+        .map(
+          (edu) =>
+            `${edu.degree} in ${edu.fieldOfStudy} from ${edu.school} (${
+              edu.startMonth
+            } ${edu.startYear} - ${
+              edu.endMonth ? edu.endMonth + " " + edu.endYear : "Present"
+            })`
+        )
+        .join(", ") || "N/A"
+    }
+    Skills: ${
+      skills
+        .map(
+          (skill) =>
+            `${skill.name} (Level: ${skill.level}, Description: ${skill.description})`
+        )
+        .join(", ") || "N/A"
+    }
+  `;
+
+  // Loop through recommended jobs and evaluate each
+  const evaluations = [];
+  for (const job of recommendedJobs) {
+    // Create the prompt for the AI
+    const prompt = `You are an expert in evaluating job recommendations based on job descriptions and user profiles.
+
+      Your response should:
+      1. Provide a score out of 100 based on the fit between the user and the job. Example criteria include skills match, experience relevance, and location proximity.
+
+      **Job Details:**
+      Title: ${job.title}
+      Description: ${job.description}
+      Requirements: ${job.requirements.join(", ") || "N/A"}
+      Benefits: ${job.benefits.join(", ") || "N/A"}
+      Salary Range: ${job.salaryRange}
+      Employment Type: ${job.employmentType}
+      Location: ${job.location}
+
+      **User Home Location:** ${homeLocation}
+
+      ${userInfo ? `**User Info:** ${userInfo}` : ""}
+
+      **Response Format:**
+      <response>
+        Score: <score>/100
+      </response>
+    `;
+
+    // Generate evaluation content using the AI model
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+      generationConfig: {
+        maxOutputTokens: 1000, // Maximum number of tokens to generate
+        temperature: 0.7,
+      },
+    });
+
+    // Check the candidates array
+    if (result?.response?.candidates && result.response.candidates.length > 0) {
+      const evaluationText =
+        result.response.candidates[0].content.parts[0].text;
+
+      // If no evaluation text is returned
+      if (!evaluationText) {
+        throw new Error("AI response did not contain evaluation text.");
+      }
+
+      // Extract score
+      const responseRegex = /Score:\s*(\d+)\/100/s;
+      const matches = evaluationText.match(responseRegex);
+
+      if (!matches) {
+        throw new Error("AI response did not match expected format.");
+      }
+
+      const score = matches[1]; // Extract score
+
+      evaluations.push({
+        jobId: job._id,
+        score: Number(score), // Store score as a number for sorting
+      });
+    } else {
+      throw new Error("No candidates found in AI response.");
+    }
+  }
+
+  return evaluations; // Return evaluations for all recommended jobs
+};
+
+// AI Job Insights function for employers
+exports.getJobInsights = async (req, res) => {
+  const { jobTitle, location } = req.body;
+
+  // Validate input
+  if (!jobTitle || !location) {
+    console.log("Validation failed: Missing job title or location.");
+    return res
+      .status(400)
+      .json({ msg: "Both job title and location are required." });
+  }
+
+  // Check if API key is set
+  if (!process.env.GOOGLE_AI_API_KEY) {
+    return res.status(500).json({ msg: "This feature requires AI setup." });
+  }
+
+  try {
+    // Create the prompt for the AI tailored to job insights
+    const prompt = `You are an expert in providing insights to employers looking to create job listings. The user needs help crafting a detailed and competitive job description for a position. This will be displayed on a job marketplace website where employers will create their job listings.
+
+    Your response should:
+    1. Include a competitive salary range based on the location and the job title.
+    2. Provide details on the typical experience required for the role, especially for the given location.
+    3. Suggest key job responsibilities and the most important qualifications for the position.
+    4. Provide market trends on the demand for this job title in the specified region.
+    5. Offer insights on how to make the job posting stand out, including attractive benefits or perks.
+    6. Format the response in HTML to maintain a user-friendly format. Do not use * for emphasis; use <strong> instead.
+    7. Structure the response to include headings like 'Salary Range,' 'Experience Requirements,' 'Job Description,' 'Market Trends,' and 'Job Posting Tips.'
+    8. Ensure that the response is detailed and informative to help employers create compelling job listings.
+
+    **Job Title:** ${jobTitle} 
+    
+    **Location:** ${location} 
+    
+    **Response Format:**
+    <response>
+      <h3>Salary Range</h3>
+      <p className="sub-headings"><!-- Insert salary range based on location and job title --></p>
+      <br>
+      <h3>Experience Requirements</h3>
+      <p className="sub-headings"><!-- Insert typical experience levels for the job --></p>
+      <br>
+      <h3>Job Description</h3>
+      <p className="sub-headings"><!-- Insert key responsibilities and qualifications --></p>
+      <br>
+      <h3>Market Trends</h3>
+      <p className="sub-headings"><!-- Insert job market trends and demand in the region --></p>
+      <br>
+      <h3>Job Posting Tips</h3>
+      <p className="sub-headings"><!-- Insert tips on making the job posting attractive --></p>
+    </response>
+    `;
+
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+      generationConfig: {
+        maxOutputTokens: 1000, // Maximum number of tokens to generate
+        temperature: 0.7,
+      },
+    });
+
+    // Check the candidates array
+    if (result?.response?.candidates && result.response.candidates.length > 0) {
+      const insights = result.response.candidates[0].content.parts[0].text;
+
+      // If no insights are returned
+      if (!insights) {
+        console.log("AI response did not contain job insights.");
+        return res
+          .status(500)
+          .json({ msg: "Failed to retrieve job insights from the AI." });
+      }
+
+      // Send the insights back to the employer
+      return res.json({ insights });
+    } else {
+      console.log("No candidates found in AI response.");
+      return res
+        .status(500)
+        .json({ msg: "No candidates found in AI response." });
+    }
+  } catch (err) {
+    console.error("Error during AI request:", err.message);
+    res
+      .status(500)
+      .json({ msg: "Error retrieving job insights", error: err.message });
   }
 };

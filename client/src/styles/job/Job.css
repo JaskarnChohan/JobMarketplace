@@ -254,6 +254,10 @@ select {
     margin: 0px 0px 10px 0px;
 }
 
+.add-questions {
+    width: 100%;
+
+}
 /* Create job button */
 .create-job-container .btn {
     margin-top: 20px;

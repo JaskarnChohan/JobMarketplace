@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FaStar } from "react-icons/fa";
 import ProfileInformation from "./job-seeker/ProfileInformation";
 import Experience from "./job-seeker/Experience";
 import Education from "./job-seeker/Education";
@@ -27,6 +28,9 @@ const ProfilePage = () => {
   const [postBody, setPostBody] = useState(""); // State to store post body
   const [errors, setErrors] = useState([]); // State to hold error messages
   const [profileData, setProfileData] = useState(null); // State to store profile data
+
+  const [reviews, setReviews] = useState([]); // State for reviews
+  const [averageRating, setAverageRating] = useState(0); // State for average rating
 
   const handleLogout = () => {
     logout(); // Call logout function from context
@@ -65,6 +69,7 @@ const ProfilePage = () => {
             fetchEducations(response.data._id); // Fetch related education data
             fetchSkills(response.data._id); // Fetch related skills
             fetchResume(response.data._id); // Fetch resume
+            fetchReviews(); // Fetch reviews
           } else {
             setProfileExists(false); // No profile exists
           }
@@ -74,6 +79,30 @@ const ProfilePage = () => {
       console.error("Failed to fetch profile data:", error);
     } finally {
       setLoading(false); // Stop loading when data fetch is done
+    }
+  };
+
+  // Fetch reviews for the employer
+  const fetchReviews = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/profile/reviews/${user._id}`,
+        { withCredentials: true }
+      );
+      setReviews(response.data); // Set the reviews in state
+      // Calculate the average rating
+      const totalRating = response.data.reduce(
+        (acc, review) => acc + review.rating,
+        0
+      );
+      const averageRating =
+        response.data.length > 0
+          ? (totalRating / response.data.length).toFixed(1)
+          : 0;
+      setAverageRating(averageRating); // Set the average rating in state
+    } catch (error) {
+      // Handle error
+      console.error("Failed to fetch reviews:", error);
     }
   };
 
@@ -308,6 +337,39 @@ const ProfilePage = () => {
                             onProfileUpdate={handleProfileUpdate}
                           />
                         </div>
+                  {/* Add the reviews section */}
+                  <div className="section">
+                    <h2 className="section-title">Reviews</h2>
+                    <p className="average-rating">
+                      Average Rating: {averageRating} / 5
+                    </p>
+                    <div className="reviews-container">
+                      {Array.isArray(reviews) && reviews.length > 0 ? (
+                        reviews.map((review) => (
+                          <div className="review-card" key={review._id}>
+                            <div className="review-rating">
+                              {Array.from(
+                                { length: review.rating },
+                                (_, index) => (
+                                  <FaStar key={index} className="star" />
+                                )
+                              )}
+                            </div>
+                            <p className="review-content">{review.content}</p>
+                            <p className="review-author">
+                              - {review.companyProfile.name}
+                            </p>
+                            <p className="review-date">
+                              {new Date(review.createdAt).toLocaleDateString()}{" "}
+                              {/* Format the date */}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="section-text">No reviews available.</p>
+                      )}
+                    </div>
+                  </div>
                       </>
                     )}
                   </div>

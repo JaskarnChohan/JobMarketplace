@@ -43,7 +43,8 @@ const profileSchema = new mongoose.Schema(
       enum: ["public", "private"], // Define allowed values
       default: "private", // Set default privacy level
     },
-    savedJobs: {  // Define the savedJobs field
+    savedJobs: {
+      // Define the savedJobs field
       type: [String],
       default: [],
     },
@@ -79,6 +80,12 @@ const profileSchema = new mongoose.Schema(
         },
       ],
     },
+    reviews: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "CompanyReview", // Reference to the company reviews
+      },
+    ],
   },
   { timestamps: true }
 );

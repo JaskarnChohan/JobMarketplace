@@ -22,6 +22,7 @@ import ViewCompanyProfile from "./pages/profile/employer/ViewCompanyProfile";
 import ViewUserProfile from "./pages/profile/job-seeker/ViewUserProfile";
 import BrowseEmployers from "./pages/profile/employer/BrowseEmployers";
 import AIAnswerImprover from "./pages/AIAnswerImprover";
+import JobInsights from "./pages/JobInsights";
 import PaymentPage from "./pages/payment/PaymentPage";
 import PaymentSuccess from "./pages/payment/PaymentSuccess";
 import PaymentCancel from "./pages/payment/PaymentCancel";
@@ -60,6 +61,17 @@ const App = () => {
             element={
               isAuthenticated && isJobSeeker() ? (
                 <AIAnswerImprover />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          {/* Allow only authenticated users and employers to access the AI to get job insights */}
+          <Route
+            path="/jobinsights"
+            element={
+              isAuthenticated && isEmployer() ? (
+                <JobInsights />
               ) : (
                 <Navigate to="/login" />
               )
