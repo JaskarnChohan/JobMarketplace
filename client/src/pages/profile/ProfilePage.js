@@ -269,114 +269,116 @@ const ProfilePage = () => {
                 profileExists={profileExists}
                 onProfileUpdate={handleProfileUpdate}
               />
-              <div className="profile-content-container">
-                <div className="profile-sections">
-                  {profileExists && (
-                    <>
-                      {/* Render experiences, education, skills, and resume upload if profile exists */}
-                      <div className="section">
-                        <Experience
-                          experiences={experiences}
-                          setExperiences={setExperiences}
-                          formData={formData}
-                          onProfileUpdate={handleProfileUpdate}
-                        />
-                      </div>
-                      <div className="section">
-                        <Education
-                          educations={educations}
-                          setEducations={setEducations}
-                          formData={formData}
-                          onProfileUpdate={handleProfileUpdate}
-                        />
-                      </div>
-                      <div className="section">
-                        <Skills
-                          skills={skills}
-                          setSkills={setSkills}
-                          formData={formData}
-                          onProfileUpdate={handleProfileUpdate}
-                        />
-                      </div>
-                      <div className="section">
-                        <ResumeUpload
-                          profileId={formData._id}
-                          firstName={formData.firstName}
-                          lastName={formData.lastName}
-                          formData={formData}
-                          onProfileUpdate={handleProfileUpdate}
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Post Feed Section */}
-                <div className="feed-content">
-                  <div className="feed">
-                    <div className="feed-header">
-                      <h1 className="feed-title">Feed:</h1>
-                    </div>
-                    {/* Conditionally render the post form if the logged-in user is the owner */}
-                    {user && user._id === id && (
-                      <form className="post-form" onSubmit={handlePostCreation}>
-                        <textarea
-                          value={postTitle}
-                          onChange={(e) => setPostTitle(e.target.value)}
-                          className="post-title-input"
-                          placeholder="Post Title..."
-                        />
-                        <textarea
-                          value={postBody}
-                          onChange={(e) => setPostBody(e.target.value)}
-                          className="post-input"
-                          placeholder="Share your thoughts..."
-                        />
-                        <button className="btn post-btn" type="submit">Post</button>
-                      </form>
+              {profileExists && (
+                <div className="profile-content-container">
+                  <div className="profile-sections">
+                    {profileExists && (
+                      <>
+                        {/* Render experiences, education, skills, and resume upload if profile exists */}
+                        <div className="section">
+                          <Experience
+                            experiences={experiences}
+                            setExperiences={setExperiences}
+                            formData={formData}
+                            onProfileUpdate={handleProfileUpdate}
+                          />
+                        </div>
+                        <div className="section">
+                          <Education
+                            educations={educations}
+                            setEducations={setEducations}
+                            formData={formData}
+                            onProfileUpdate={handleProfileUpdate}
+                          />
+                        </div>
+                        <div className="section">
+                          <Skills
+                            skills={skills}
+                            setSkills={setSkills}
+                            formData={formData}
+                            onProfileUpdate={handleProfileUpdate}
+                          />
+                        </div>
+                        <div className="section">
+                          <ResumeUpload
+                            profileId={formData._id}
+                            firstName={formData.firstName}
+                            lastName={formData.lastName}
+                            formData={formData}
+                            onProfileUpdate={handleProfileUpdate}
+                          />
+                        </div>
+                      </>
                     )}
-                    <div className="feed-body">
-                      {/* If user has not posted anything yet, display a message */}
-                      {profileData?.posts && profileData.posts.length === 0 && (
-                        <p className="feed-text">
-                          {fullName} has not posted anything yet.
-                        </p>
+                  </div>
+  
+                  {/* Post Feed Section */}
+                  <div className="feed-content">
+                    <div className="feed">
+                      <div className="feed-header">
+                        <h1 className="feed-title">Feed:</h1>
+                      </div>
+                      {/* Conditionally render the post form if the logged-in user is the owner */}
+                      {user && user._id === id && (
+                        <form className="post-form" onSubmit={handlePostCreation}>
+                          <textarea
+                            value={postTitle}
+                            onChange={(e) => setPostTitle(e.target.value)}
+                            className="post-title-input"
+                            placeholder="Post Title..."
+                          />
+                          <textarea
+                            value={postBody}
+                            onChange={(e) => setPostBody(e.target.value)}
+                            className="post-input"
+                            placeholder="Share your thoughts..."
+                          />
+                          <button className="btn post-btn" type="submit">Post</button>
+                        </form>
                       )}
-                      {/* Display user posts */}
-                      {profileData?.posts
-                        .sort((a, b) => new Date(b.date) - new Date(a.date))
-                        .map((post) => (
-                          <div key={post._id} className="post">
-                            <h2 className="post-title">{post.title}</h2>
-                            <p className="post-body">{post.body}</p>
-                            <p className="post-date">
-                              {new Date(post.date).toLocaleDateString()}
-                            </p>
-                            <div className="post-vote">
-                              <button
-                                className={`btn btn-upvote ${hasVoted(post.votes, user._id, 1) ? "voted-up" : ""}`}
-                                onClick={() => handleVote(post._id, 1)}
-                              >
-                                <FaHeart />
-                              </button>
-                              <p>
-                                {post.votes.reduce((acc, vote) => acc + vote.vote, 0)}
+                      <div className="feed-body">
+                        {/* If user has not posted anything yet, display a message */}
+                        {profileData?.posts && profileData.posts.length === 0 && (
+                          <p className="feed-text">
+                            {fullName} has not posted anything yet.
+                          </p>
+                        )}
+                        {/* Display user posts */}
+                        {profileData?.posts
+                          .sort((a, b) => new Date(b.date) - new Date(a.date))
+                          .map((post) => (
+                            <div key={post._id} className="post">
+                              <h2 className="post-title">{post.title}</h2>
+                              <p className="post-body">{post.body}</p>
+                              <p className="post-date">
+                                {new Date(post.date).toLocaleDateString()}
                               </p>
+                              <div className="post-vote">
+                                <button
+                                  className={`btn btn-upvote ${hasVoted(post.votes, user._id, 1) ? "voted-up" : ""}`}
+                                  onClick={() => handleVote(post._id, 1)}
+                                >
+                                  <FaHeart />
+                                </button>
+                                <p>
+                                  {post.votes.reduce((acc, vote) => acc + vote.vote, 0)}
+                                </p>
+                              </div>
+                              {user && user._id === id && (
+                                <button
+                                  className="btn delete-btn"
+                                  onClick={() => handlePostDeletion(post._id)}
+                                >
+                                  Delete
+                                </button>
+                              )}
                             </div>
-                            {user && user._id === id && (
-                              <button
-                                className="btn delete-btn"
-                                onClick={() => handlePostDeletion(post._id)}
-                              >
-                                Delete
-                              </button>
-                            )}
-                          </div>
-                        ))}
+                          ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </>
           )}
         </div>
