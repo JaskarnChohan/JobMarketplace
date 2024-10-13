@@ -549,6 +549,74 @@ const ViewUserProfile = () => {
           )}
         </div>
 
+        {/* New Reviews Section */}
+        <div className="section">
+          <h2 className="section-title">User Reviews</h2>
+          <p className="average-rating">
+            Average Rating: {averageRating} <FaStar />
+          </p>
+          {isAuthenticated && isEmployer() && hasProfile ? (
+            userHasReviewed ? (
+              <div className="manage-review-buttons">
+                <p className="section-text">Manage your review.</p>
+                <button
+                  className="btn review-btn"
+                  onClick={() => {
+                    const reviewToEdit = reviews.find(
+                      (review) => review._id === userReviewId
+                    );
+                    if (reviewToEdit) {
+                      openReviewModal(
+                        reviewToEdit.content,
+                        reviewToEdit.rating
+                      );
+                    }
+                  }}
+                >
+                  Edit Review
+                </button>
+                <button
+                  className="btn delete-review-btn"
+                  onClick={openConfirmationModal}
+                >
+                  Delete Review
+                </button>
+              </div>
+            ) : (
+              <button className="btn review-btn" onClick={openReviewModal}>
+                Add Review
+              </button>
+            )
+          ) : (
+            <p className="section-text">
+              You must create a profile to write a review.
+            </p>
+          )}
+          <div className="reviews-container">
+            {Array.isArray(reviews) && reviews.length > 0 ? (
+              reviews.map((review) => (
+                <div className="review-card" key={review._id}>
+                  <div className="review-rating">
+                    {Array.from({ length: review.rating }, (_, index) => (
+                      <FaStar key={index} className="star" />
+                    ))}
+                  </div>
+                  <p className="review-content">{review.content}</p>
+                  <p className="review-author">
+                    - {review.companyProfile.name}
+                  </p>
+                  <p className="review-date">
+                    {new Date(review.createdAt).toLocaleDateString()}{" "}
+                    {/* Format the date */}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="section-text">No reviews available.</p>
+            )}
+          </div>
+        </div>
+
         <div className="feed-content">
           {/* User Post Feed */}
           <div className="feed">
@@ -622,73 +690,6 @@ const ViewUserProfile = () => {
                   </div>
                 ))}
             </div>
-          </div>
-        )}
-        {/* New Reviews Section */}
-        <div className="section">
-          <h2 className="section-title">User Reviews</h2>
-          <p className="average-rating">
-            Average Rating: {averageRating} <FaStar />
-          </p>
-          {isAuthenticated && isEmployer() && hasProfile ? (
-            userHasReviewed ? (
-              <div className="manage-review-buttons">
-                <p className="section-text">Manage your review.</p>
-                <button
-                  className="btn review-btn"
-                  onClick={() => {
-                    const reviewToEdit = reviews.find(
-                      (review) => review._id === userReviewId
-                    );
-                    if (reviewToEdit) {
-                      openReviewModal(
-                        reviewToEdit.content,
-                        reviewToEdit.rating
-                      );
-                    }
-                  }}
-                >
-                  Edit Review
-                </button>
-                <button
-                  className="btn delete-review-btn"
-                  onClick={openConfirmationModal}
-                >
-                  Delete Review
-                </button>
-              </div>
-            ) : (
-              <button className="btn review-btn" onClick={openReviewModal}>
-                Add Review
-              </button>
-            )
-          ) : (
-            <p className="section-text">
-              You must create a profile to write a review.
-            </p>
-          )}
-          <div className="reviews-container">
-            {Array.isArray(reviews) && reviews.length > 0 ? (
-              reviews.map((review) => (
-                <div className="review-card" key={review._id}>
-                  <div className="review-rating">
-                    {Array.from({ length: review.rating }, (_, index) => (
-                      <FaStar key={index} className="star" />
-                    ))}
-                  </div>
-                  <p className="review-content">{review.content}</p>
-                  <p className="review-author">
-                    - {review.companyProfile.name}
-                  </p>
-                  <p className="review-date">
-                    {new Date(review.createdAt).toLocaleDateString()}{" "}
-                    {/* Format the date */}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <p className="section-text">No reviews available.</p>
-            )}
           </div>
         </div>
         {/* Premium access required modal */}
