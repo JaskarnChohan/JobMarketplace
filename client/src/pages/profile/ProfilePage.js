@@ -52,7 +52,7 @@ const ProfilePage = () => {
       } else {
         // Fetch data for job seeker profile
         const response = await axios.get(
-          `http://localhost:5050/api/profile/fetch/${id}`,
+          `http://localhost:5050/api/profile/fetch`,
           { withCredentials: true }
         );
 
