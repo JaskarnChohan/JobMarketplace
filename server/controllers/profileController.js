@@ -207,7 +207,9 @@ exports.updateProfileById = async (req, res) => {
   const updateData = req.body;
 
   try {
-    const profile = await Profile.findByIdAndUpdate(profileId, updateData, { new: true });
+    const profile = await Profile.findByIdAndUpdate(profileId, updateData, {
+      new: true,
+    });
 
     if (!profile) {
       return res.status(404).json({ msg: "Profile not found" });
@@ -368,6 +370,7 @@ exports.deleteResume = async (req, res) => {
     res.status(500).json({ errors: [{ msg: "Server error" }] });
   }
 };
+
 // Fetch profile by user ID
 exports.getProfileByUserId = async (req, res) => {
   try {
@@ -404,7 +407,7 @@ exports.getProfileByUserId = async (req, res) => {
     const educations = await Education.find({ profile: profile._id });
     const experiences = await Experience.find({ profile: profile._id });
 
-    // Return the profile data with related skills, education, and experience
+    // Prepare profile details
     const profileWithDetails = {
       ...profile.toObject(),
       firstName: profile.firstName,
@@ -415,8 +418,14 @@ exports.getProfileByUserId = async (req, res) => {
       skills,
       educations,
       experiences,
-      posts,
     };
+
+    // Conditionally add posts if they exist
+    if (profile.posts && profile.posts.length > 0) {
+      profileWithDetails.posts = profile.posts;
+    }
+
+    // Return the profile data with related skills, education, experience, and optionally posts
     res.json(profileWithDetails);
   } catch (err) {
     // Handle server error
