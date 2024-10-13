@@ -48,6 +48,38 @@ const profileSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    posts: {
+      type: [
+        {
+          title: {
+            type: String,
+            required: true,
+          },
+          body: {
+            type: String,
+            required: true,
+          },
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+          votes: {
+            type: [
+              {
+                voter: {
+                  type: String,
+                  required: true,
+                },
+                vote: {
+                  type: Number,
+                  required: true,
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
     reviews: [
       {
         type: mongoose.Schema.Types.ObjectId,

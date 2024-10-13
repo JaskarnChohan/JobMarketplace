@@ -153,8 +153,9 @@ exports.updateProfile = async (req, res) => {
       phoneNumber,
       bio,
       preferredClassification,
-      savedJobs,
+      posts,
     } = req.body;
+    console.log("received posts: ", posts);
 
     // Find the user's profile
     let profile = await Profile.findOne({ user: req.user.id });
@@ -172,6 +173,7 @@ exports.updateProfile = async (req, res) => {
     profile.bio = bio || profile.bio;
     profile.preferredClassification =
       preferredClassification || profile.preferredClassification;
+    profile.posts = posts || profile.posts;
 
     await profile.save();
 
@@ -197,6 +199,24 @@ exports.updateProfile = async (req, res) => {
     // Handle server error
     console.error(err.message);
     res.status(500).json({ errors: [{ msg: "Server error" }] });
+  }
+};
+
+exports.updateProfileById = async (req, res) => {
+  const { profileId } = req.params;
+  const updateData = req.body;
+
+  try {
+    const profile = await Profile.findByIdAndUpdate(profileId, updateData, { new: true });
+
+    if (!profile) {
+      return res.status(404).json({ msg: "Profile not found" });
+    }
+
+    res.json(profile);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: "Server error" });
   }
 };
 
@@ -395,6 +415,7 @@ exports.getProfileByUserId = async (req, res) => {
       skills,
       educations,
       experiences,
+      posts,
     };
     res.json(profileWithDetails);
   } catch (err) {

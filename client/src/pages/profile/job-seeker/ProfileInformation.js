@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Modal from "react-modal";
+import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
 import {
   FaPencilAlt,
   FaMapMarkerAlt,
@@ -33,10 +35,12 @@ const ProfileInformation = ({
   } = useForm();
 
   // State to manage modals
+  const { user } = useAuth();
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [pictureModalIsOpen, setPictureModalIsOpen] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [fileName, setFileName] = useState("No file chosen");
+  const navigate = useNavigate();
 
   // Reset form data if profile exists
   useEffect(() => {
@@ -167,6 +171,9 @@ const ProfileInformation = ({
             <button className="btn edit-profile" onClick={openModal}>
               <FaPencilAlt /> Edit Profile
             </button>
+            {/*<button className="btn edit-profile" onClick={() => navigate(`../viewprofile/${user._id}`)}>
+              <FaPencilAlt /> View Profile
+            </button>*/}
           </div>
         </div>
       ) : (

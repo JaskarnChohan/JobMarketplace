@@ -1,7 +1,7 @@
 /* General container styles */
 .section {
-    margin: 0 auto 20px auto; 
-    max-width: 50%;
+    margin: 0 0 20px 0; /* Remove auto margins to prevent centering */
+    max-width: 100%; /* Ensure it takes full width */
 }
 
 .section-title {
@@ -404,4 +404,186 @@ label .sub-text {
   font-weight: bold;
   margin-bottom: 10px;
   color: #333;
+}
+
+/* Profile Content Container */
+.profile-content-container {
+  display: flex;
+  gap: 20px; /* Space between the two divs */
+  margin: 0 auto; /* Center the container */
+  max-width: 1200px; /* Adjust width as needed */
+  padding: 20px; /* Add padding */
+}
+
+/* Profile Sections */
+.profile-sections {
+    flex: 2; /* Take up more space */
+    padding: 20px; /* Consistent padding */
+    background-color: #fff; /* Background color for consistency */
+    border-radius: 8px; /* Consistent border radius */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Consistent box shadow */
+    width: 100%; /* Ensure it takes full width */
+  }
+
+/* Additional Content */
+.additional-content {
+  flex: 1; /* Take up available space */
+  padding: 20px; /* Consistent padding */
+  background-color: #fff; /* Background color for consistency */
+  border-radius: 8px; /* Consistent border radius */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Consistent box shadow */
+}
+
+/* Feed Content */
+.feed-content {
+  flex: 1; /* Take up less space */
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto 20px auto; /* Consistent margin */
+}
+
+/* Feed Header */
+.feed-header {
+  margin-bottom: 20px;
+}
+
+.feed-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Post Form */
+.post-form {
+    margin-bottom: 20px;
+    background-color: #f9f9f9; /* Light background for contrast */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}  
+
+.post-title-input,
+.post-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd; /* Lighter border */
+  border-radius: 4px;
+  font-size: 16px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+}
+
+.post-title {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd; /* Lighter border */
+  border-radius: 4px;
+  font-size: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Subtle inner shadow */
+}
+
+.post-btn {
+    background-color: #fcc707; /* Match the theme color */
+    color: #292929; /* Dark text color */
+    border: none !important;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.post-btn:hover {
+    background-color: #4ea3df; /* Lighter shade on hover */
+    transform: scale(1.05);
+}
+
+/* Feed Body */
+.feed-body {
+  margin-top: 20px;
+}
+
+/* Individual Post */
+.post {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.post-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+    margin-left: 0; /* Remove left margin to avoid indentation */
+}
+
+.post-body {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.post-date {
+    font-size: 14px;
+    color: #999;
+}
+
+.delete-btn {
+    background-color: #e57373; /* Red color for delete button */
+    color: white;
+    border: none !important;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    margin-top: 10px;
+}
+
+.delete-btn:hover {
+    background-color: #d32f2f; /* Darker red for hover */
+    transform: scale(1.05);
+}
+
+.post-vote {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.btn-upvote, .btn-downvote {
+    background-color: transparent;
+    color: #777;
+    border: none !important;
+    cursor: pointer;
+    font-size: 20px;
+    margin: 0 5px;
+    transition: transform 0.2s ease;
+}
+
+.btn-upvote {
+    margin-left: -9px;
+}
+
+.btn-upvote:hover, .btn-downvote:hover {
+    background-color: transparent !important;
+    transform: scale(1.2);
+}
+
+.voted-up {
+    color: green;
+}
+
+.voted-down {
+    color: red;
 }
