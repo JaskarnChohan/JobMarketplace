@@ -299,6 +299,7 @@ const EmployerProfileInformation = ({
         { posts: updatedPosts },
         { withCredentials: true }
       );
+      fetchProfileData();
     } catch (err) {
       console.error(err);
     }
