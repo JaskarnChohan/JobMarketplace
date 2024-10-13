@@ -345,9 +345,9 @@ const EmployerProfileInformation = ({
             <button className="btn edit-profile" onClick={openModal}>
               <FaPencilAlt /> Edit Profile
             </button>
-            // <button className="btn edit-profile" onClick={() => navigate(`../viewcompany/${user._id}`)}>
-            //   <FaPencilAlt /> View Profile
-            // </button>
+            {/*<button className="btn edit-profile" onClick={() => navigate(`../viewcompany/${user._id}`)}>
+              <FaPencilAlt /> View Profile
+            </button>*/}
           </div>
         </div>
       ) : (
