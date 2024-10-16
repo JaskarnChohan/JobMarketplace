@@ -75,9 +75,12 @@ const EmployerProfileInformation = ({
   const fetchProfileData = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:5050/api/employer/profile/fetch", {
-        withCredentials: true,
-      });
+      const response = await axios.get(
+        "http://localhost:5050/api/employer/profile/fetch",
+        {
+          withCredentials: true,
+        }
+      );
       setProfileData(response.data);
       setPosts(response.data.posts); // Ensure posts are correctly set
     } catch (error) {
@@ -277,7 +280,7 @@ const EmployerProfileInformation = ({
         { posts: updatedPosts },
         { withCredentials: true }
       );
-      
+
       fetchProfileData();
       setPostBody("");
       setPostTitle("");
@@ -287,7 +290,9 @@ const EmployerProfileInformation = ({
   };
 
   const handlePostDeletion = async (postId) => {
-    const confirmDeletion = window.confirm("Are you sure you want to delete this post?");
+    const confirmDeletion = window.confirm(
+      "Are you sure you want to delete this post?"
+    );
     if (!confirmDeletion) return;
 
     try {
@@ -417,7 +422,7 @@ const EmployerProfileInformation = ({
                 )}
               </div>
             </div>
-          
+
             <div className="section">
               <h2 className="section-title">Reviews</h2>
               <p className="average-rating">
@@ -470,7 +475,9 @@ const EmployerProfileInformation = ({
                     className="post-input"
                     placeholder="Share your thoughts..."
                   />
-                  <button className="btn post-btn" type="submit">Post</button>
+                  <button className="btn post-btn" type="submit">
+                    Post
+                  </button>
                 </form>
               )}
               <div className="feed-body">
@@ -492,7 +499,9 @@ const EmployerProfileInformation = ({
                       </p>
                       <div className="post-vote">
                         <button
-                          className={`btn btn-upvote ${hasVoted(post.votes, user._id, 1) ? "voted-up" : ""}`}
+                          className={`btn btn-upvote ${
+                            hasVoted(post.votes, user._id, 1) ? "voted-up" : ""
+                          }`}
                           onClick={() => handleVote(post._id, 1)}
                         >
                           <FaHeart />

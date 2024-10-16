@@ -106,7 +106,11 @@ exports.updateCompanyProfile = async (req, res) => {
     }
 
     // Update the profile with the new data
-    const updatedProfile = await CompanyProfile.findByIdAndUpdate(profileId, updateData, { new: true });
+    const updatedProfile = await CompanyProfile.findByIdAndUpdate(
+      profileId,
+      updateData,
+      { new: true }
+    );
 
     // If the company name has changed, update the employerName in all related jobs
     if (updateData.name && updateData.name !== existingProfile.name) {
@@ -192,11 +196,7 @@ exports.updateCompanyLogo = async (req, res) => {
     await companyProfile.save();
 
     // Remove the old logo from the filesystem if it exists and is not the default logo
-    if (
-      oldLogoPath &&
-      oldLogoPath !== DEFAULT_LOGO &&
-      fs.existsSync(oldLogoPath)
-    ) {
+    if (oldLogoPath !== DEFAULT_LOGO && fs.existsSync(oldLogoPath)) {
       fs.unlinkSync(oldLogoPath);
     }
 
