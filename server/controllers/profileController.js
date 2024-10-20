@@ -128,7 +128,6 @@ exports.updateSavedJobs = async (req, res) => {
 
     // if profile not found, return an error
     if (!profile) {
-      console.log("profile not found");
       return res.status(404).json({ errors: [{ msg: "Profile not found" }] });
     }
 
@@ -156,7 +155,6 @@ exports.updateProfile = async (req, res) => {
       preferredClassification,
       posts,
     } = req.body;
-    console.log("received posts: ", posts);
 
     // Find the user's profile
     let profile = await Profile.findOne({ user: req.user.id });

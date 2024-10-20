@@ -1,4 +1,5 @@
 const Application = require("../models/application");
+const Notification = require("../models/notification");
 const { evaluateApplication } = require("./aiController");
 
 // Create a new application
@@ -94,7 +95,6 @@ exports.updateApplicationStatus = async (req, res) => {
       .json({ message: "Error updating application: " + err.message });
   }
 };
-    
 
 // Delete an application
 exports.deleteApplication = async (req, res) => {

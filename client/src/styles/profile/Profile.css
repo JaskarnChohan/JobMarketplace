@@ -495,11 +495,6 @@ label .sub-text {
     transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.post-btn:hover {
-    background-color: #4ea3df; /* Lighter shade on hover */
-    transform: scale(1.05);
-}
-
 /* Feed Body */
 .feed-body {
   margin-top: 20px;
@@ -561,7 +556,7 @@ label .sub-text {
     margin-top: 10px;
 }
 
-.btn-upvote, .btn-downvote {
+.post-vote .btn-upvote, .post-vote .btn-downvote {
     background-color: transparent;
     color: #777;
     border: none !important;
@@ -571,16 +566,16 @@ label .sub-text {
     transition: transform 0.2s ease;
 }
 
-.btn-upvote {
+.post .btn-upvote {
     margin-left: -9px;
 }
 
-.btn-upvote:hover, .btn-downvote:hover {
+.post-vote .btn-upvote:hover, .post-vote .btn-downvote:hover {
     background-color: transparent !important;
     transform: scale(1.2);
 }
 
-.voted-up {
+.post-vote .voted-up {
     color: green;
 }
 

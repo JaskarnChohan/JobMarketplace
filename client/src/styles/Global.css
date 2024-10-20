@@ -99,6 +99,9 @@ pre, textarea{
 }
 
 /* Dashboard */
+.dashboard {
+  padding: 30px;
+}
 .dashboard .lrg-heading, .dashboard .med-heading {
   text-align: center;
 }

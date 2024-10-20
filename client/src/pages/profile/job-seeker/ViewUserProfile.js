@@ -672,12 +672,6 @@ const ViewUserProfile = () => {
                       <p>
                         {post.votes.reduce((acc, vote) => acc + vote.vote, 0)}
                       </p>
-                      {/* <button
-                        className={`btn btn-downvote ${hasVoted(post.votes, user._id, -1) ? "voted-down" : ""}`}
-                        onClick={() => handleVote(post._id, -1)}
-                      >
-                        <FaHeartBroken />
-                      </button> */}
                     </div>
                     {user && user._id === id && (
                       <button

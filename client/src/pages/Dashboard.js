@@ -12,7 +12,8 @@ import { FaTag } from "react-icons/fa";
 import Spinner from "../components/Spinner/Spinner";
 
 const Dashboard = () => {
-  const { logout, user, isJobSeeker } = useAuth(); // Get logout function and user info from context
+  const { isAuthenticated, logout, user, isJobSeeker } = useAuth(); // Get logout function and user info from context
+  const [hasProfile, setHasProfile] = useState(false); // State to track if user has a profile
   const navigate = useNavigate();
   const [userJobs, setUserJobs] = useState([]); // State to hold user's jobs
   const [jobApplicationsMap, setJobApplicationsMap] = useState({}); // Map to track job applications
@@ -35,6 +36,25 @@ const Dashboard = () => {
       }
     }
   }, [user]);
+
+  // Fetch profile data to check if user has a profile
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        const profileResponse = await axios.get(
+          `http://localhost:5050/api/profile/fetch/`,
+          { withCredentials: true }
+        );
+        setHasProfile(profileResponse.data.profileExists);
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchProfileData(); // Fetch profile data if the user is authenticated
+    }
+  }, [isAuthenticated]);
 
   // Fetch jobs for the logged-in employer
   const fetchUserJobs = async () => {
@@ -442,90 +462,100 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            <div>
-              <h3 className="page-title">Your Applications</h3>
+            {hasProfile ? (
+              <div>
+                <h3 className="page-title">Your Applications</h3>
 
-              {/* Check if there are any grouped applications */}
-              {Object.keys(groupedApplications).length > 0 ? (
-                Object.keys(groupedApplications).map((status) => (
-                  <div key={status}>
-                    <h4 className="sub-headings">{status}</h4>
-                    {groupedApplications[status].length > 0 ? (
-                      <div className="applicants-grid">
-                        {groupedApplications[status].map((application) => (
-                          <div key={application._id} className="applicant">
-                            <h4
-                              className="job-title hover"
-                              onClick={() =>
-                                navigate(`/jobview/${application.jobId._id}`)
-                              }
-                            >
-                              {application.jobId.title}
-                            </h4>
-                            <p className="job-info">
-                              <FaTag /> {application.status}
-                            </p>
-                            <p className="job-info">
-                              Applied At:{" "}
-                              {new Date(
-                                application.appliedAt
-                              ).toLocaleDateString()}
-                            </p>
-                            <button
-                              className="small-btn"
-                              onClick={() => openConfirmationModal(application)}
-                            >
-                              Delete Application
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="sub-headings">
-                        No applications for {status}.
-                      </p>
-                    )}
-                  </div>
-                ))
-              ) : (
-                <p className="sub-headings">You have no applications yet.</p>
-              )}
-            </div>
-            {/* Saved Jobs Section */}
-            <div>
-              <h3 className="page-title">Saved Jobs</h3>
-
-              {/* Check if there are any saved jobs */}
-              {filteredSavedJobs.length > 0 ? (
-                <div className="applicants-grid">
-                  {filteredSavedJobs.map((job) => (
-                    <div key={job._id} className="applicant">
-                      <h4
-                        className="job-title hover"
-                        onClick={() => navigate(`/jobview/${job._id}`)}
-                      >
-                        {job.title}
-                      </h4>
-                      <p className="job-info">
-                        <FaTag /> {job.status}
-                      </p>
-                      <p className="job-info">
-                        Posted At:{" "}
-                        {new Date(job.createdAt).toLocaleDateString()}
-                      </p>
-                      <button
-                        className="small-btn btn-delete"
-                        onClick={() => handleUnsaveJob(job._id)}
-                      >
-                        Unsave Job
-                      </button>
+                {/* Check if there are any grouped applications */}
+                {Object.keys(groupedApplications).length > 0 ? (
+                  Object.keys(groupedApplications).map((status) => (
+                    <div key={status}>
+                      <h4 className="sub-headings">{status}</h4>
+                      {groupedApplications[status].length > 0 ? (
+                        <div className="applicants-grid">
+                          {groupedApplications[status].map((application) => (
+                            <div key={application._id} className="applicant">
+                              <h4
+                                className="job-title hover"
+                                onClick={() =>
+                                  navigate(`/jobview/${application.jobId._id}`)
+                                }
+                              >
+                                {application.jobId.title}
+                              </h4>
+                              <p className="job-info">
+                                <FaTag /> {application.status}
+                              </p>
+                              <p className="job-info">
+                                Applied At:{" "}
+                                {new Date(
+                                  application.appliedAt
+                                ).toLocaleDateString()}
+                              </p>
+                              <button
+                                className="small-btn"
+                                onClick={() =>
+                                  openConfirmationModal(application)
+                                }
+                              >
+                                Delete Application
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="sub-headings">
+                          No applications for {status}.
+                        </p>
+                      )}
                     </div>
-                  ))}
+                  ))
+                ) : (
+                  <p className="sub-headings">You have no applications yet.</p>
+                )}
+
+                {/* Saved Jobs Section */}
+                <div>
+                  <h3 className="page-title">Saved Jobs</h3>
+
+                  {/* Check if there are any saved jobs */}
+                  {filteredSavedJobs.length > 0 ? (
+                    <div className="applicants-grid">
+                      {filteredSavedJobs.map((job) => (
+                        <div key={job._id} className="applicant">
+                          <h4
+                            className="job-title hover"
+                            onClick={() => navigate(`/jobview/${job._id}`)}
+                          >
+                            {job.title}
+                          </h4>
+                          <p className="job-info">
+                            <FaTag /> {job.status}
+                          </p>
+                          <p className="job-info">
+                            Posted At:{" "}
+                            {new Date(job.createdAt).toLocaleDateString()}
+                          </p>
+                          <button
+                            className="small-btn btn-delete"
+                            onClick={() => handleUnsaveJob(job._id)}
+                          >
+                            Unsave Job
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="sub-headings">You have no saved jobs yet.</p>
+                  )}
                 </div>
-              ) : (
-                <p className="sub-headings">You have no saved jobs yet.</p>
-              )}
-            </div>
+              </div>
+            ) : (
+              <p className="med-heading">
+                You need to create a profile to see your applications and saved
+                jobs.
+              </p>
+            )}
           </>
         ) : (
           <p className="sub-headings">

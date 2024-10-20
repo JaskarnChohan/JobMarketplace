@@ -96,7 +96,7 @@ const JobView = () => {
   // Fetch saved jobs on component mount
   useEffect(() => {
     // Fetch saved jobs if the user is a job seeker
-    if (isJobSeeker()) {
+    if (isJobSeeker() && hasProfile) {
       const fetchSavedJobs = async () => {
         try {
           const response = await axios.get(`/api/profile/savedjobs`);
@@ -222,7 +222,7 @@ const JobView = () => {
               {job.company}
             </p>
             {/* Check if user is authenticated and is a job seeker before showing the save button */}
-            {isAuthenticated && isJobSeeker() ? (
+            {isAuthenticated && isJobSeeker() && hasProfile ? (
               isJobSaved(job._id) ? (
                 <button
                   className="btn btn-delete"

@@ -250,11 +250,9 @@ const Messaging = () => {
 
         // Update conversation list and select the new conversation
         setConversations((prev) => [...prev, newConversation]);
-        handleConversationSelect(newConversation); // Directly select the new conversation
+        setSelectedConversation(newConversation); // Directly select the new conversation
         setNewConversationEmail(""); // Clear input
         setError(""); // Clear any previous errors
-        // Refresh the conversation list
-        fetchConversations();
       } catch (error) {
         console.error("Error starting new conversation", error);
         // Check if the error is due to user not being found
@@ -364,7 +362,7 @@ const Messaging = () => {
                               navigate(`/viewcompany/${conv.recipientId}`)
                             }
                           >
-                            {conv.companyName || "Unknown"}
+                            {conv.companyName || conv.email}
                           </span>
                         )}{" "}
                       </div>
@@ -395,7 +393,8 @@ const Messaging = () => {
                   {selectedConversation.firstName &&
                   selectedConversation.lastName
                     ? `${selectedConversation.firstName} ${selectedConversation.lastName}`
-                    : selectedConversation.companyName || "Unknown"}
+                    : selectedConversation.companyName ||
+                      selectedConversation.email}
                 </h3>
                 <div className="message-history" ref={messageEndRef}>
                   {selectedConversation?.messages?.length > 0 ? (
