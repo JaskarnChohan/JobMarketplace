@@ -94,17 +94,7 @@ exports.updateApplicationStatus = async (req, res) => {
       .json({ message: "Error updating application: " + err.message });
   }
 };
-    // Check if application exists
-    if (!application) {
-      return res.status(404).json({ message: "Application not found" });
-    }
-    res.status(200).json(application);
-  } catch (err) {
-    res
-      .status(400)
-      .json({ message: "Error updating application: " + err.message });
-  }
-};
+    
 
 // Delete an application
 exports.deleteApplication = async (req, res) => {
