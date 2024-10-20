@@ -348,7 +348,7 @@ const Experience = ({ experiences, setExperiences, formData }) => {
               className={errors.title ? "error" : ""}
             />
             {errors.title && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.title.message}
               </p>
@@ -361,7 +361,7 @@ const Experience = ({ experiences, setExperiences, formData }) => {
               className={errors.company ? "error" : ""}
             />
             {errors.company && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.company.message}
               </p>
@@ -392,19 +392,19 @@ const Experience = ({ experiences, setExperiences, formData }) => {
               </select>
             </div>
             {errors.startMonth && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.startMonth.message}
               </p>
             )}
             {errors.startYear && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.startYear.message}
               </p>
             )}
             {startDateError && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {startDateError}
               </p>
@@ -439,19 +439,19 @@ const Experience = ({ experiences, setExperiences, formData }) => {
                   </select>
                 </div>
                 {errors.endMonth && (
-                  <p className="error-message">
+                  <p className="error-messages">
                     <i className="fas fa-exclamation-circle error-icon"></i>
                     {errors.endMonth.message}
                   </p>
                 )}
                 {errors.endYear && (
-                  <p className="error-message">
+                  <p className="error-messages">
                     <i className="fas fa-exclamation-circle error-icon"></i>
                     {errors.endYear.message}
                   </p>
                 )}
                 {endDateError && (
-                  <p className="error-message">
+                  <p className="error-messages">
                     <i className="fas fa-exclamation-circle error-icon"></i>
                     {endDateError}
                   </p>
@@ -476,7 +476,7 @@ const Experience = ({ experiences, setExperiences, formData }) => {
               className={errors.description ? "error" : ""}
             ></textarea>
             {errors.description && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.description.message}
               </p>

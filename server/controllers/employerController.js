@@ -6,6 +6,7 @@ const Job = require("../models/jobListing");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const companyReviews = require("../models/companyReviews");
+const Notification = require("../models/notification");
 const { updateProfile } = require("./profileController");
 
 // Default logo path
@@ -339,6 +340,17 @@ exports.createReview = async (req, res) => {
     await CompanyProfile.findByIdAndUpdate(companyId, {
       $push: { reviews: review._id },
     });
+
+    // Create a notification for the job seeker
+    const notificationMessage = `You have received a new review.`;
+
+    const notification = new Notification({
+      user: companyId, // The job seeker receives the notification
+      message: notificationMessage,
+      type: "REVIEW", // Type of notification
+    });
+
+    await notification.save(); // Save the notification to the database
 
     res.status(201).json(review);
   } catch (error) {

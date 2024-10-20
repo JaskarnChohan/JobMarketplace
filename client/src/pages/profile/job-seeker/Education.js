@@ -339,7 +339,7 @@ const Education = ({ educations, setEducations, formData }) => {
               {...register("school", { required: "School is required" })}
             />
             {errors.school && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.school.message}
               </p>
@@ -351,7 +351,7 @@ const Education = ({ educations, setEducations, formData }) => {
               {...register("degree", { required: "Degree is required" })}
             />
             {errors.degree && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.degree.message}
               </p>
@@ -365,7 +365,7 @@ const Education = ({ educations, setEducations, formData }) => {
               })}
             />
             {errors.fieldOfStudy && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.fieldOfStudy.message}
               </p>
@@ -394,19 +394,19 @@ const Education = ({ educations, setEducations, formData }) => {
               </select>
             </div>
             {errors.startMonth && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.startMonth.message}
               </p>
             )}
             {errors.startYear && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.startYear.message}
               </p>
             )}
             {startDateError && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {startDateError}
               </p>
@@ -439,19 +439,19 @@ const Education = ({ educations, setEducations, formData }) => {
                   </select>
                 </div>
                 {errors.endMonth && (
-                  <p className="error-message">
+                  <p className="error-messages">
                     <i className="fas fa-exclamation-circle error-icon"></i>
                     {errors.endMonth.message}
                   </p>
                 )}
                 {errors.endYear && (
-                  <p className="error-message">
+                  <p className="error-messages">
                     <i className="fas fa-exclamation-circle error-icon"></i>
                     {errors.endYear.message}
                   </p>
                 )}
                 {endDateError && (
-                  <p className="error-message">
+                  <p className="error-messages">
                     <i className="fas fa-exclamation-circle error-icon"></i>
                     {endDateError}
                   </p>

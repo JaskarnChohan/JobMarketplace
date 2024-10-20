@@ -213,7 +213,7 @@ const ProfileInformation = ({
               })}
             />
             {errors.firstName && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.firstName.message}
               </p>
@@ -228,7 +228,7 @@ const ProfileInformation = ({
               })}
             />
             {errors.lastName && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.lastName.message}
               </p>
@@ -249,7 +249,7 @@ const ProfileInformation = ({
               ))}
             </select>
             {errors.homeLocation && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.homeLocation.message}
               </p>
@@ -268,7 +268,7 @@ const ProfileInformation = ({
               })}
             />
             {errors.phoneNumber && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.phoneNumber.message}
               </p>
@@ -290,7 +290,7 @@ const ProfileInformation = ({
               className={errors.bio ? "error" : ""}
             />
             {errors.bio && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.bio.message}
               </p>
@@ -311,7 +311,7 @@ const ProfileInformation = ({
               ))}
             </select>
             {errors.preferredClassification && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.preferredClassification.message}
               </p>

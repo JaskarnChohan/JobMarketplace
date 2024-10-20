@@ -88,7 +88,7 @@ const Navbar = ({ isAuthenticated, handleLogout }) => {
     return (
       <>
         <Link to="/dashboard">Dashboard</Link>
-        <Link to="/messaging">Messaging</Link>
+        <Link to="/messages">Messages</Link>
         {user.role === "employer" && (
           <>
             <Link to="/jobmanagement">Job Management</Link>

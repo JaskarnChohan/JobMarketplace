@@ -176,7 +176,7 @@ const Skills = ({ skills, setSkills, formData }) => {
               {...register("name", { required: "Skill Name is required" })}
             />
             {errors.name && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.name.message}
               </p>
@@ -193,7 +193,7 @@ const Skills = ({ skills, setSkills, formData }) => {
               <option value="Expert">Expert</option>
             </select>
             {errors.level && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.level.message}
               </p>
@@ -211,7 +211,7 @@ const Skills = ({ skills, setSkills, formData }) => {
               })}
             ></textarea>
             {errors.description && (
-              <p className="error-message">
+              <p className="error-messages">
                 <i className="fas fa-exclamation-circle error-icon"></i>
                 {errors.description.message}
               </p>

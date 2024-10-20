@@ -1,5 +1,8 @@
 const Message = require("../models/message");
 const User = require("../models/user");
+const Profile = require("../models/profile");
+const CompanyProfile = require("../models/companyProfile");
+const Notification = require("../models/notification");
 const mongoose = require("mongoose");
 
 // Send a message

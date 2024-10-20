@@ -5,6 +5,7 @@ const Experience = require("../models/experience");
 const Education = require("../models/education");
 const User = require("../models/user");
 const UserReview = require("../models/userReviews");
+const Notification = require("../models/notification");
 const fs = require("fs");
 const path = require("path");
 
@@ -503,6 +504,17 @@ exports.createReview = async (req, res) => {
     await Profile.findByIdAndUpdate(jobSeekerID, {
       $push: { reviews: review._id },
     });
+
+    // Create a notification for the job seeker
+    const notificationMessage = `You have received a new review.`;
+
+    const notification = new Notification({
+      user: jobSeekerID, // The job seeker receives the notification
+      message: notificationMessage,
+      type: "REVIEW", // Type of notification
+    });
+
+    await notification.save(); // Save the notification to the database
 
     res.status(201).json(review);
   } catch (error) {

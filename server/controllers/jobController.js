@@ -1,10 +1,10 @@
 const JobListing = require("../models/jobListing.js");
+const Notification = require("../models/notification.js");
 const Profile = require("../models/profile"); // Import the Profile model
 const CompanyProfile = require("../models/companyProfile"); // Import the CompanyProfile model
 const Application = require("../models/application"); // Import the Application model
 const AiController = require("./aiController"); // Import the AiController
 const { validationResult, check } = require("express-validator");
-const mongoose = require("mongoose");
 
 // Create Job Listing Validation rules
 const createJobValidationRules = [
@@ -172,6 +172,33 @@ exports.updateJobListing = async (req, res) => {
     if (!job) {
       return res.status(404).json({ msg: "Job not found" });
     }
+
+    // Check if a new question was explicitly added by the `isNewQuestion` flag
+    if (req.body.isNewQuestion) {
+      const notificationMessage = `A new question was added to the job listing "${job.title}".`;
+
+      const notification = new Notification({
+        user: job.employer, // The employer receives the notification
+        message: notificationMessage, // Notification message
+        type: "QUESTION", // Type of notification
+      });
+
+      await notification.save(); // Save the notification
+    }
+
+    // If a question was answered, send a notification to the question author
+    if (req.body.answeredQuestionAuthor) {
+      const notificationMessage = `Your question on the job listing "${job.title}" has been answered.`;
+
+      const notification = new Notification({
+        user: req.body.answeredQuestionAuthor, // The question's author receives the notification
+        message: notificationMessage, // Notification message
+        type: "ANSWER", // Type of notification for an answered question
+      });
+
+      await notification.save(); // Save the notification
+    }
+
     console.log("Job updated successfully returning: ", job);
     res.json(job);
   } catch (err) {
@@ -248,6 +275,7 @@ exports.getJobsByEmployer = async (req, res) => {
 };
 
 // Create Job Listing
+// Create Job Listing
 exports.createJob = [
   createJobValidationRules,
   async (req, res) => {
@@ -274,7 +302,8 @@ exports.createJob = [
     } = req.body;
 
     try {
-      let JobListing = await JobListing.findOne({
+      // Check if identical job listing already exists
+      let existingJob = await JobListing.findOne({
         employer,
         title,
         description,
@@ -289,14 +318,14 @@ exports.createJob = [
         status,
       });
 
-      // Check if identical job listing already exists
-      if (JobListing) {
+      if (existingJob) {
         return res
           .status(400)
           .json({ errors: [{ msg: "Identical job listing already exists" }] });
       }
 
-      JobListing = new JobListing({
+      // Create new job listing
+      const newJobListing = new JobListing({
         employer,
         title,
         description,
@@ -311,10 +340,12 @@ exports.createJob = [
         status,
         questions,
       });
-      await JobListing.save();
+
+      await newJobListing.save();
 
       res.status(200).json({ success: true });
     } catch (err) {
+      console.error(err.message);
       // Handle server error
       res.status(500).json({ errors: [{ msg: "Server error" }] });
     }

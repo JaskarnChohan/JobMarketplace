@@ -214,11 +214,15 @@ const ProfilePage = () => {
   };
 
   const handlePostDeletion = async (postId) => {
-    const confirmDeletion = window.confirm("Are you sure you want to delete this post?");
+    const confirmDeletion = window.confirm(
+      "Are you sure you want to delete this post?"
+    );
     if (!confirmDeletion) return;
 
     try {
-      const updatedPosts = profileData.posts.filter((post) => post._id !== postId);
+      const updatedPosts = profileData.posts.filter(
+        (post) => post._id !== postId
+      );
       await handlePostUpdate(updatedPosts);
     } catch (err) {
       console.error(err);
@@ -244,21 +248,21 @@ const ProfilePage = () => {
         }
         return post;
       });
-  
+
       console.log("Updated posts:", updatedPosts);
-  
+
       setProfileData((prevProfile) => ({
         ...prevProfile,
         posts: updatedPosts,
       }));
-  
+
       // Ensure the request includes the necessary credentials
       const response = await axios.put(
         `http://localhost:5050/api/profile/update/${profileData._id}`,
         { posts: updatedPosts },
         { withCredentials: true }
       );
-  
+
       console.log("Vote update response:", response.data);
     } catch (err) {
       console.error(err);
@@ -269,7 +273,9 @@ const ProfilePage = () => {
     return votes.some((v) => v.voter === userId && v.vote === voteType);
   };
 
-  const fullName = `${profileData?.firstName || ""} ${profileData?.lastName || ""}`;
+  const fullName = `${profileData?.firstName || ""} ${
+    profileData?.lastName || ""
+  }`;
 
   return (
     <div>
@@ -355,25 +361,31 @@ const ProfilePage = () => {
                                       )
                                     )}
                                   </div>
-                                  <p className="review-content">{review.content}</p>
+                                  <p className="review-content">
+                                    {review.content}
+                                  </p>
                                   <p className="review-author">
                                     - {review.companyProfile.name}
                                   </p>
                                   <p className="review-date">
-                                    {new Date(review.createdAt).toLocaleDateString()}{" "}
+                                    {new Date(
+                                      review.createdAt
+                                    ).toLocaleDateString()}{" "}
                                     {/* Format the date */}
                                   </p>
                                 </div>
                               ))
                             ) : (
-                              <p className="section-text">No reviews available.</p>
+                              <p className="section-text">
+                                No reviews available.
+                              </p>
                             )}
                           </div>
                         </div>
                       </>
                     )}
                   </div>
-  
+
                   {/* Post Feed Section */}
                   <div className="feed-content">
                     <div className="feed">
@@ -382,7 +394,10 @@ const ProfilePage = () => {
                       </div>
                       {/* Conditionally render the post form if the logged-in user is the owner */}
                       {user && user._id === id && (
-                        <form className="post-form" onSubmit={handlePostCreation}>
+                        <form
+                          className="post-form"
+                          onSubmit={handlePostCreation}
+                        >
                           <textarea
                             value={postTitle}
                             onChange={(e) => setPostTitle(e.target.value)}
@@ -395,16 +410,19 @@ const ProfilePage = () => {
                             className="post-input"
                             placeholder="Share your thoughts..."
                           />
-                          <button className="btn post-btn" type="submit">Post</button>
+                          <button className="btn post-btn" type="submit">
+                            Post
+                          </button>
                         </form>
                       )}
                       <div className="feed-body">
                         {/* If user has not posted anything yet, display a message */}
-                        {profileData?.posts && profileData.posts.length === 0 && (
-                          <p className="feed-text">
-                            {fullName} has not posted anything yet.
-                          </p>
-                        )}
+                        {profileData?.posts &&
+                          profileData.posts.length === 0 && (
+                            <p className="feed-text">
+                              {fullName} has not posted anything yet.
+                            </p>
+                          )}
                         {/* Display user posts */}
                         {profileData?.posts
                           .sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -417,13 +435,20 @@ const ProfilePage = () => {
                               </p>
                               <div className="post-vote">
                                 <button
-                                  className={`btn btn-upvote ${hasVoted(post.votes, user._id, 1) ? "voted-up" : ""}`}
+                                  className={`btn btn-upvote ${
+                                    hasVoted(post.votes, user._id, 1)
+                                      ? "voted-up"
+                                      : ""
+                                  }`}
                                   onClick={() => handleVote(post._id, 1)}
                                 >
                                   <FaHeart />
                                 </button>
                                 <p>
-                                  {post.votes.reduce((acc, vote) => acc + vote.vote, 0)}
+                                  {post.votes.reduce(
+                                    (acc, vote) => acc + vote.vote,
+                                    0
+                                  )}
                                 </p>
                               </div>
                               {user && user._id === id && (

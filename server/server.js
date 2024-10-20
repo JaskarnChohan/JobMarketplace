@@ -12,13 +12,12 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 const { createPremiumPlan } = require("./config/paypal");
 const cors = require("cors"); // Middleware to enable CORS
 const cookieParser = require("cookie-parser"); // Middleware to parse cookies
 const localtunnel = require("localtunnel"); // Import localtunnel
 require("dotenv").config(); // Load environment variables from .env file
-const notificationRoutes = require("./routes/notificationRoutes");
-
 
 // Initialise the Express application
 const app = express();
@@ -61,7 +60,6 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/employer", employerRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/application", applicationRoutes);
-<<<<<<< Updated upstream
 app.use("/api/ai", aiRoutes);
 app.use("/api/payment", paymentRoutes);
 
@@ -70,9 +68,7 @@ const { router: messageRouter, initSocketRoutes } = messageRoutes;
 initSocketRoutes(io); // Pass Socket.IO instance to message routes
 
 app.use("/api/messages", messageRouter);
-=======
 app.use("/api/notification", notificationRoutes);
->>>>>>> Stashed changes
 
 // Serve static files in the uploads folder
 app.use("/uploads", express.static("uploads"));
@@ -137,6 +133,3 @@ process.on("SIGINT", () => {
     console.log("HTTP server closed");
   });
 });
-
-
-

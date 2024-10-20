@@ -812,7 +812,7 @@ exports.getJobInsights = async (req, res) => {
     3. Suggest key job responsibilities and the most important qualifications for the position.
     4. Provide market trends on the demand for this job title in the specified region.
     5. Offer insights on how to make the job posting stand out, including attractive benefits or perks.
-    6. Format the response in HTML to maintain a user-friendly format. Do not use * for emphasis; use <strong> instead.
+    6. Format the response in HTML to maintain a user-friendly format. Do not use * at all for emphasis; use <strong> instead.
     7. Structure the response to include headings like 'Salary Range,' 'Experience Requirements,' 'Job Description,' 'Market Trends,' and 'Job Posting Tips.'
     8. Ensure that the response is detailed and informative to help employers create compelling job listings.
 

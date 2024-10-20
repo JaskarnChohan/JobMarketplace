@@ -140,7 +140,10 @@ const JobQnA = ({ job, setErrors, setJob }) => {
       ];
       const response = await axios.put(
         `http://localhost:5050/api/jobs/update/${job._id}`,
-        { QnA: updatedQnA },
+        {
+          QnA: updatedQnA,
+          isNewQuestion: true, // Indicate that a new question is being added
+        },
         { withCredentials: true }
       );
       setJob((prevJob) => ({
@@ -239,26 +242,36 @@ const JobQnA = ({ job, setErrors, setJob }) => {
 
   const handleSubmitAnsweredQuestion = async (index) => {
     try {
+      const answeredQuestionAuthor = job.QnA[index].author; // Get the author of the question
       const updatedQnA = job.QnA.map((qa, i) => {
         if (i === index) {
           return {
             ...qa,
-            answer: answeredQuestion,
+            answer: answeredQuestion, // Set the new answer
           };
         }
         return qa;
       });
+
+      // Send the updated QnA and the question author to the backend
       const response = await axios.put(
         `http://localhost:5050/api/jobs/update/${job._id}`,
-        { QnA: updatedQnA },
+        {
+          QnA: updatedQnA,
+          answeredQuestionAuthor, // Add the author of the answered question
+        },
         { withCredentials: true }
       );
+
+      // Update job state with the new QnA
       setJob((prevJob) => ({
         ...prevJob,
-        QnA: response.data.QnA, // Ensure we update the state with the response data
-      })); // Update job state
-      setEditingAnswerIndex(null); // Clear editing index
-      setAnsweredQuestion(""); // Clear edited question
+        QnA: response.data.QnA,
+      }));
+
+      // Clear editing index and the input field for answered question
+      setEditingAnswerIndex(null);
+      setAnsweredQuestion("");
     } catch (err) {
       console.error(err); // Log any errors
       setErrors([{ msg: "Failed to update answer" }]); // Display error message
