@@ -41,7 +41,6 @@ const Signup = () => {
         password,
         role,
       });
-      console.log(res.data);
       navigate("/login");
     } catch (err) {
       if (err.response && err.response.data.errors) {

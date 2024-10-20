@@ -41,11 +41,11 @@ const Home = () => {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:5050/api/profile/user/${user._id}`,
+        const profileResponse = await axios.get(
+          `http://localhost:5050/api/profile/fetch/`,
           { withCredentials: true }
         );
-        setHasProfile(!!response.data); // Set true if profile data exists
+        setHasProfile(profileResponse.data.profileExists);
       } catch (error) {
         console.error("Error fetching profile data:", error);
       }
