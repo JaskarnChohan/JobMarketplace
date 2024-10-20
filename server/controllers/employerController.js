@@ -141,7 +141,6 @@ exports.updateCompanyProfile = async (req, res) => {
 
 /// Update existing company profile by user ID
 exports.updateCompanyProfileById = async (req, res) => {
-  console.log("updateCompanyProfileById called");
   try {
     const { profileId } = req.params;
     const updateData = req.body;

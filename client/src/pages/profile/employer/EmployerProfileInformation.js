@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Modal from "react-modal";
 import {
@@ -73,7 +73,7 @@ const EmployerProfileInformation = ({
 
   // Function to fetch profile data depending on the user's type (employer/job seeker)
   const fetchProfileData = async () => {
-    setLoading(true);
+    setLoading(true); // Set loading to true when fetching data
     try {
       const response = await axios.get(
         "http://localhost:5050/api/employer/profile/fetch",
@@ -81,12 +81,12 @@ const EmployerProfileInformation = ({
           withCredentials: true,
         }
       );
-      setProfileData(response.data);
-      setPosts(response.data.posts); // Ensure posts are correctly set
+      setProfileData(response.data); // Set the profile data in state
+      setPosts(response.data.posts); // Set the posts in state
     } catch (error) {
       console.error("Failed to fetch profile data:", error);
     } finally {
-      setLoading(false);
+      setLoading(false); // Set loading to false after fetching data
     }
   };
 

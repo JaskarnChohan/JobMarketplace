@@ -110,7 +110,7 @@ const JobListings = () => {
             "http://localhost:5050/api/jobs/recommended",
             { withCredentials: true }
           );
-          setRecommendedJobs(response.data || []);
+          setRecommendedJobs(response.data || []); // Set recommended jobs
         } catch (error) {
           setErrors([{ msg: "Failed to load recommended jobs." }]);
         } finally {

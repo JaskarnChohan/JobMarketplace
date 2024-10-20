@@ -13,6 +13,7 @@ import {
   FaCalendarAlt,
   FaGlobe,
   FaStar,
+  FaHeart,
 } from "react-icons/fa";
 import Modal from "react-modal";
 import Navbar from "../../../components/layout/Navbar";
@@ -22,7 +23,6 @@ import { useAuth } from "../../../context/AuthContext";
 import "../../../styles/profile/Profile.css";
 import "../../../styles/profile/ProfileInfo.css";
 import "../../../styles/Global.css";
-import { FaHeart } from "react-icons/fa";
 
 const ViewCompany = () => {
   // Retrieve the company ID from the URL parameters
@@ -70,7 +70,7 @@ const ViewCompany = () => {
           `http://localhost:5050/api/profile/fetch/`,
           { withCredentials: true }
         );
-        if (profileResponse.data){
+        if (profileResponse.data) {
           setHasProfile(profileResponse.data.profileExists); // Set the profile existence flag
         }
         setPosts(response.data.posts || []);

@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Modal from "react-modal";
 import { useAuth } from "../../context/AuthContext";
 import Spinner from "../../components/Spinner/Spinner";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
-import Modal from "react-modal"; // Import react-modal
 import "../../styles/Payment.css";
 
 Modal.setAppElement("#root"); // To prevent screen readers from reading content behind the modal
 
 const PaymentPage = () => {
-  const { logout, user, isEmployer, isJobSeeker } = useAuth(); // Get user type
+  const { logout, isJobSeeker } = useAuth(); // Get user type
   const navigate = useNavigate(); // For navigation
   const [loading, setLoading] = useState(false); // Loading state
   const [error, setError] = useState(null); // Error state
@@ -174,11 +174,13 @@ const PaymentPage = () => {
     }
   };
 
+  // Handle user logout
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
+  // Open and close the confirmation modal
   const openConfirmationModal = () => {
     setConfirmationModalIsOpen(true);
   };

@@ -3,7 +3,7 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import Spinner from "../../components/Spinner/Spinner";
 import { FaTimes, FaCheckCircle } from "react-icons/fa"; // Import success icon
-import "../../styles/Payment.css"; // Ensure to import your CSS
+import "../../styles/Payment.css";
 
 const PaymentSuccess = () => {
   const location = useLocation(); // Get location object from react-router-dom

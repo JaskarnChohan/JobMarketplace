@@ -117,8 +117,6 @@ const CreateJob = () => {
         "http://localhost:5050/api/jobs/create",
         formData
       );
-      console.log(res.data);
-      console.log(formData);
       // Navigate to job management page on success
       navigate("/jobmanagement");
     } catch (err) {
@@ -126,7 +124,6 @@ const CreateJob = () => {
       if (err.response && err.response.data.errors) {
         setErrors(err.response.data.errors);
       } else {
-        console.error(err);
         setErrors([{ msg: "An error occurred. Please try again later." }]);
       }
     }

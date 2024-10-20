@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FaStar } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { FaStar, FaHeart } from "react-icons/fa";
 import ProfileInformation from "./job-seeker/ProfileInformation";
 import Experience from "./job-seeker/Experience";
 import Education from "./job-seeker/Education";
@@ -10,9 +11,7 @@ import EmployerProfileInformation from "./employer/EmployerProfileInformation";
 import Navbar from "../../components/layout/Navbar";
 import Footer from "../../components/layout/Footer";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 import Spinner from "../../components/Spinner/Spinner";
-import { FaHeart, FaHeartBroken } from "react-icons/fa";
 
 const ProfilePage = () => {
   const [formData, setFormData] = useState({});
@@ -141,6 +140,7 @@ const ProfilePage = () => {
       );
       setSkills(response.data); // Set fetched skills data
     } catch (error) {
+      // Handle error
       console.error("Failed to fetch skills:", error);
     }
   };
@@ -157,6 +157,7 @@ const ProfilePage = () => {
         resume: response.data.resume, // Add resume data to the formData state
       }));
     } catch (error) {
+      // Handle error
       console.error("Failed to fetch resume:", error);
     }
   };
@@ -170,31 +171,31 @@ const ProfilePage = () => {
     fetchProfileData();
   };
 
+  // Function to update posts in the profile
   const handlePostUpdate = async (updatedPosts) => {
     try {
-      console.log("Updating posts with: ", updatedPosts);
       const response = await axios.put(
         "http://localhost:5050/api/profile/update",
         { posts: updatedPosts },
         { withCredentials: true }
       );
-      console.log("Updated Posts: ", response.data.posts);
+      // Update the profile data with the new posts
       setProfileData((prevProfile) => ({
         ...prevProfile,
         posts: response.data.posts,
       }));
     } catch (err) {
+      // Handle error
       console.error(err);
     }
   };
 
+  // Function to handle post creation
   const handlePostCreation = async (event) => {
-    // console.log("Creating post");
     event.preventDefault();
     try {
       if (!postBody || !postTitle) {
         setErrors([{ msg: "Post/Title cannot be empty" }]);
-        // console.log("Post/Title cannot be empty");
         return;
       }
       const newPost = {
@@ -203,17 +204,19 @@ const ProfilePage = () => {
         votes: [],
       };
 
-      const updatedPosts = [...profileData.posts, newPost];
-      // console.log("Updated Posts: ", updatedPosts);
-      await handlePostUpdate(updatedPosts);
-      setPostBody("");
-      setPostTitle("");
+      const updatedPosts = [...profileData.posts, newPost]; // Add new post to existing posts
+      await handlePostUpdate(updatedPosts); // Update the posts
+      setPostBody(""); // Clear post body after submission
+      setPostTitle(""); // Clear post title after submission
     } catch (err) {
+      // Handle error
       console.error(err);
     }
   };
 
+  // Function to handle post deletion
   const handlePostDeletion = async (postId) => {
+    // Confirm deletion before proceeding
     const confirmDeletion = window.confirm(
       "Are you sure you want to delete this post?"
     );
@@ -223,18 +226,20 @@ const ProfilePage = () => {
       const updatedPosts = profileData.posts.filter(
         (post) => post._id !== postId
       );
-      await handlePostUpdate(updatedPosts);
+      await handlePostUpdate(updatedPosts); // Update the posts
     } catch (err) {
-      console.error(err);
+      console.error(err); // Handle error
     }
   };
 
+  // Function to handle likes on a post
   const handleVote = async (postId, vote) => {
     try {
-      console.log("Voting on post:", postId, "with vote:", vote);
       const updatedPosts = profileData.posts.map((post) => {
+        // Find the post to update
         if (post._id === postId) {
           const existingVote = post.votes.find((v) => v.voter === user._id);
+          // If the user has already voted on the post
           if (existingVote) {
             if (existingVote.vote === vote) {
               // Remove vote if the same vote is clicked again
@@ -243,14 +248,14 @@ const ProfilePage = () => {
               existingVote.vote = vote;
             }
           } else {
+            // Add a new like if the user has not liked on the post
             post.votes.push({ voter: user._id, vote });
           }
         }
-        return post;
+        return post; // Return the updated post
       });
 
-      console.log("Updated posts:", updatedPosts);
-
+      // Update the profile data with the new posts
       setProfileData((prevProfile) => ({
         ...prevProfile,
         posts: updatedPosts,
@@ -262,17 +267,18 @@ const ProfilePage = () => {
         { posts: updatedPosts },
         { withCredentials: true }
       );
-
-      console.log("Vote update response:", response.data);
     } catch (err) {
+      // Handle error
       console.error(err);
     }
   };
 
+  // Function to check if the user has already liked on a post
   const hasVoted = (votes, userId, voteType) => {
     return votes.some((v) => v.voter === userId && v.vote === voteType);
   };
 
+  // Full name of the user
   const fullName = `${profileData?.firstName || ""} ${
     profileData?.lastName || ""
   }`;

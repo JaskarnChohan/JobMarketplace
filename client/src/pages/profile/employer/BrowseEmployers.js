@@ -11,8 +11,8 @@ import "../../../styles/job/Job.css";
 import noresults from "../../../assets/void.png";
 
 const BrowseEmployers = () => {
-  const { isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth(); // Authentication context
+  const navigate = useNavigate(); // Navigation hook
 
   // State variables
   const [employerData, setEmployerData] = useState([]);
@@ -21,29 +21,29 @@ const BrowseEmployers = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [searched, setSearched] = useState(false); // New state to track search
+  const [searched, setSearched] = useState(false);
 
   // Fetch employers based on search term and current page
   const fetchEmployers = async () => {
-    setLoading(true);
+    setLoading(true); // Set loading to true when fetching employers
     try {
       const res = await axios.get("http://localhost:5050/api/employer", {
         params: { search, page: currentPage },
       });
-      setEmployerData(res.data.employers);
-      setTotalPages(res.data.totalPages);
+      setEmployerData(res.data.employers); // Set employer data
+      setTotalPages(res.data.totalPages); // Set total pages
       setSearched(true); // Set searched to true when fetching employers
     } catch (err) {
       setErrors([{ msg: "An error occurred: " + err }]);
     } finally {
-      setLoading(false);
+      setLoading(false); // Set loading to false after fetching employers
     }
   };
 
+  // Fetch employers on component mount
   useEffect(() => {
     fetchEmployers();
   }, []);
-
 
   // Handle user logout
   const handleLogout = () => {

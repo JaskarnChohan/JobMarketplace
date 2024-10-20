@@ -25,29 +25,35 @@ const JobQnA = ({ job, setErrors, setJob }) => {
     }
   };
 
+  // Handle question deletion
   const handleDeleteQuestion = async (index) => {
     try {
+      // Filter out the question to be deleted
       const updatedQnA = job.QnA.filter((_, i) => i !== index);
       const response = await axios.put(
         `http://localhost:5050/api/jobs/update/${job._id}`,
         { QnA: updatedQnA },
         { withCredentials: true }
       );
+      // Update the job state with the new QnA
       setJob((prevJob) => ({
         ...prevJob,
         QnA: response.data.QnA,
       }));
     } catch (err) {
+      // Log any errors and display an error message
       console.error(err);
       setErrors([{ msg: "Failed to delete question" }]);
     }
   };
 
+  // Handle question deletion confirmation
   const handleDeleteQuestionClick = (index) => {
     setQuestionToDelete(index);
     setConfirmationDialogIsOpen(true);
   };
 
+  // Handle question deletion confirmation
   const handleConfirmDelete = async () => {
     if (questionToDelete !== null) {
       await handleDeleteQuestion(questionToDelete);
@@ -56,13 +62,14 @@ const JobQnA = ({ job, setErrors, setJob }) => {
     }
   };
 
+  // Handle canceling question deletion
   const handleCancelDelete = () => {
     setQuestionToDelete(null);
     setConfirmationDialogIsOpen(false);
   };
 
+  // Get author name based on user role
   const getAuthorName = async (authorId) => {
-    console.log("getAuthorName called with authorId:", authorId); // Debugging log
     if (authorId === job.employer) {
       return job.company;
     } else if (user.role === "employer") {
@@ -71,32 +78,33 @@ const JobQnA = ({ job, setErrors, setJob }) => {
           `http://localhost:5050/api/employer/profile/fetch/`,
           { withCredentials: true }
         );
-        console.log("API response:", response.data); // Debugging log
+        // Check if the employer has a profile
         if (response.data.name === undefined) {
           return -1;
         }
-        let name = response.data.name;
-        console.log("Employer name:", name); // Debugging log
+        let name = response.data.name; // Get the employer name
         return name;
       } catch (err) {
+        // Log any errors and return "Unknown" if the name is not found
         console.error("Error fetching company name:", err); // Debugging log
         return "Unknown";
       }
     } else {
+      // Fetch the author name from the user profile
       try {
         const response = await axios.get(
           `http://localhost:5050/api/profile/user/${authorId}`
         );
-        console.log("API response:", response.data); // Debugging log
         if (
           response.data.firstName === undefined &&
           response.data.lastName === undefined
         ) {
           return -1;
         }
-        let name = response.data.firstName + " " + response.data.lastName;
+        let name = response.data.firstName + " " + response.data.lastName; // Combine first and last name
         return name;
       } catch (err) {
+        // Log any errors and return "Unknown" if the name is not found
         console.error("Error fetching author name:", err); // Debugging log
         return "Unknown";
       }
@@ -106,7 +114,6 @@ const JobQnA = ({ job, setErrors, setJob }) => {
   //George Haeberlin: handle new question submission
   const handleSubmitQuestion = async (e) => {
     e.preventDefault();
-    console.log("User._id:", user._id); // Debugging log
     try {
       if (!newQuestion) {
         setErrors([{ msg: "Question cannot be empty" }]); // Display error if question is empty
@@ -121,6 +128,7 @@ const JobQnA = ({ job, setErrors, setJob }) => {
         ]); // Display error if author name is not found
         return; // Do nothing if the author name is not found
       }
+      // Prepare updated QnA with the new question
       const updatedQnA = [
         ...job.QnA.map((qa) => ({
           author: qa.author,
@@ -158,7 +166,6 @@ const JobQnA = ({ job, setErrors, setJob }) => {
 
   //George Haeberlin: handle vote submission and removal
   const handleVote = async (qaId, vote) => {
-    console.log("handleVote called with qaId:", qaId, "and vote:", vote); // Debugging log
     try {
       const updatedQnA = job.QnA.map((qa) => {
         if (qa._id === qaId) {
@@ -235,11 +242,13 @@ const JobQnA = ({ job, setErrors, setJob }) => {
     }
   };
 
+  // Handle answering a question
   const handleAnswerQuestion = (index) => {
     setEditingAnswerIndex(index);
     setAnsweredQuestion(job.QnA[index].answer || ""); // Set the answer to the current answer or an empty string
   };
 
+  // Handle submitting an answer
   const handleSubmitAnsweredQuestion = async (index) => {
     try {
       const answeredQuestionAuthor = job.QnA[index].author; // Get the author of the question
@@ -278,11 +287,13 @@ const JobQnA = ({ job, setErrors, setJob }) => {
     }
   };
 
+  // Handle canceling an answer
   const handleCancelAnswer = () => {
     setEditingAnswerIndex(null);
     setAnsweredQuestion("");
   };
 
+  // Handle canceling an edit
   const handleCancelEdit = () => {
     setEditingQuestionIndex(null);
     setEditedQuestion("");

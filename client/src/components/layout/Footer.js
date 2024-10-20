@@ -1,8 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
-import "../../styles/misc/Footer.css";
-import logo from "../../assets/logo.png";
+import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa"; // Import social media icons
+import "../../styles/misc/Footer.css"; // Import the Footer component styling
+import logo from "../../assets/logo.png"; // Import the JobHive logo
 
 const Footer = () => {
   return (

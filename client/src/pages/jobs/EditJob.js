@@ -47,7 +47,6 @@ const EditJob = () => {
       } catch (err) {
         setError("Failed to fetch job");
         setLoading(false);
-        console.error(err);
       }
     };
 
@@ -113,13 +112,11 @@ const EditJob = () => {
         job,
         config
       );
-      console.log(res.data);
-      navigate("/jobmanagement");
+      navigate("/jobmanagement"); // Redirect to job management page
     } catch (err) {
       if (err.response && err.response.data.errors) {
         setError(err.response.data.errors);
       } else {
-        console.error(err);
         setError([{ msg: "An error occurred. Please try again later." }]);
       }
     }

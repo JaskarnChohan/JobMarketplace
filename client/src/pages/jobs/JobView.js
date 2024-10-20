@@ -71,7 +71,7 @@ const JobView = () => {
               },
             }
           );
-          setHasApplied(applicationResponse.data.hasApplied);
+          setHasApplied(applicationResponse.data.hasApplied); // Update applied status
 
           // Check if the user has a profile
           const profileResponse = await axios.get(
@@ -83,10 +83,10 @@ const JobView = () => {
           setHasProfile(profileResponse.data.profileExists);
         }
 
-        setLoading(false);
+        setLoading(false); // Set loading state to false
       } catch (err) {
-        setLoading(false);
-        console.error(err);
+        setLoading(false); // Set loading state to false
+        console.error(err); // Log any errors
       }
     };
 
@@ -95,17 +95,18 @@ const JobView = () => {
 
   // Fetch saved jobs on component mount
   useEffect(() => {
+    // Fetch saved jobs if the user is a job seeker
     if (isJobSeeker()) {
       const fetchSavedJobs = async () => {
         try {
-          const response = await axios.get(`/api/profile/getSavedJobs`);
+          const response = await axios.get(`/api/profile/savedjobs`);
           setSavedJobs(response.data.savedJobs); // Update saved jobs state
         } catch (err) {
+          // Log any errors
           console.error(err);
         }
       };
-
-      fetchSavedJobs();
+      fetchSavedJobs(); // Call the fetchSavedJobs function
     }
   }, []);
 
@@ -123,17 +124,6 @@ const JobView = () => {
   const daysAgo = Math.floor(
     (new Date() - new Date(job.datePosted)) / (1000 * 60 * 60 * 24)
   );
-
-  // get saved jobs
-  const getSavedJobs = async () => {
-    try {
-      // Send request to fetch saved jobs
-      const response = await axios.get(`/api/profile/getSavedJobs`);
-      setSavedJobs(response.data.savedJobs); // Update saved jobs state
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   // Handle user logout
   const handleLogout = () => {
@@ -208,7 +198,7 @@ const JobView = () => {
       }
       setSavedJobs(updatedSavedJobs); // Update saved jobs state
       await axios.put(
-        `http://localhost:5050/api/profile/updateSavedJobs`,
+        `http://localhost:5050/api/profile/updatesavedjobs`,
         { savedJobs: updatedSavedJobs }, // Ensure the payload is correctly formatted
         { withCredentials: true } // Ensure credentials (cookies) are included in request
       );

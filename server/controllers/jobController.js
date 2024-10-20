@@ -159,7 +159,6 @@ exports.deleteJobListing = async (req, res) => {
 
 // Update job listing
 exports.updateJobListing = async (req, res) => {
-  console.log("updateJobListing called: ", req.body);
   const { _id } = req.params;
 
   try {
@@ -198,13 +197,10 @@ exports.updateJobListing = async (req, res) => {
 
       await notification.save(); // Save the notification
     }
-
-    console.log("Job updated successfully returning: ", job);
     res.json(job);
   } catch (err) {
     // Handle server error
     res.status(500).json({ errors: [{ msg: "Server error" }] });
-    console.log("Error updating job: ", err);
   }
 };
 
@@ -275,11 +271,9 @@ exports.getJobsByEmployer = async (req, res) => {
 };
 
 // Create Job Listing
-// Create Job Listing
 exports.createJob = [
   createJobValidationRules,
   async (req, res) => {
-    console.log(req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });

@@ -43,7 +43,7 @@ const ViewUserProfile = () => {
   const [confirmationModalIsOpen, setConfirmationModalIsOpen] = useState(false); // State for confirmation modal visibility
 
   const [hasProfile, setHasProfile] = useState(false); // State to check if the user has a profile
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Navigation hook
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -52,7 +52,7 @@ const ViewUserProfile = () => {
           `http://localhost:5050/api/profile/user/${id}`,
           { withCredentials: true }
         );
-        setProfileData(response.data);
+        setProfileData(response.data); // Set profile data
         // Check if the user has a profile
         const profileResponse = await axios.get(
           `http://localhost:5050/api/employer/profile/fetch/`,
@@ -64,7 +64,7 @@ const ViewUserProfile = () => {
       }
     };
 
-    fetchProfileData();
+    fetchProfileData(); // Fetch profile data
     fetchUserReviews(); // Refresh reviews
   }, [id]);
 

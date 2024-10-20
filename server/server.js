@@ -1,8 +1,13 @@
 // Import necessary modules
 const express = require("express");
 const http = require("http"); // Import http module for creating an HTTP server
+const cors = require("cors"); // Middleware to enable CORS
+const cookieParser = require("cookie-parser"); // Middleware to parse cookies
+const localtunnel = require("localtunnel"); // Import localtunnel
 const connectDatabase = require("./config/database"); // Function to connect to the database
 const socketConfig = require("./config/socket"); // Function to configure the socket
+const { createPremiumPlan } = require("./config/paypal"); // Function to create a premium plan
+require("dotenv").config(); // Load environment variables from .env file
 // Route imports
 const authRoutes = require("./routes/authRoutes");
 const jobRoutes = require("./routes/jobRoutes");
@@ -13,11 +18,6 @@ const messageRoutes = require("./routes/messageRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
-const { createPremiumPlan } = require("./config/paypal");
-const cors = require("cors"); // Middleware to enable CORS
-const cookieParser = require("cookie-parser"); // Middleware to parse cookies
-const localtunnel = require("localtunnel"); // Import localtunnel
-require("dotenv").config(); // Load environment variables from .env file
 
 // Initialise the Express application
 const app = express();
@@ -62,16 +62,15 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/application", applicationRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/notification", notificationRoutes);
+// Serve static files in the uploads folder
+app.use("/uploads", express.static("uploads"));
 
 // Middleware to initialize message routes with Socket.IO instance
 const { router: messageRouter, initSocketRoutes } = messageRoutes;
 initSocketRoutes(io); // Pass Socket.IO instance to message routes
 
 app.use("/api/messages", messageRouter);
-app.use("/api/notification", notificationRoutes);
-
-// Serve static files in the uploads folder
-app.use("/uploads", express.static("uploads"));
 
 // Global error handling middleware
 app.use((err, req, res, next) => {

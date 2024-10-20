@@ -130,28 +130,27 @@ const Dashboard = () => {
   };
 
   // George Haeberlin: Get saved jobs functionality
-  // get saved job IDs
   const getSavedJobIds = async () => {
     if (isJobSeeker()) {
       try {
         // Send request to fetch saved jobs
-        const response = await axios.get(`/api/profile/getSavedJobs`);
+        const response = await axios.get(`/api/profile/savedjobs`);
         setSavedJobIds(response.data.savedJobs); // Update saved jobs state
       } catch (err) {
+        // Log any errors
         console.error(err);
       }
     }
   };
 
   // George Haeberlin: Fetch saved jobs functionality
-  // fetch saved jobs
   const fetchSavedJobs = async () => {
     try {
       const jobPromises = savedJobIds.map((jobId) =>
         axios.get(`/api/jobs/${jobId}`)
       );
-      const jobResponses = await Promise.all(jobPromises);
-      const jobs = jobResponses.map((res) => res.data);
+      const jobResponses = await Promise.all(jobPromises); // Fetch saved jobs
+      const jobs = jobResponses.map((res) => res.data); // Extract job data
       setSavedJobs(jobs); // Update saved jobs state
     } catch (err) {
       console.error(err);
@@ -180,11 +179,12 @@ const Dashboard = () => {
       closeConfirmationModal(); // Close modal after deletion
       // Refresh jobs or applications based on user role
       if (user.role === "employer") {
-        fetchUserJobs();
+        fetchUserJobs(); // Refresh jobs
       } else {
-        fetchUserApplications();
+        fetchUserApplications(); // Refresh applications
       }
     } catch (err) {
+      // Log any errors
       setErrors([
         {
           msg:
@@ -202,11 +202,12 @@ const Dashboard = () => {
       });
       // Refresh jobs or applications based on user role
       if (user.role === "employer") {
-        fetchUserJobs();
+        fetchUserJobs(); // Refresh jobs
       } else {
-        fetchUserApplications();
+        fetchUserApplications(); // Refresh applications
       }
     } catch (err) {
+      // Log any errors
       setErrors([
         {
           msg:
@@ -217,7 +218,6 @@ const Dashboard = () => {
     }
   };
   // George Haeberlin: Handle unsave job
-  // Handle unsave job
   const handleUnsaveJob = async (jobId) => {
     try {
       // Filter out the jobId from savedJobIds
@@ -232,12 +232,12 @@ const Dashboard = () => {
 
       // Send request to update saved jobs in the backend
       await axios.put(
-        `http://localhost:5050/api/profile/updateSavedJobs`,
+        `http://localhost:5050/api/profile/updatesavedjobs`,
         { savedJobs: updatedSavedJobIds },
         { withCredentials: true }
       );
 
-      getSavedJobIds();
+      getSavedJobIds(); // Fetch saved job IDs again
     } catch (err) {
       setErrors([
         {

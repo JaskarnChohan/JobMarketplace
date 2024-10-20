@@ -1,15 +1,14 @@
 import React, { useState } from "react";
 import Navbar from "../components/layout/Navbar";
 import axios from "axios";
-import { useNavigate, Link, redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/Global.css";
 import "../styles/profile/ProfileInfo.css";
-import Modal from "react-modal";
 import Spinner from "../components/Spinner/Spinner";
 
 const AIAnswerImprover = () => {
-  const { logout, user } = useAuth(); // Get logout function and user info from context
+  const { logout } = useAuth(); // Get logout function from context
   const navigate = useNavigate();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
@@ -38,26 +37,27 @@ const AIAnswerImprover = () => {
 
   // Call AI service to improve the question and answer
   const handleImprove = async () => {
-    if (!validateInput()) return;
+    if (!validateInput()) return; // Validate the input
 
-    setLoading(true);
-    setError("");
+    setLoading(true); // Start loading
+    setError(""); // Clear any previous errors
     try {
       // Set the Authorization header with the token
       const res = await axios.post(
         "http://localhost:5050/api/ai/improve",
         { question, answer },
-        { withCredentials: true } // Add this as a config object
+        { withCredentials: true }
       );
 
       const improvedText = res.data.improvedText;
 
-      setAiResponse(improvedText);
+      setAiResponse(improvedText); // Set the improved text
     } catch (err) {
+      // Log the error to the console
       console.error("Error improving response:", err);
       setError("There was an error improving your response. Please try again.");
     } finally {
-      setLoading(false);
+      setLoading(false); // Stop loading
     }
   };
 

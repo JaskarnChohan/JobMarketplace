@@ -8,7 +8,7 @@ import "../styles/profile/ProfileInfo.css";
 import Spinner from "../components/Spinner/Spinner";
 
 const JobInsights = () => {
-  const { logout, user } = useAuth(); // Get logout function and user info from context
+  const { logout } = useAuth(); // Get logout function from context
   const navigate = useNavigate();
   const [jobTitle, setJobTitle] = useState("");
   const [location, setLocation] = useState("");
@@ -39,8 +39,8 @@ const JobInsights = () => {
   const handleGetInsights = async () => {
     if (!validateInput()) return;
 
-    setLoading(true);
-    setError("");
+    setLoading(true); // Start loading
+    setError(""); // Clear any previous errors
     try {
       const res = await axios.post(
         "http://localhost:5050/api/ai/job-insights",
@@ -51,15 +51,16 @@ const JobInsights = () => {
       const jobInsights = res.data.insights;
 
       if (jobInsights) {
-        setAiResponse(jobInsights);
+        setAiResponse(jobInsights); // Set the job insights
       } else {
         throw new Error("No job insights received.");
       }
     } catch (err) {
+      // Log the error to the console
       console.error("Error fetching job insights:", err);
       setError("There was an error fetching job insights. Please try again.");
     } finally {
-      setLoading(false);
+      setLoading(false); // Stop loading
     }
   };
 

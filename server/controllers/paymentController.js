@@ -4,9 +4,11 @@ const User = require("../models/user");
 // Check subscription status
 exports.subscriptionStatus = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id); // Fetch user by ID
+    // Check if user exists
     if (!user) return res.status(404).json({ error: "User not found" });
 
+    // Respond with subscription status
     const { subscription } = user;
     res.status(200).json({
       subscriptionType: subscription.type,
@@ -14,6 +16,7 @@ exports.subscriptionStatus = async (req, res) => {
       startDate: subscription.startDate,
     });
   } catch (error) {
+    // Handle server error
     console.error("Error fetching subscription status:", error);
     res.status(500).json({ error: "Server error" });
   }
@@ -22,8 +25,9 @@ exports.subscriptionStatus = async (req, res) => {
 // Create PayPal payment for monthly subscription
 exports.createPayment = async (req, res) => {
   try {
-    const planId = await createPremiumPlan();
+    const planId = await createPremiumPlan(); // Create premium plan
 
+    // Set attributes for billing agreement
     const billingAgreementAttributes = {
       name: "JobHive Premium Subscription",
       description: "Monthly subscription for JobHive Premium features",
@@ -36,6 +40,7 @@ exports.createPayment = async (req, res) => {
       },
     };
 
+    // Create billing agreement
     paypal.billingAgreement.create(
       billingAgreementAttributes,
       (error, billingAgreement) => {
@@ -53,6 +58,7 @@ exports.createPayment = async (req, res) => {
       }
     );
   } catch (error) {
+    // Handle server error
     console.error("Error in create-payment route:", error);
     res.status(500).json({ error: "Error creating payment" });
   }
@@ -63,6 +69,7 @@ exports.executePayment = async (req, res) => {
   const { token } = req.body;
 
   try {
+    // Execute payment
     paypal.billingAgreement.execute(
       token,
       {},
@@ -81,7 +88,7 @@ exports.executePayment = async (req, res) => {
           agreementId: billingAgreement.id,
         };
 
-        await user.save();
+        await user.save(); // Save user with updated subscription
         res.json({
           message: "Payment executed successfully",
           billingAgreement,
@@ -89,6 +96,7 @@ exports.executePayment = async (req, res) => {
       }
     );
   } catch (error) {
+    // Handle server error
     console.error("Error in execute-payment route:", error);
     res.status(500).json({ error: "Payment execution failed" });
   }
@@ -97,9 +105,11 @@ exports.executePayment = async (req, res) => {
 // Downgrade subscription
 exports.downgradeSubscription = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id); // Fetch user by ID
+    // Check if user exists
     if (!user) return res.status(404).json({ error: "User not found" });
 
+    // Check if user has an active JobHive Premium subscription
     if (
       user.subscription.type !== "JobHive Premium" ||
       user.subscription.status !== "active"
@@ -109,6 +119,7 @@ exports.downgradeSubscription = async (req, res) => {
         .json({ error: "No active JobHive Premium subscription to downgrade" });
     }
 
+    // Get the PayPal agreement ID
     const agreementId = user.subscription.agreementId;
     if (!agreementId) {
       return res
@@ -116,6 +127,7 @@ exports.downgradeSubscription = async (req, res) => {
         .json({ error: "No active PayPal agreement to cancel" });
     }
 
+    // Cancel the PayPal agreement
     paypal.billingAgreement.cancel(
       agreementId,
       { note: "User downgrade" },
@@ -131,7 +143,7 @@ exports.downgradeSubscription = async (req, res) => {
         user.subscription.status = "canceled";
         user.subscription.agreementId = undefined;
 
-        await user.save();
+        await user.save(); // Save user with downgraded subscription
         res.json({
           message:
             "Subscription downgraded and PayPal agreement canceled successfully.",
@@ -140,6 +152,7 @@ exports.downgradeSubscription = async (req, res) => {
       }
     );
   } catch (error) {
+    // Handle server error
     console.error("Error downgrading subscription:", error);
     res.status(500).json({ error: "Error downgrading subscription" });
   }
@@ -147,26 +160,28 @@ exports.downgradeSubscription = async (req, res) => {
 
 // Cancel route for PayPal to handle subscription cancellations
 exports.cancelSubscription = async (req, res) => {
-  console.log("PayPal subscription canceled:", req.body);
   const { resource } = req.body;
   const agreementId = resource.id;
 
   try {
+    // Find user by PayPal agreement ID
     const user = await User.findOne({
       "subscription.agreementId": agreementId,
     });
     if (!user) return res.status(404).json({ error: "User not found" });
 
+    // Update user subscription
     user.subscription.type = "Free";
     user.subscription.status = "canceled";
     user.subscription.agreementId = undefined;
 
-    await user.save();
+    await user.save(); // Save user with canceled subscription
     res.json({
       message: "Subscription canceled successfully.",
       subscription: user.subscription,
     });
   } catch (error) {
+    // Handle server error
     console.error("Error canceling subscription:", error);
     res.status(500).json({ error: "Error canceling subscription" });
   }
