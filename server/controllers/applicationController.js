@@ -58,11 +58,42 @@ exports.updateApplicationStatus = async (req, res) => {
   const { status } = req.body;
 
   try {
-    const application = await Application.findByIdAndUpdate(
-      applicationId,
-      { status },
-      { new: true }
+    // Find the application and populate the job details
+    const application = await Application.findById(applicationId).populate(
+      "jobId"
     );
+
+    // Check if the application exists
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    // Update the status of the application
+    application.status = status;
+    await application.save();
+
+    // Get the job name from the populated jobId field
+    const jobName = application.jobId.title;
+
+    // Create a notification for the user
+    const notificationMessage = `Application for "${jobName}" is now "${status}".`;
+
+    // Reuse the notification logic if you have the helper function
+    const notification = new Notification({
+      user: application.userId, // The user receiving the notification
+      message: notificationMessage, // The notification message
+      type: "APPLICATION", // Specify the type of notification
+    });
+
+    await notification.save(); // Save the notification
+
+    res.status(200).json(application);
+  } catch (err) {
+    res
+      .status(400)
+      .json({ message: "Error updating application: " + err.message });
+  }
+};
     // Check if application exists
     if (!application) {
       return res.status(404).json({ message: "Application not found" });
