@@ -96,7 +96,7 @@ const JobView = () => {
   // Fetch saved jobs on component mount
   useEffect(() => {
     // Fetch saved jobs if the user is a job seeker
-    if (isJobSeeker() && hasProfile) {
+    if (isJobSeeker()) {
       const fetchSavedJobs = async () => {
         try {
           const response = await axios.get(`/api/profile/savedjobs`);
