@@ -145,6 +145,10 @@ const JobView = () => {
     }));
   };
 
+  const handleRemoveError = (index) => {
+    setErrors((prevErrors) => prevErrors.filter((_, i) => i !== index));
+  };
+
   // Modify the handleApply function to include answers
   const handleApply = async () => {
     const unansweredQuestions = questions.filter(
@@ -327,7 +331,10 @@ const JobView = () => {
       {errors.length > 0 && (
         <div className="error-messages">
           {errors.map((error, index) => (
-            <p key={index}>{error.msg}</p>
+            <div className="error-message">
+              <p key={index}>{error.msg}</p>
+              <button onClick={() => handleRemoveError(index)} className="remove-error-btn">X</button>
+            </div>
           ))}
         </div>
       )}

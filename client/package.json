@@ -1,5 +1,13 @@
 {
   "name": "client",
+  "jest": {
+    "transform": {
+      "^.+\\.[t|j]sx?$": "babel-jest"
+    },
+    "moduleNameMapper": {
+      "^axios$": "<rootDir>/__mocks__/axios.js"
+    }
+  },
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:5050",
@@ -45,5 +53,11 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.8",
+    "@babel/preset-env": "^7.25.8",
+    "@babel/preset-react": "^7.25.7",
+    "babel-jest": "^29.7.0"
   }
 }
