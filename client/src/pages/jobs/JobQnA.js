@@ -251,6 +251,10 @@ const JobQnA = ({ job, setErrors, setJob }) => {
   // Handle submitting an answer
   const handleSubmitAnsweredQuestion = async (index) => {
     try {
+      if (!answeredQuestion) {
+        setErrors([{ msg: "Answer cannot be empty" }]); // Display error if answer is empty
+        return; // Do nothing if the answer is empty
+      }
       const answeredQuestionAuthor = job.QnA[index].author; // Get the author of the question
       const updatedQnA = job.QnA.map((qa, i) => {
         if (i === index) {
@@ -420,6 +424,7 @@ const JobQnA = ({ job, setErrors, setJob }) => {
                         user._id === job.employer &&
                         !qa.answer && (
                           <button
+                            data-testid="answer-button"
                             onClick={() => handleAnswerQuestion(index)}
                             className="answer-question-btn"
                           >
@@ -445,6 +450,7 @@ const JobQnA = ({ job, setErrors, setJob }) => {
                 {editingAnswerIndex === index ? (
                   <>
                     <textarea
+                      data-testid="answer-input"
                       value={answeredQuestion}
                       onChange={(e) => setAnsweredQuestion(e.target.value)}
                       className="qa-edit-textarea"
@@ -475,6 +481,7 @@ const JobQnA = ({ job, setErrors, setJob }) => {
                         user._id === job.employer &&
                         qa.answer && (
                           <button
+                            data-testid="answer-button"
                             onClick={() => handleAnswerQuestion(index)}
                             className="answer-question-btn"
                           >
