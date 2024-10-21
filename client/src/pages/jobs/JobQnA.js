@@ -3,7 +3,7 @@ import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { FaArrowUp, FaArrowDown } from "react-icons/fa"; // Ensure to import necessary icons
 import Modal from "react-modal"; // Ensure you have Modal component imported
-//import "../../styles/job/JobView.css";
+import "../../styles/job/JobView.css";
 
 const JobQnA = ({ job, setErrors, setJob }) => {
   const { isAuthenticated, user, isJobSeeker } = useAuth(); // Grab authentication details from context
